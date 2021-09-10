@@ -66,7 +66,6 @@ h6 {
   align-items: center;
   z-index: 997;
   overflow-y: auto;
-  /* background-color: #424242; */
 }
 
 #header * {
@@ -153,7 +152,7 @@ h6 {
 --------------------------------------------------------------*/
 /* Desktop Navigation */
 .nav-menu {
-  margin-top: 35px;
+  margin-top: 25px;
 }
 
 .nav-menu ul {
@@ -291,7 +290,7 @@ h6 {
 
 /* Header Top */
 #header.header-top {
-  height: 80px;
+  height: 70px;
   position: fixed;
   left: 0;
   top: 0;
@@ -312,6 +311,7 @@ h6 {
 #header.header-top .container {
   display: flex;
   align-items: center;
+  margin: 0 auto;
 }
 
 #header.header-top .nav-menu {
@@ -409,7 +409,7 @@ section {
 }
 
 section.section-show {
-  top: 100px;
+  top: 70px;
   bottom: auto;
   opacity: 1;
   padding-bottom: 45px;
@@ -425,7 +425,7 @@ section .container {
     top: 120px;
   }
   section.section-show {
-    top: 80px;
+    top: 50px;
   }
 }
 
@@ -443,7 +443,7 @@ section .container {
 
 .section-title h2::after {
   content: '';
-  width: 120px;
+  width: 100px;
   height: 4px;
   border-radius: 2px;
   display: inline-block;
@@ -473,6 +473,11 @@ section .container {
 .about-me .content ul {
   list-style: none;
   padding: 0;
+}
+
+.about-me.container img {
+  border-radius: 5%;
+  border: solid var(--primary);
 }
 
 .about-me .content ul li {
@@ -663,9 +668,8 @@ section .container {
 # Services
 --------------------------------------------------------------*/
 .services .icon-box {
-  min-width: 345px;
+  margin: auto;
   text-align: center;
-  /* background: rgba(204, 204, 204, 0.1); */
   padding: 40px 20px;
   transition: all ease-in-out 0.3s;
   border-radius: 5%;
