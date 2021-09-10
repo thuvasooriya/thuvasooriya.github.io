@@ -8,4 +8,6 @@ Made with lots of 🖤 by [mastarstrange](https://mastarstrange.github.io) for h
 
 ### Have fun learning.
 
+Give it a star if you can and chill.
+
 See ya on the other side. ✌🏽
