@@ -112,7 +112,7 @@ h6 {
 }
 
 #header .social-links a {
-  font-size: 16px;
+  font-size: 20px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -123,10 +123,12 @@ h6 {
   border-radius: 50%;
   width: 40px;
   height: 40px;
+  transition: all 0.1s ease-in-out 0s;
 }
 
 #header .social-links a:hover {
-  background: var(--accentv2);
+  color: var(--accent);
+  border: 2px solid var(--accent);
 }
 
 @media (max-width: 992px) {
@@ -216,19 +218,21 @@ h6 {
   outline: none !important;
   line-height: 1;
   cursor: pointer;
-  text-align: right;
+  /* text-align: right; */
 }
 
 .mobile-nav-toggle i {
   color: #fff;
+  transition: all 0.3s ease-in-out 0s;
+}
+.mobile-nav-toggle i:hover {
+  color: var(--accent);
 }
 
 .mobile-nav {
   position: fixed;
   top: 55px;
-  right: 15px;
-  bottom: 15px;
-  left: 15px;
+  right: 20px;
   z-index: 9999;
   overflow-y: auto;
   background: rgba(0, 0, 0, 0.7);
@@ -236,8 +240,9 @@ h6 {
   opacity: 0;
   visibility: hidden;
   border-radius: 10px;
-  padding: 10px 0;
-  border: 2px solid rgba(255, 255, 255, 0.12);
+  padding: 10px 20px 20px 20px;
+  border: 2px solid var(--accent);
+  box-shadow: 4px 4px rgba(0, 0, 0, 0.7);
 }
 
 .mobile-nav * {
@@ -250,26 +255,46 @@ h6 {
   display: block;
   position: relative;
   color: #fff;
-  padding: 10px 20px;
+  padding: 10px;
   font-weight: 500;
   outline: none;
+  font-size: 20px;
+  text-align: right;
+}
+.mobile-nav a:before {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: 5px;
+  right: 10px;
+  background-color: var(--accent);
+  visibility: hidden;
+  width: 0px;
+  border-radius: 2px;
+  transition: all 0.3s ease-in-out 0s;
+}
+
+.mobile-nav a:hover:before,
+.mobile-nav li:hover > a:before,
+.mobile-nav .active > a:before {
+  visibility: visible;
+  width: 40px;
 }
 
 .mobile-nav a:hover,
 .mobile-nav .active > a,
 .mobile-nav li:hover > a {
-  color: var(--primary);
+  color: var(--accent);
   text-decoration: none;
 }
 
 .mobile-nav-overly {
-  width: 100%;
-  height: 100%;
+  width: 80%;
   z-index: 9997;
   top: 0;
   left: 0;
   position: fixed;
-  background: rgba(9, 9, 9, 0.6);
   overflow: hidden;
   display: none;
   transition: ease-in-out 0.2s;
@@ -280,12 +305,13 @@ h6 {
 }
 
 .mobile-nav-active .mobile-nav {
+  background-color: var(--pbackg);
   opacity: 1;
   visibility: visible;
 }
 
 .mobile-nav-active .mobile-nav-toggle i {
-  color: #fff;
+  color: rgb(201, 87, 87);
 }
 
 /* Header Top */
@@ -945,7 +971,7 @@ section .container {
 }
 
 .contact .info-box .social-links a {
-  font-size: 18px;
+  font-size: 24px;
   display: inline-block;
   color: #fff;
   line-height: 1;
