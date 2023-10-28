@@ -1,10 +1,10 @@
-# Hola! Strangers
+# Hola! Strangers 👋🏽
 
-This is a profile website of mine.
+This is kind of a low blow on what a portfolio site is for me. It's outdated by a mile.
 
-Made with lots of 🖤 by [mastarstrange](https://mastarstrange.github.io) for himself.
+Made with lots of 🖤 by [thuvasooriya](https://thuvasooriya.github.io) for himself. So if you want to see some self loathing feel free to visit and surf.
 
-### You can see more of my work [there!](https://mastarstrange.github.io)
+New one in the works ...
 
 ### Have fun learning.
 
