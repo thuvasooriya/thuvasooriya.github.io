@@ -1,0 +1,32 @@
+{
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.codeActionsOnSave": {
+		"source.fixAll": "explicit"
+	},
+	"[markdown]": {
+		"editor.wordWrap": "on"
+	},
+	"prettier.documentSelectors": ["**/*.astro"],
+	"eslint.probe": [
+		"astro",
+		"javascript",
+		"javascriptreact",
+		"markdown",
+		"typescript",
+		"typescriptreact"
+	],
+	"[astro]": {
+		"editor.defaultFormatter": "astro-build.astro-vscode"
+	},
+	"cSpell.ignorePaths": [
+		"package-lock.json",
+		"node_modules",
+		"vscode-extension",
+		".git/objects",
+		".vscode",
+		".vscode-insiders",
+		"settings.json",
+		"**/**.config.ts"
+	],
+	"cSpell.words": ["Astro", "bunx"]
+}

@@ -1,0 +1,31 @@
+---
+import aboutImg from "@/assets/about-astro.png";
+import PageLayout from "@/layouts/Base.astro";
+import { Image } from "astro:assets";
+
+const meta = {
+	description: "life of a minced person",
+	title: "about",
+};
+---
+
+<PageLayout meta={meta}>
+	<div class="space-y-6">
+		<h1 class="title">About</h1>
+		<p>
+			hello there, thank you for coming here to my humble home, i'm a curious human being from a
+			small island in a planet called earth.
+			<br />
+			<br />
+			i would like to call myself a wizard with computers and related technologies but you do you and
+			decide for yourself. i consider myself lucky enough to design and create some feel good artworks
+			and creations when i had the time for it. please don't bother with me if the trouble's not worth
+			it, i'm an unlocked closed book with a heavy hard cover. if you wanna surprise me i was born on
+			the milk chocolate day.
+			<br />
+			<br />
+			i don't want to ruin your day with all my interests, shuffle through stuff i've done if you wanna
+			know a bit.
+		</p>
+	</div>
+</PageLayout>

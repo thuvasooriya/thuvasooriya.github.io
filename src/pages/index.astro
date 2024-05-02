@@ -1,0 +1,37 @@
+---
+import SocialList from "@/components/SocialList.astro";
+import PostPreview from "@/components/blog/PostPreview.astro";
+import PageLayout from "@/layouts/Base.astro";
+import { getAllPosts, sortMDByDate } from "@/data/post";
+
+const MAX_POSTS = 10;
+const allPosts = await getAllPosts();
+const allPostsByDate = sortMDByDate(allPosts).slice(0, MAX_POSTS);
+---
+
+<PageLayout meta={{ title: "home" }}>
+	<section>
+		<h1 class="title mb-6">vanakkam makkale!</h1>
+		<p class="mb-4">
+			hello there, thank you for coming here to my humble home, i’m a curious human being from a
+			small island in a planet called earth.
+			<br />
+			<br />
+			this site is very much a work in progress right now. and if you are wondering about the snake-case...
+			yeah that's here to stay.
+		</p>
+		<SocialList />
+	</section>
+	<section aria-label="blog" class="mt-16">
+		<h2 class="title mb-4 text-xl">posts</h2>
+		<ul class="space-y-4">
+			{
+				allPostsByDate.map((p) => (
+					<li class="flex flex-col gap-x-2 sm:flex-row">
+						<PostPreview post={p} />
+					</li>
+				))
+			}
+		</ul>
+	</section>
+</PageLayout>
