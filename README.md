@@ -1,13 +1,43 @@
-# Hola! Strangers 👋🏽
+# site4thuva v2
 
-This is kind of a low blow on what a portfolio site is for me. It's outdated by a mile.
+### hola strangers! 👋🏽
 
-Made with lots of 🖤 by [thuva](https://thuvasooriya.me) for himself. So if you want to see some self loathing feel free to visit and surf.
+this is the second version of my site made with lots of 🖤. so if you want to see some self loathing feel free to visit and surf.
 
-New one in the works ...
+have fun learning.
 
-### Have fun learning.
+give it a star if you can and chill.
+see ya on the other side. ✌🏽
 
-Give it a star if you can and chill.
+## stack
 
-See ya on the other side. ✌🏽
+- bun
+- astro
+- tailwindcss
+- markdown
+
+nothing fancy yet
+
+## todo
+
+- [ ] proper logo setup
+- [ ] font change to JetBrains Mono
+- [ ] fix dates
+- [ ] embrace snake case for footnotes, and dates
+- [ ] redesign image viewer
+- [ ] social links fixes
+- [ ] proper color pallette
+- [ ] fix dark mode and search icons
+- [ ] nav redesign
+- [ ] latex support
+- [ ] portable markdown planning
+- [ ] resume page
+- [ ] now page
+- [ ] add my projects
+- [ ] add rest of my blog posts
+- [ ] make links and buttons interactive and responsive
+- [ ] add more animations
+
+### credits
+
+[astro-theme-cactus](https://github.com/chrismwilliams/astro-theme-cactus)
