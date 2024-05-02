@@ -21,20 +21,20 @@ nothing fancy yet
 ## todo
 
 - [ ] proper logo setup
-- [ ] font change to JetBrains Mono
-- [ ] fix dates
-- [ ] embrace snake case for footnotes, and dates
-- [ ] redesign image viewer
-- [ ] social links fixes
 - [ ] proper color pallette
+- [ ] font change to JetBrains Mono
+- [ ] resume page
+- [ ] add my projects
+- [ ] now page
+- [ ] add rest of my blog posts
+- [x] fix dates
+- [x] embrace snake case for footnotes, and dates
+- [ ] redesign image viewer
+- [x] social links fixes
 - [ ] fix dark mode and search icons
 - [ ] nav redesign
 - [ ] latex support
 - [ ] portable markdown planning
-- [ ] resume page
-- [ ] now page
-- [ ] add my projects
-- [ ] add rest of my blog posts
 - [ ] make links and buttons interactive and responsive
 - [ ] add more animations
 
