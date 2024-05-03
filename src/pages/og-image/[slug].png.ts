@@ -8,21 +8,35 @@ import { getAllPosts } from "@/data/post";
 
 import RobotoMono from "@/assets/roboto-mono-regular.ttf";
 import RobotoMonoBold from "@/assets/roboto-mono-700.ttf";
+import JBMono from "@/assets/jbm/JetBrainsMono-Regular.ttf";
+import JBMonoBold from "@/assets/jbm/JetBrainsMono-Bold.ttf";
 
 const ogOptions: SatoriOptions = {
 	width: 1200,
 	height: 630,
 	// debug: true,
 	fonts: [
+		// {
+		// 	name: "Roboto Mono",
+		// 	data: Buffer.from(RobotoMono),
+		// 	weight: 400,
+		// 	style: "normal",
+		// },
+		// {
+		// 	name: "Roboto Mono",
+		// 	data: Buffer.from(RobotoMonoBold),
+		// 	weight: 700,
+		// 	style: "normal",
+		// },
 		{
-			name: "Roboto Mono",
-			data: Buffer.from(RobotoMono),
+			name: "JetBrains Mono",
+			data: Buffer.from(JBMono),
 			weight: 400,
 			style: "normal",
 		},
 		{
-			name: "Roboto Mono",
-			data: Buffer.from(RobotoMonoBold),
+			name: "JetBrains Mono",
+			data: Buffer.from(JBMonoBold),
 			weight: 700,
 			style: "normal",
 		},

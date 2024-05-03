@@ -32,6 +32,7 @@ export default {
 			},
 			fontFamily: {
 				// Add any custom fonts here
+
 				sans: [...fontFamily.sans],
 				serif: [...fontFamily.serif],
 			},
@@ -120,9 +121,9 @@ export default {
 		plugin(function ({ addComponents }) {
 			addComponents({
 				".cactus-link": {
-					"@apply italic decoration-1": {},
+					"@apply text-link no-underline": {},
 					"&:hover": {
-						"@apply decoration-link decoration-2": {},
+						"@apply font-semibold italic decoration-link decoration-2": {},
 					},
 				},
 				".title": {

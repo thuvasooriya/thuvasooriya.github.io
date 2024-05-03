@@ -1,4 +1,4 @@
-# site4thuva v2
+# site4thuva v002: `humbled`
 
 ### hola strangers! 👋🏽
 
@@ -20,7 +20,8 @@ nothing fancy yet
 
 ## todo
 
-- [ ] proper logo setup
+- [x] proper logo setup
+- [ ] welcome message in many langs
 - [ ] proper color pallette
 - [ ] font change to JetBrains Mono
 - [ ] resume page
@@ -29,9 +30,11 @@ nothing fancy yet
 - [ ] add rest of my blog posts
 - [x] fix dates
 - [x] embrace snake case for footnotes, and dates
-- [ ] redesign image viewer
+- [x] fix image viewer
 - [x] social links fixes
 - [ ] fix dark mode and search icons
+- [ ] back to top icon change
+- [ ] reader can switch fonts
 - [ ] nav redesign
 - [ ] latex support
 - [ ] portable markdown planning

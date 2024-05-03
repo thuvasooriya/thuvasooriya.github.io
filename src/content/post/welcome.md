@@ -1,9 +1,12 @@
 ---
-title: "welcome to my jungle"
-publishDate: "30 March 2024"
+title: "welcome to my humble abode"
+publishDate: "2 May 2024"
+updatedDate: "2 May 2024"
 description: "saluting you for having the courage to enter my domain"
+coverImage:
+  src: "./gojo_welcome.png"
+  alt: "the strongest sorcerer, gojo satoru, welcoming you to his domain"
 tags: ["blog"]
-# ogImage: "/social-card.png"
 ---
 
 ## what is this?

@@ -2,15 +2,10 @@ import type { SiteConfig } from "@/types";
 import type { AstroExpressiveCodeOptions } from "astro-expressive-code";
 
 export const siteConfig: SiteConfig = {
-	// Used as both a meta property (src/components/BaseHead.astro L:31 + L:49) & the generated satori png (src/pages/og-image/[slug].png.ts)
-	author: "thuva sooriya",
-	// Meta property used to construct the meta title property, found in src/components/BaseHead.astro L:11
-	title: "madhouse",
-	// Meta property used as the default description meta property
-	description: "hot mess of a site that describes a fucking cool person",
-	// HTML lang property, found in src/layouts/Base.astro L:18
+	author: "thuvasooriya",
+	title: "humbled",
+	description: "hot mess of a site that also serves as a brain dump of a fucking cool person",
 	lang: "en-US",
-	// Meta property, found in src/components/BaseHead.astro L:42
 	ogLocale: "en_US",
 	// Date.prototype.toLocaleDateString() parameters, found in src/utils/date.ts.
 	date: {
