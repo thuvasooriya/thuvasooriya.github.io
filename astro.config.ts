@@ -5,6 +5,8 @@ import tailwind from "@astrojs/tailwind";
 import sitemap from "@astrojs/sitemap";
 import remarkUnwrapImages from "remark-unwrap-images";
 import rehypeExternalLinks from "rehype-external-links";
+import rehypeKatex from "rehype-katex";
+import remarkMath from "remark-math";
 import { remarkReadingTime } from "./src/utils/remark-reading-time";
 import icon from "astro-icon";
 import expressiveCode from "astro-expressive-code";
@@ -14,7 +16,11 @@ import { expressiveCodeOptions } from "./src/site.config";
 export default defineConfig({
 	site: "https://thuvasooriya.me",
 	markdown: {
-		remarkPlugins: [remarkUnwrapImages, remarkReadingTime],
+		remarkPlugins: [
+			remarkUnwrapImages,
+			remarkReadingTime,
+			[remarkMath, { singleDollarTextMath: true }],
+		],
 		rehypePlugins: [
 			[
 				rehypeExternalLinks,
@@ -23,6 +29,7 @@ export default defineConfig({
 					rel: ["nofollow, noopener, noreferrer"],
 				},
 			],
+			rehypeKatex,
 		],
 		remarkRehype: {
 			footnoteLabelProperties: {

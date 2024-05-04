@@ -33,11 +33,13 @@ nothing fancy yet
 - [x] embrace snake case for footnotes, and dates
 - [x] fix image viewer
 - [x] social links fixes
+- [x] latex support
+- [ ] katex font issues
 - [ ] fix dark mode and search icons
 - [ ] back to top icon change
 - [ ] reader can switch fonts
 - [ ] nav redesign
-- [ ] latex support
+
 - [ ] portable markdown planning
 - [ ] make links and buttons interactive and responsive
 - [ ] add more animations

@@ -31,7 +31,7 @@ if the answer to the above question is an astounding yes, then you are good to g
 
 here are the 6 basic definitions of trigonometry
 
-1. $\sin(x) = \frac{opposite}{hypotenuse}$
+1. $$\sin(x) = \frac{opposite}{hypotenuse}$$
 2. $\cos(x) = \frac{adjacent}{hypotenuse}$
 3. $\tan(x) = \frac{opposite}{adjacent} = \frac{\sin(x)}{\cos(x)}$
 4. $\cot(x) = \frac{1}{\tan(x)}$
@@ -78,11 +78,11 @@ the trigonometric functions can be expressed in terms of sum of angles. the foll
 
 one fun mnemonic to remember the above identities that i found on one of [patrickjmt's youtube video](https://www.youtube.com/watch?v=sGDbKmWmTDw) is,
 
-"sine is **sum**thing that switches"
+> sine is **sum**thing that switches
 
 say that again 5 times and imagine you switching handsigns until you put up your middle finger. now you won't forget this. i know i still can so i'll make sure to read this blog again.
 
-> "cosine is the opposite of sine" which means if sign is the same in sine so it will be opposite in cosine. and since sine switches, cosine doesn't.
+> cosine is the opposite of sine, which means if sign is the same in sine so it will be opposite in cosine. and since sine switches, cosine doesn't.
 
 > lhs and rhs begins with the same trig function.
 
@@ -90,19 +90,19 @@ here is a tan version. i wonder where did that come from.
 
 $\tan(x \pm y) = \frac{\tan(x) \pm \tan(y)}{1 \mp \tan(x)\tan(y)}$
 
-i won't be mentioning much about tan versions from now on since i find calculating in sine and cos easier for mental models. and you can always derive tan from sin and cos
+i won't be mentioning much about tan versions from now on since i find calculating in sine and cosine easier for mental models. and you can always derive tan from sin and cos
 
 ## the big dogs
 
 ### double angle identities
 
-> $x = y$
+$x = y$
 
-$\sin(2x) = 2\sin(x)\cos(x)$
+> $\sin(2x) = 2\sin(x)\cos(x)$
 
-$\cos(2x) = \cos^2(x) - \sin^2(x) = 2\cos^2(x) - 1 = 1 - 2\sin^2(x) $
+> $\cos(2x) = \cos^2(x) - \sin^2(x) = 2\cos^2(x) - 1 = 1 - 2\sin^2(x) $
 
-$\tan(2x) = \frac{2\tan(x)}{1 - \tan^2(x)}$
+> $\tan(2x) = \frac{2\tan(x)}{1 - \tan^2(x)}$
 
 here pythagorean adds in a bonus which comes in handy for half angle identities.
 
@@ -112,29 +112,29 @@ $\sin^2(x) = \frac{1 - \cos(2x)}{2}$
 
 $\cos^2(x) = \frac{1 + \cos(2x)}{2}$
 
-i know you've been spoiled in the previous section but i presume you won't have any doubts about this. if you face any difficulties i recommend watching [patrickjmt's video](https://www.youtube.com/watch?v=5Q2nZ2b5b6k).
+i know you've been spoiled in the previous section but it's still cool. if you face any difficulties deriving this, i recommend watching [patrickjmt's video](https://www.youtube.com/watch?v=5Q2nZ2b5b6k).
 
 ### product to sum identities
 
 here is where the revelation happened to me. i always had trouble remembering these. but now i know that these are basically just using $\sin(x+y)$ and $\cos(x+y)$ identities in some fancy ways.
 
-now how do you feel about the identities below?
+now, how do you feel about the identities below?
 
-> hint: i've switched the side of the products to make it easy for you!
+_hint: i've switched the side of the products to make it easy for you!_
 
-$\sin(x+y) + \sin(x-y) = 2\sin(x)\cos(y)$
+> $\sin(x+y) + \sin(x-y) = 2\sin(x)\cos(y)$
 
 now that you have a mental note of the sum of angles identity, you can add up $\sin(x)\cos(y) + \cos(x)\sin(y)$ with sign turned version of the same which will cut the last part off and you will be left with $2\sin(x)\cos(y)$. easy right?
 
-$\sin(x+y) - \sin(x-y) = 2\cos(x)\sin(y)$
+> $\sin(x+y) - \sin(x-y) = 2\cos(x)\sin(y)$
 
 this is not so different from the previous one, we all know what happens when negative meets negative right?
 
-$\cos(x+y) + \cos(x-y) = 2\cos(x)\cos(y)$
+> $\cos(x+y) + \cos(x-y) = 2\cos(x)\cos(y)$
 
-this is crazy twins version of the previous ones. begins with cos and last part sign is changed, hence its a goner. so you are left with 2cosxcosy.
+this is crazy twins version of the previous ones. begins with cos and last part sign is changed, hence its a goner. so you are left with $2\cos(x)\cos(y)$.
 
-$\cos(x+y) - \cos(x-y) = -2\sin(x)\sin(y)$
+> $\cos(x+y) - \cos(x-y) = -2\sin(x)\sin(y)$
 
 this is the odd one out. with a negative result but if you think from basics all terms are turned negative in $\cos(x-y)$ so when the positive thing in $\cos(x+y)$ ( $\cos(x)\cos(y)$ of course) is cut off we are left with $-2\sin(x)\sin(y)$.
 
@@ -144,13 +144,13 @@ i know you are feeling good about yourself.
 
 so i've made some nifty changes in the presentation of above product to sum and below sum to product to make the relationship apparent to you.
 
-$\sin(a) + \sin(b) = 2\sin(\frac{a+b}{2})\cos(\frac{a-b}{2})$
+> $\sin(a) + \sin(b) = 2\sin(\frac{a+b}{2})\cos(\frac{a-b}{2})$
 
-$\sin(a) - \sin(b) = 2\cos(\frac{a+b}{2})\sin(\frac{a-b}{2})$
+> $\sin(a) - \sin(b) = 2\cos(\frac{a+b}{2})\sin(\frac{a-b}{2})$
 
-$\cos(a) + \cos(b) = 2\cos(\frac{a+b}{2})\cos(\frac{a-b}{2})$
+> $\cos(a) + \cos(b) = 2\cos(\frac{a+b}{2})\cos(\frac{a-b}{2})$
 
-$\cos(a) - \cos(b) = -2\sin(\frac{a+b}{2})\sin(\frac{a-b}{2})$
+> $\cos(a) - \cos(b) = -2\sin(\frac{a+b}{2})\sin(\frac{a-b}{2})$
 
 do you see anything? just compare x and y with a and b and derive a relationship. it will only make you high when you git it yourself so i won't be spoiling the fun for you.
 
