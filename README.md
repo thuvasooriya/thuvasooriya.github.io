@@ -24,6 +24,7 @@ nothing fancy yet
 - [ ] welcome message in many langs
 - [ ] proper color pallette
 - [ ] font change to JetBrains Mono
+- [ ] fix satori
 - [ ] resume page
 - [ ] add my projects
 - [ ] now page
