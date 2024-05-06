@@ -28,5 +28,5 @@
 		"settings.json",
 		"**/**.config.ts"
 	],
-	"cSpell.words": ["Astro", "bunx"]
+	"cSpell.words": ["Astro", "bunx", "uart"]
 }

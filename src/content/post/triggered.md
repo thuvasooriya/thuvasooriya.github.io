@@ -1,5 +1,5 @@
 ---
-title: "triggered by trignometry"
+title: "triggered by trigonometry"
 description: "a cheatsheet to remember the lost art of trigonometric identities"
 publishDate: "04 May 2024"
 updatedDate: 04 May 2024

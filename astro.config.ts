@@ -15,6 +15,9 @@ import { expressiveCodeOptions } from "./src/site.config";
 // https://astro.build/config
 export default defineConfig({
 	site: "https://thuvasooriya.me",
+	redirects: {
+		"goto/jotter": "https://jotter.onrender.com",
+	},
 	markdown: {
 		remarkPlugins: [
 			remarkUnwrapImages,
