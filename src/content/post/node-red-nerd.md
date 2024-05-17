@@ -1,10 +1,10 @@
 ---
-title: "setting up node-red like a nerd"
-description: "i go through the basics that i followed to get the node-red installed easily"
+title: "dealing with node-red like a nerd"
+description: "my hard ass time with node-red when trying an embedded project"
 publishDate: "02 May 2024"
-updatedDate: "03 May 2024"
+updatedDate: "17 May 2024"
 tags: ["embedded"]
-# draft: true
+draft: true
 ---
 
 ## exposition

@@ -1,4 +1,5 @@
 import type { CollectionEntry } from "astro:content";
+
 import { getCollection } from "astro:content";
 
 /** Note: this function filters out draft posts based on the environment */
