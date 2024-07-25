@@ -33,7 +33,7 @@ export default {
 			fontFamily: {
 				// Add any custom fonts here
 
-				sans: [...fontFamily.sans],
+				sans: ["JetBrainsMono",...fontFamily.sans],
 				serif: [...fontFamily.serif],
 			},
 			transitionProperty: {
@@ -59,17 +59,17 @@ export default {
 				DEFAULT: {
 					css: {
 						a: {
-							"@apply cactus-link": "",
+							// "@apply cactus-link": "",
 						},
 						strong: {
 							fontWeight: "700",
 						},
 						code: {
-							border: "1px dotted #666",
-							borderRadius: "2px",
+							// border: "1px dotted #666",
+							// borderRadius: "2px",
 						},
 						blockquote: {
-							borderLeftWidth: "0",
+							borderLeftWidth: "2",
 						},
 						hr: {
 							borderTopStyle: "dashed",

@@ -4,13 +4,15 @@ description: "my hard ass time with node-red when trying an embedded project"
 publishDate: "02 May 2024"
 updatedDate: "17 May 2024"
 tags: ["embedded"]
-draft: true
+draft: false
 ---
 
 ## exposition
 
 by this time you probably know what node-red is and what is it used for if you really wanna know, ping me in x.
 this post tells you how to install node-red in a way that you can use it like a modern day chad.
+
+> this post seems out of date will try to update with the medibox project code when i get the time. in the meantime if you found it working or found a solution feel free to open a pull request or dm me.
 
 ## installation
 

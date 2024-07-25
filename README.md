@@ -20,7 +20,8 @@ nothing fancy yet
 
 ## todo
 
-- [x] proper logo setup
+- [x] ~proper logo setup~
+- [ ] redesign the logo
 - [ ] welcome message in many langs
 - [ ] proper color pallette
 - [ ] font change to JetBrains Mono

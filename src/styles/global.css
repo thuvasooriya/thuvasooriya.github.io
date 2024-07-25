@@ -6,8 +6,8 @@
 	:root,
 	:root[data-theme="light"] {
 		color-scheme: light;
-		/* https://tailwindcss.com/docs/customizing-colors#using-css-variables */
-		--theme-bg: 0deg 0% 98%;
+		/* --theme-bg: 52deg 100% 91%; */
+		--theme-bg: 49deg 38% 94%;
 		--theme-link: 172deg 18% 41%;
 		--theme-text: 203deg 11% 15%;
 		--theme-accent: 351deg 66% 48%;
@@ -17,28 +17,29 @@
 
 	:root[data-theme="dark"] {
 		color-scheme: dark;
-		/* --theme-bg: 210deg 6% 12%; */
-		--theme-bg: 180deg 0% 0%;
+		--theme-bg: 220deg 10% 10%;
 		--theme-link: 100deg 49% 67%;
 		--theme-text: 220deg 3% 79%;
-		/* --theme-accent: 159deg 64% 45%; */
 		--theme-accent-2: 13deg 72% 59%;
 		--theme-accent: 206deg 57% 59%;
-		/* --theme-accent-2: 0deg 0% 93%; */
-		--theme-quote: 102deg 100% 86%;
+		--theme-quote: 150deg 57% 60%;
 	}
 	@font-face {
-		font-family: "JetBrainsMono";
-		font-style: normal;
-		font-weight: 400;
+		font-family: "JetBrains Mono";
+		src:
+			url("https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono/web/woff2/JetBrainsMono-Bold-Italic.woff2")
+				format("woff2"),
+			url("https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono/web/woff/JetBrainsMono-Bold-Italic.woff")
+				format("woff");
+		font-weight: 700;
+		font-style: italic;
 		font-display: swap;
-		src: url(assets/jbm/JetBrainsMono-Regular.ttf) format("ttf");
 	}
 	html {
 		@apply scroll-smooth;
 	}
 
 	body {
-		@apply mx-auto flex min-h-screen max-w-3xl flex-col bg-bgColor px-8 pt-16 font-mono text-sm font-normal text-textColor antialiased;
+		@apply mx-auto flex min-h-screen max-w-3xl flex-col bg-bgColor px-8 pt-16 antialiased;
 	}
 }

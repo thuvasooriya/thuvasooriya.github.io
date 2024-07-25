@@ -9,7 +9,6 @@ import rehypeExternalLinks from "rehype-external-links";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 import remarkUnwrapImages from "remark-unwrap-images";
-
 import { expressiveCodeOptions } from "./src/site.config";
 import { remarkReadingTime } from "./src/utils/remark-reading-time";
 
@@ -41,7 +40,12 @@ export default defineConfig({
 		remarkPlugins: [
 			remarkUnwrapImages,
 			remarkReadingTime,
-			[remarkMath, { singleDollarTextMath: true }],
+			[
+				remarkMath,
+				{
+					singleDollarTextMath: true,
+				},
+			],
 		],
 		remarkRehype: {
 			footnoteLabelProperties: {
@@ -62,7 +66,6 @@ export default defineConfig({
 		plugins: [rawFonts([".ttf", ".woff"])],
 	},
 });
-
 function rawFonts(ext: string[]) {
 	return {
 		name: "vite-plugin-raw-fonts",
