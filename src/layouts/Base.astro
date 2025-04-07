@@ -6,6 +6,7 @@ import Footer from "@/components/layout/Footer.astro";
 import Header from "@/components/layout/Header.astro";
 import { siteConfig } from "@/site.config";
 import type { SiteMeta } from "@/types";
+import { AstroFont } from "astro-font";
 
 interface Props {
 	meta: SiteMeta;
@@ -19,10 +20,26 @@ const {
 <html class="scroll-smooth" lang={siteConfig.lang}>
 	<head>
 		<BaseHead articleDate={articleDate} description={description} ogImage={ogImage} title={title} />
+		<AstroFont
+			config={[
+				{
+					src: [],
+					name: "JetBrains Mono",
+					googleFontsURL:
+						"https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap",
+					preload: true,
+					display: "swap",
+					selector: "body",
+					fallback: "monospace",
+					cssVariable: "astro-font-jetbrains-mono",
+				},
+			]}
+		/>
 	</head>
 	<body
-		class="bg-global-bg text-global-text mx-auto flex min-h-screen max-w-3xl flex-col px-4 pt-16 font-mono text-sm font-normal antialiased sm:px-8"
+		class="bg-global-bg text-global-text mx-auto flex min-h-screen max-w-3xl flex-col px-4 pt-16 font-mono text-sm antialiased sm:px-8"
 	>
+		<div id="theme-transition-overlay" aria-hidden="true"></div>
 		<ThemeProvider />
 		<SkipLink />
 		<Header />

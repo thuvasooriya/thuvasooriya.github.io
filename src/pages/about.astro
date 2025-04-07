@@ -1,53 +1,142 @@
 ---
+// TODO:
+// - refine aboutme paragraph
+// - refactor interests card and make it make it float
+// - refactor now page
+// make quote section along with avatar and make it minimal
+// - remove timeline for now
+import SocialList from "@/components/SocialList.astro";
 import PageLayout from "@/layouts/Base.astro";
+import { Icon } from "astro-icon/components";
 
 const meta = {
-	description: "life of a minced person",
+	description: "somewhere between psychotic and iconic",
 	title: "about",
 };
+
+const now_struct = [
+	{
+		tag: "work",
+		title: "remote intern @ ntu ccds",
+		description: "research assistant in the field of robotics and digital design",
+		icon: "mdi:briefcase",
+	},
+	{
+		tag: "edu",
+		title: "final year undergrad @ entc uom",
+		description: "having fun with entc-fam",
+		icon: "mdi:school",
+	},
+	{
+		tag: "tinker",
+		title: "azem - micromouse sim in zig",
+		description: "cross platform, easy to use, contribute and extend",
+		icon: "mdi:cog",
+	},
+	{
+		tag: "travel",
+		title: "highland camping",
+		description: "elevated stress levels detected. go chill",
+		icon: "mdi:map-marker",
+	},
+	{
+		tag: "watch",
+		title: "black mirror s2",
+		description: "where do we go from here",
+		icon: "mdi:film",
+	},
+	{
+		tag: "read",
+		title: "dale carnegie - omnibus",
+		description: "i'm not a people person, but i try",
+		icon: "mdi:book-open-page-variant",
+	},
+];
 ---
 
 <PageLayout meta={meta}>
-	<div class="space-y-6">
-		<h1 class="title">about</h1>
-		<p>
-			hello there, thank you for coming here to my <a class="cactus-link" href="/posts/welcome/"
-				>humble abode</a
-			>, i'm a curious human being from a small island in a planet called earth.
-			<br />
-			<br />
-			i would like to call myself a wizard with computers and related technologies but you do you and
-			decide for yourself. i consider myself lucky enough to design and create some feel good artworks
-			and creations when i had the time for it. please don't bother with me if the trouble's not worth
-			it, i'm an unlocked closed book with a heavy hard cover. if you wanna surprise me i was born on
-			the milk chocolate day.
-			<br />
-			<br />
-			i don't want to ruin your day with all my interests, shuffle through stuff i've done if you wanna
-			know a bit.
-			<br />
-			<br />
+	<div class="space-y-16">
+		<!-- Hero Section -->
+		<section class="relative">
+			<section>
+				<div
+					class="from-primary/30 absolute top-0 right-0 -z-10 h-64 w-64 rounded-full bg-gradient-to-bl to-transparent opacity-70 blur-3xl"
+				>
+				</div>
+				<div
+					class="from-accent/30 absolute bottom-0 left-0 -z-10 h-40 w-40 rounded-full bg-gradient-to-tr to-transparent opacity-60 blur-2xl"
+				>
+				</div>
+			</section>
+			<section>
+				<div class="relative w-full md:w-auto">
+					<h2 class="mb-6 flex items-center justify-center text-xl font-semibold">
+						<Icon name="mdi:altimeter" class="text-primary mr-2 h-5 w-5" /> now
+					</h2>
+					<div class="bg-primary/5 border-primary/20 rounded-2xl border p-6 backdrop-blur-sm">
+						<div class="space-y-6">
+							{
+								now_struct.map((item, index) => (
+									<div class="relative pl-8">
+										<div class="bg-primary/20 absolute top-0 left-0 mt-3 flex h-10 w-10 items-center justify-center rounded-lg">
+											<Icon name={item.icon} class="text-primary h-6 w-6" />
+										</div>
+										<div class="pl-8">
+											<span class="text-primary">{item.tag}</span>
+											<h4 class="font-semibold">{item.title}</h4>
+											<p class="text-gray-600 dark:text-gray-400">{item.description}</p>
+										</div>
+									</div>
+								))
+							}
+						</div>
 
-			<a class="cactus-link" href="https://docs.thuvasooriya.me/cv.pdf">click here for my cv</a>
-		</p>
-		<h1 class="title">now</h1>
-		<p>
-			i'm currently working as an remote intern at <a
-				class="cactus-link"
-				href="https://www.ntu.edu.sg/computing"
-				>ntu college of computing and data science
-			</a> and a almost final year undergrad at <a class="cactus-link" href="https://ent.uom.lk/"
-				>entc uom</a
-			>. <br />
-			<br />
-			currently engaged in,
-			<ul class="list-disc pl-6">
-				<li>learning: digital system design</li>
-				<li>creating: firmware for micromouse</li>
-				<li>travelling: south of srilanka</li>
-				<li>reading: dale carnige's omnibus</li>
-				<li>watching: solo leveling s02</li>
-			</ul>
-		</p>
+						<div class="border-primary/10 mt-5 flex flex-wrap justify-center gap-4 border-t pt-5">
+							<a
+								class="bg-primary/10 hover:bg-primary/20 text-primary flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors"
+								href="https://docs.thuvasooriya.me/cv.pdf"
+								target="_blank"
+							>
+								<Icon name="mdi:file-document" class="h-5 w-5" />
+								view my cv
+							</a>
+
+							<a
+								class="bg-variant-4/10 hover:bg-variant-4/20 text-variant-4 flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors"
+								href="/posts"
+							>
+								<Icon name="mdi:blog" class="h-5 w-5" />
+								read my posts
+							</a>
+							<SocialList />
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<div class="relative mt-6 w-full md:w-auto">
+				<h2 class="mb-6 flex items-center justify-center text-xl font-semibold">
+					<Icon name="mdi:hand-wave" class="text-variant-2 mr-2 h-5 w-5" /> hola
+				</h2>
+				<div class="bg-accent/5 border-accent/20 rounded-2xl border p-6 backdrop-blur-sm">
+					<div class="prose max-w-none text-sm">
+						hello there, thank you for coming here to my <a class="text-link" href="/posts/welcome/"
+							>humble abode</a
+						>, i'm a curious human being from a small island in a planet called earth.
+						<p>
+							i would like to call myself a wizard with computers and related technologies but you
+							do you and decide for yourself. i consider myself lucky enough to design and create
+							some feel good artworks and creations when i had the time for it.
+						</p>
+
+						<p>
+							please don't bother with me if the trouble's not worth it, i'm an unlocked closed book
+							with a heavy hard cover. if you wanna surprise me i was born on the milk chocolate
+							day.
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
 	</div>
 </PageLayout>

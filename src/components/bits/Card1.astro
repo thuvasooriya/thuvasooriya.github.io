@@ -1,0 +1,30 @@
+---
+const categories = [
+	{ name: "tech", count: 12, icon: "mdi:laptop" },
+	{ name: "design", count: 8, icon: "mdi:palette" },
+	{ name: "thoughts", count: 5, icon: "mdi:thought-bubble" },
+];
+---
+
+<!-- Categories -->
+<section class="bg-accent/5 rounded-xl p-5">
+	<h3 class="mb-4 font-medium">Explore Topics</h3>
+	<ul class="space-y-2">
+		{
+			categories.map((category) => (
+				<li>
+					<a
+						href={`/tags/${category.name}/`}
+						class="group hover:bg-accent/10 flex items-center justify-between rounded-lg px-3 py-2 transition-colors"
+					>
+						<span class="flex items-center gap-2">
+							<Icon name={category.icon} class="text-accent h-4 w-4" />
+							{category.name}
+						</span>
+						<span class="bg-accent/10 rounded-full px-2 py-0.5 text-xs">{category.count}</span>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</section>

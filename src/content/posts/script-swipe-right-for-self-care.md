@@ -25,8 +25,6 @@ in most of the apps a standard swipe brings our profile, it’s time for us to s
 
 for most guys, life is what happens between social media scrolls and self-doubt. don’t be that guy and be mindful enough to not start a relationship with a russian chat bot sent to seduce you.
 
-**( 3.45 slide 4)**
-
 almost everything will work again if you unplug it for a few minutes, including you.
 so, who's up for a 30 day mindfulness challenge.
 double tap to like or swipe right for the next speech.

@@ -1,24 +1,231 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
-import SocialList from "@/components/SocialList.astro";
+// import { Image } from "astro:assets";
+import LanguageGreeting from "@/components/LanguageGreeting.astro";
+import { Icon } from "astro-icon/components";
 import PostPreview from "@/components/blog/PostPreview.astro";
 import Note from "@/components/note/Note.astro";
 import { getAllPosts } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
 import { collectionDateSort } from "@/utils/date";
+import SocialList from "@/components/SocialList.astro";
 
-const MAX_POSTS = 5;
+const MAX_POSTS = 10;
 const allPosts = await getAllPosts();
 const allPostsByDate = allPosts
 	.sort(collectionDateSort)
 	.slice(0, MAX_POSTS) as CollectionEntry<"post">[];
 
-const MAX_NOTES = 2;
+const MAX_NOTES = 3;
 const allNotes = await getCollection("note");
 const latestNotes = allNotes.sort(collectionDateSort).slice(0, MAX_NOTES);
 ---
 
 <PageLayout meta={{ title: "home" }}>
+	<!-- blur/gradients -->
+	<section class="z-0">
+		<!-- where we'll have the background magic and effects -->
+		<div
+			aria-hidden="true"
+			class="bg-accent/5 absolute top-4 left-0 h-24 w-24 rounded-full blur-xl"
+		>
+		</div>
+		<div
+			aria-hidden="true"
+			class="bg-primary/5 absolute top-4 right-0 h-32 w-32 rounded-full blur-xl"
+		>
+		</div>
+		<div
+			aria-hidden="true"
+			class="bg-variant-2/5 absolute top-50 right-2 h-64 w-64 rounded-full blur-xl"
+		>
+		</div>
+	</section>
+	<!-- language greeting and button -->
+	<section class="">
+		<div class="relative z-10">
+			<!-- <div
+				class="bg-accent/5 text-accent mb-4 inline-flex items-center rounded-full px-3 py-1 text-sm font-medium backdrop-blur-sm"
+			> -->
+			<!-- <h1 class="title">ヽ(⌐■_■)ノ♪♬</h1> -->
+			<!-- </section> -->
+			<!-- <Icon name="mdi:hand-wave" class="mr-1 h-4 w-4" /> -->
+			<LanguageGreeting />
+		</div>
+
+		<div class="flex flex-wrap gap-4">
+			<a
+				href="/posts"
+				class="group bg-primary/5 text-primary hover:bg-primary/10 flex items-center gap-1 rounded-full px-5 py-2 text-sm font-medium transition-all"
+			>
+				feast
+				<Icon
+					name="mdi:arrow-right"
+					class="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+				/>
+			</a>
+			<a
+				href="/about"
+				class="bg-accent/10 text-accent hover:bg-accent/20 flex items-center gap-1 rounded-full px-5 py-2 text-sm font-medium transition-all"
+			>
+				<Icon
+					name="mdi:sunglasses"
+					class="mr-1 h-4 w-4 transition-transform group-hover:translate-x-0.5"
+				/>
+				it's me
+			</a>
+		</div>
+	</section>
+
+	<!-- Social Links with subtle hover effects -->
+	<!-- <section class="bg-accent/5 mt-10 rounded-xl p-5 backdrop-blur-sm">
+		<h2 class="mb-4 text-lg font-medium">Connect with me</h2>
+		<SocialList />
+	</section> -->
+
+	<!-- Newsletter/CTA section -->
+	<section
+		class="bg-accent/5 border-accent/20 mt-16 rounded-lg border p-6 text-center backdrop-blur-sm"
+	>
+		<h2 class="mb-2 text-xl font-medium">stay updated</h2>
+		<p class="mb-4 text-sm">get notified when i publish new content</p>
+		<div class="flex flex-wrap justify-center gap-4 text-sm">
+			<a
+				class="bg-primary/10 hover:bg-primary/20 text-primary flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors"
+				href="/"
+				target="_blank"
+			>
+				<Icon name="mdi:file-document" class="h-5 w-5" />
+				<del>newsletter</del>wip
+			</a>
+			<a
+				href="/rss.xml"
+				class="bg-accent/10 hover:bg-accent/20 text-accent flex items-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors"
+			>
+				<Icon name="mdi:rss" class="h-4 w-4" />
+				rss
+			</a>
+			<SocialList />
+		</div>
+	</section>
+
+	<section>
+		<!-- Featured Content -->
+		<div class="mt-16 grid gap-8 md:grid-cols-[2fr_1fr]">
+			<!-- Latest Posts with hover card effects -->
+			<section aria-label="blog">
+				<div class="mb-6 flex items-center justify-between">
+					<h2 class="title text-accent text-xl">posts</h2>
+					<a
+						href="/posts/"
+						class="group text-accent flex items-center gap-1 text-sm transition-all hover:translate-x-0.5"
+					>
+						view all
+						<Icon
+							name="mdi:arrow-right"
+							class="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+						/>
+					</a>
+				</div>
+
+				<ul class="grid gap-0">
+					{
+						allPostsByDate.map((post, index) => (
+							<li class="group relative rounded-xl transition-all">
+								<div class="bg-accent/[0.03] absolute inset-0 -z-10 rounded-xl opacity-0 transition-opacity group-hover:opacity-100" />
+								<div class="flex flex-col gap-x-2 p-3 sm:flex-row">
+									<PostPreview post={post} />
+								</div>
+							</li>
+						))
+					}
+				</ul>
+			</section>
+
+			<!-- Sidebar with categories and tweets -->
+			<div class="space-y-8">
+				{
+					latestNotes.length > 0 && (
+						<section>
+							<div class="mb-3 flex items-center justify-between">
+								<h2 class="title text-accent text-lg">tweets</h2>
+								<a
+									href="/tweets/"
+									class="group text-accent flex items-center gap-1 text-xs transition-all hover:translate-x-0.5"
+								>
+									view all
+									<Icon
+										name="mdi:arrow-right"
+										class="h-3 w-3 transition-transform group-hover:translate-x-0.5"
+									/>
+								</a>
+							</div>
+							<ul class="space-y-4" role="list">
+								{latestNotes.map((note) => (
+									<li class="transform transition-transform hover:-translate-y-0.5">
+										<Note note={note} as="h3" isPreview />
+									</li>
+								))}
+							</ul>
+						</section>
+					)
+				}
+			</div>
+		</div>
+	</section>
+</PageLayout>
+
+<script>
+	// Optional: Add subtle scroll animations with Intersection Observer API
+	document.addEventListener("DOMContentLoaded", () => {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add("fade-in");
+					}
+				});
+			},
+			{
+				threshold: 0.1,
+			},
+		);
+
+		document.querySelectorAll("section").forEach((section) => {
+			observer.observe(section);
+		});
+	});
+</script>
+
+<style>
+	/* Optional: Add subtle animations */
+	section {
+		opacity: 0.8;
+		transform: translateY(10px);
+		transition:
+			opacity 0.6s ease,
+			transform 0.6s ease;
+	}
+
+	.fade-in {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	@keyframes float {
+		0% {
+			transform: translateY(0px);
+		}
+		50% {
+			transform: translateY(-5px);
+		}
+		100% {
+			transform: translateY(0px);
+		}
+	}
+</style>
+
+<!-- <PageLayout meta={{ title: "home" }}>
 	<section class="">
 		<h1 class="title mb-4">ヽ(⌐■_■)ノ♪♬</h1>
 		<p class="font-strong mb-4">
@@ -32,7 +239,7 @@ const latestNotes = allNotes.sort(collectionDateSort).slice(0, MAX_NOTES);
 		<SocialList />
 	</section>
 	<section aria-label="blog" class="mt-8">
-		<h2 class="title text-accent mb-4 text-xl">
+		<h2 class="title text-accent-1 mb-4 text-xl">
 			<a href="/posts/">posts</a>
 		</h2>
 		<ul class="space-y-4">
@@ -48,7 +255,7 @@ const latestNotes = allNotes.sort(collectionDateSort).slice(0, MAX_NOTES);
 	{
 		latestNotes.length > 0 && (
 			<section class="mt-6">
-				<h2 class="title text-accent mb-4 text-xl">
+				<h2 class="title text-accent-1 mb-4 text-xl">
 					<a href="/tweets/">tweets</a>
 				</h2>
 				<ul class="space-y-4" role="list">
@@ -61,4 +268,4 @@ const latestNotes = allNotes.sort(collectionDateSort).slice(0, MAX_NOTES);
 			</section>
 		)
 	}
-</PageLayout>
+</PageLayout> -->

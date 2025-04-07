@@ -37,21 +37,22 @@ const socialLinks: {
 	// 	link: "https://linkedin.com/in/thuvasooriya",
 	// 	name: "mdi:linkedin",
 	// },
-	// {
-	// 	friendlyName: "pinterest",
-	// 	link: "https://pinterest.com/thuvasooriya",
-	// 	name: "mdi:pinterest",
-	// },
-	// {
-	// 	friendlyName: "spotify",
-	// 	link: "https://open.spotify.com/user/31557wv7breljjzr744htxbumd7a",
-	// 	name: "mdi:spotify",
-	// },
+	{
+		friendlyName: "pinterest",
+		link: "https://pinterest.com/thuvasooriya",
+		name: "mdi:pinterest",
+	},
+	{
+		friendlyName: "spotify",
+		link: "https://open.spotify.com/user/31557wv7breljjzr744htxbumd7a",
+		name: "mdi:spotify",
+	},
 ];
 ---
 
-<div class="flex flex-wrap items-end gap-x-2">
-	<!-- <p>Find me on</p> -->
+<div
+	class="bg-variant-3/10 hover:bg-variant-3/20 text-variant-3 flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors"
+>
 	<ul class="flex flex-1 items-center gap-x-2 sm:flex-initial">
 		{
 			socialLinks.map(({ friendlyName, isWebmention, link, name }) => (

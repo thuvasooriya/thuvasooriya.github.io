@@ -13,11 +13,12 @@ this is the second speech i had to prepare and present in my department as part 
 
 ## script
 
-my life engine is making a furious beat. i am standing in the front, trying to close all the leaks of my nervousness around me. **_then i remembered, the very first time i saw you is a title that is meant to misdirect all of you._** to get you all cozy in the feeling of your crushes and loved ones. that's when i wake you up with a clap to your face. now, that's an impression i wouldn't forget. a crudely strategic one to be exact. hope you feel the same. with that please give me a moment to stir up your thoughts on how, why and what are first impressions.
+my life engine is making a furious beat. i am standing in the front, trying to close all the leaks of my nervousness around me. **then i remembered, the very first time i saw you is a title that is meant to misdirect all of you.** to get you all cozy in the feeling of your crushes and loved ones. 
+that's when i wake you up with a _clap to your face_. now, that's an impression i wouldn't forget. a crudely strategic one to be exact. hope you feel the same. with that please give me a moment to stir up your thoughts on how, why and what are first impressions.
 
 a very warm greetings to the topics master and our awesome audience.
 
-_the very first time i saw you, probably i looked away and avoided eye contact because i'm a really shy person trying to push the boundaries of being an introvert. if i had seen you then it might be because of your attire like some people who dashes through with impeccable clothing styles, or your personality like some pleasantly surprising and humorous colleagues around you, or an information or a performance that you shared like a surprisingly real truth or a dramatic speech. or something entirely different but impressive. i hope everyone is in the same circle as me._ these impressions are what initially defines how i would feel about someone for the foreseeable future. and let's be real unless you are going to spend absurd amount of time together (i didn't mean lectures) all you have of the other person is the first impression. and that my dear friends is important.
+_the very first time i saw you, probably i looked away and avoided eye contact because i'm a really shy person trying to push the boundaries of being an introvert._ if i had seen you then it might be because of **your attire like some people who dashes through with impeccable clothing styles, or your personality like some pleasantly surprising and humorous colleagues around you, or an information or a performance that you shared like a surprisingly real truth or a dramatic speech. or something entirely different but impressive.** i hope everyone is in the same circle as me. these impressions are what initially defines how i would feel about someone for the foreseeable future. and let's be real unless you are going to spend absurd amount of time together (i didn't mean lectures) all you have of the other person is the first impression. **and that my dear friends is important.**
 
 personally i would often think to put on the “i got no friends and that's ok” song in headphones and walk alone keeping a stone cold face. but in reality we are a connective species and we need to sync whether we want it or not. and a great first impressions can win you a connection worth sharing life to or a connection that's worth giving you a chance to succeed in life. or both if you are a lucky landmine. take the first public pitch for the iphone. the admiration and surprise in the release was the first impression that led to the best selling phone lineup lasting even now when some of their ideals about privacy are in question. and let's not forget about barak obama's first speech which turned the tides of the history of democracy.
 
@@ -25,6 +26,7 @@ let’s jump into some asterisks regarding first impressions. they _are unquanti
 
 finally i hope this was an intriguing thought experiment for you. the very first time i saw each and every one of you i thought, oh god save me from these people. right now i’m thinking, what an interesting bunch of friends and fiends i have here. it’s never too late to change an impression, give other people another chance to prove themselves but do your best to win others with real first impressions. there are 8 billion buttons for you to push. take it slow and take it real. all the best.
 
-## closing
+### vibe check
 
-if you are still alive after all that, here is a space for celebration => [____ celebration area ____]
+if you are still alive after all that, here is a space for celebration 
+#### [____ celebration area ____]
