@@ -1,0 +1,185 @@
+---
+import type { MarkdownHeading } from "astro";
+import { generateToc, type TocItem } from "@/utils";
+import TOCHeading from "./TOCHeading.astro";
+
+interface Props {
+	headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+
+const toc = generateToc(headings);
+---
+
+<!-- floating toc sidebar - adaptive height with theme background -->
+<aside
+	class="toc-sidebar fixed right-4 top-1/2 max-h-[80vh] w-72 -translate-y-1/2 translate-x-[120%] overflow-y-auto rounded-lg border border-zinc-200 shadow-2xl transition-transform duration-300 data-[open=true]:translate-x-0 dark:border-zinc-700"
+	data-open="false"
+	id="toc-sidebar"
+	style="z-index: 80; background: var(--color-global-bg);"
+>
+	<nav class="px-6 py-6">
+		<ol class="space-y-2 first:mt-0 last:mb-0">
+			{toc.map((heading: TocItem) => <TOCHeading heading={heading} />)}
+		</ol>
+	</nav>
+</aside>
+
+<!-- toc toggle button - just glowing icon -->
+<button
+	class="toc-toggle-btn fixed right-4 top-1/2 -translate-y-1/2 translate-x-full opacity-0 transition-all duration-300 data-[show=true]:translate-x-0 data-[show=true]:opacity-100 data-[open=true]:translate-x-full data-[open=true]:opacity-0"
+	data-show="false"
+	data-open="false"
+	id="toc-toggle-btn"
+	type="button"
+	aria-label="Toggle table of contents"
+	style="z-index: 90;"
+>
+	<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+		<path d="M4 6h16M4 12h8M4 18h16" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+	</svg>
+</button>
+
+<script is:inline>
+	(function() {
+		var observers = [];
+		var listeners = [];
+
+		function cleanup_toc() {
+			// disconnect all observers
+			observers.forEach(function(obs) { obs.disconnect(); });
+			observers = [];
+
+			// remove event listeners
+			listeners.forEach(function(item) {
+				item.element.removeEventListener(item.event, item.handler);
+			});
+			listeners = [];
+		}
+
+		function init_toc() {
+			// cleanup previous initialization
+			cleanup_toc();
+
+			var sidebar = document.getElementById("toc-sidebar");
+			var toggle_btn = document.getElementById("toc-toggle-btn");
+			var target_header = document.getElementById("blog-hero");
+
+			if (!sidebar || !toggle_btn || !target_header) {
+				return;
+			}
+
+			// reset states
+			sidebar.dataset.open = "false";
+			toggle_btn.dataset.open = "false";
+			toggle_btn.dataset.show = "false";
+
+			// show/hide toggle button based on hero visibility
+			var observer = new IntersectionObserver(function(entries) {
+				entries.forEach(function(entry) {
+					toggle_btn.dataset.show = (!entry.isIntersecting).toString();
+				});
+			});
+
+			observer.observe(target_header);
+			observers.push(observer);
+
+			// toggle sidebar
+			function toggle_sidebar() {
+				var is_open = sidebar.dataset.open === "true";
+				sidebar.dataset.open = (!is_open).toString();
+				toggle_btn.dataset.open = (!is_open).toString();
+			}
+
+			toggle_btn.addEventListener("click", toggle_sidebar);
+			listeners.push({ element: toggle_btn, event: "click", handler: toggle_sidebar });
+
+			// close on outside click
+			function outside_click(e) {
+				if (
+					sidebar.dataset.open === "true" &&
+					!sidebar.contains(e.target) &&
+					!toggle_btn.contains(e.target)
+				) {
+					sidebar.dataset.open = "false";
+					toggle_btn.dataset.open = "false";
+				}
+			}
+
+			document.addEventListener("click", outside_click);
+			listeners.push({ element: document, event: "click", handler: outside_click });
+
+			// close on escape key
+			function escape_key(e) {
+				if (e.key === "Escape" && sidebar.dataset.open === "true") {
+					sidebar.dataset.open = "false";
+					toggle_btn.dataset.open = "false";
+				}
+			}
+
+			document.addEventListener("keydown", escape_key);
+			listeners.push({ element: document, event: "keydown", handler: escape_key });
+
+			// highlight active heading
+			var headings = document.querySelectorAll("article h2, article h3, article h4");
+			var toc_links = sidebar.querySelectorAll(".toc-link");
+
+			var heading_observer = new IntersectionObserver(
+				function(entries) {
+					entries.forEach(function(entry) {
+						var slug = entry.target.id;
+						var link = sidebar.querySelector('.toc-link[data-slug="' + slug + '"]');
+						
+						if (entry.isIntersecting) {
+							toc_links.forEach(function(l) { l.classList.remove("active"); });
+							if (link) link.classList.add("active");
+						}
+					});
+				},
+				{ rootMargin: "-100px 0px -66%" }
+			);
+
+			headings.forEach(function(heading) { heading_observer.observe(heading); });
+			observers.push(heading_observer);
+		}
+
+		// initial load
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", init_toc);
+		} else {
+			init_toc();
+		}
+
+		// view transitions
+		document.addEventListener("astro:page-load", init_toc);
+		document.addEventListener("astro:before-swap", cleanup_toc);
+	})();
+</script>
+
+<style>
+	.toc-link.active {
+		color: var(--color-accent);
+		background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		padding-left: 0.5rem;
+		padding-right: 0.5rem;
+	}
+
+	.toc-toggle-btn {
+		background: transparent;
+		border: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.toc-toggle-btn svg {
+		filter: drop-shadow(0 0 8px var(--color-primary)) drop-shadow(0 0 12px var(--color-primary));
+		transition: filter 0.3s ease, transform 0.3s ease;
+	}
+
+	.toc-toggle-btn:hover svg {
+		filter: drop-shadow(0 0 12px var(--color-primary)) drop-shadow(0 0 16px var(--color-primary));
+		transform: translateX(-4px);
+	}
+</style>

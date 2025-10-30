@@ -1,0 +1,262 @@
+---
+import { getEntry, render } from "astro:content";
+import { Icon } from "astro-icon/components";
+import PageLayout from "@/layouts/Base.astro";
+
+const aboutPage = await getEntry("page", "about");
+
+if (!aboutPage) {
+	throw new Error("About page content not found");
+}
+
+const { Content } = await render(aboutPage);
+
+const meta = {
+	description: aboutPage.data.description || "",
+	title: aboutPage.data.title,
+};
+
+const tiles = aboutPage.data.tiles || [];
+
+// helper function to get color classes
+function get_tile_colors(color: string) {
+	const color_map = {
+		primary: {
+			bg: "bg-primary/5",
+			border: "border-primary/20",
+			icon: "text-primary",
+			glow: "from-primary/10",
+			shadow: "var(--color-primary)",
+		},
+		accent: {
+			bg: "bg-accent/5",
+			border: "border-accent/20",
+			icon: "text-accent",
+			glow: "from-accent/10",
+			shadow: "var(--color-accent)",
+		},
+		"variant-1": {
+			bg: "bg-variant-1/5",
+			border: "border-variant-1/20",
+			icon: "text-variant-1",
+			glow: "from-variant-1/10",
+			shadow: "var(--color-variant-1)",
+		},
+		"variant-2": {
+			bg: "bg-variant-2/5",
+			border: "border-variant-2/20",
+			icon: "text-variant-2",
+			glow: "from-variant-2/10",
+			shadow: "var(--color-variant-2)",
+		},
+		"variant-3": {
+			bg: "bg-variant-3/5",
+			border: "border-variant-3/20",
+			icon: "text-variant-3",
+			glow: "from-variant-3/10",
+			shadow: "var(--color-variant-3)",
+		},
+		"variant-4": {
+			bg: "bg-variant-4/5",
+			border: "border-variant-4/20",
+			icon: "text-variant-4",
+			glow: "from-variant-4/10",
+			shadow: "var(--color-variant-4)",
+		},
+		"social-github": {
+			bg: "bg-primary/5",
+			border: "border-primary/20",
+			icon: "text-primary",
+			glow: "from-primary/10",
+			shadow: "var(--color-social-github)",
+		},
+		"social-x": {
+			bg: "bg-accent/5",
+			border: "border-accent/20",
+			icon: "text-accent",
+			glow: "from-accent/10",
+			shadow: "var(--color-social-x)",
+		},
+		"social-instagram": {
+			bg: "bg-variant-1/5",
+			border: "border-variant-1/20",
+			icon: "text-variant-1",
+			glow: "from-variant-1/10",
+			shadow: "var(--color-social-instagram)",
+		},
+		"social-pinterest": {
+			bg: "bg-variant-2/5",
+			border: "border-variant-2/20",
+			icon: "text-variant-2",
+			glow: "from-variant-2/10",
+			shadow: "var(--color-social-pinterest)",
+		},
+		"social-spotify": {
+			bg: "bg-variant-3/5",
+			border: "border-variant-3/20",
+			icon: "text-variant-3",
+			glow: "from-variant-3/10",
+			shadow: "var(--color-social-spotify)",
+		},
+		"social-rss": {
+			bg: "bg-variant-4/5",
+			border: "border-variant-4/20",
+			icon: "text-variant-4",
+			glow: "from-variant-4/10",
+			shadow: "var(--color-social-rss)",
+		},
+	};
+	return color_map[color as keyof typeof color_map] || color_map.primary;
+}
+
+// helper function to get span classes
+function get_span_classes(span: string) {
+	const span_map = {
+		"1": "col-span-1 sm:col-span-1 md:col-span-1",
+		"2": "col-span-2 sm:col-span-2 md:col-span-2",
+		"3": "col-span-2 sm:col-span-2 md:col-span-3 xl:col-span-3",
+		"4": "col-span-2 sm:col-span-2 md:col-span-4 lg:col-span-4",
+		"6": "col-span-2 sm:col-span-2 md:col-span-4 lg:col-span-6",
+		full: "col-span-full",
+	};
+	return span_map[span as keyof typeof span_map] || span_map["2"];
+}
+---
+
+<PageLayout meta={meta} pageType="home">
+	<div class="w-full space-y-8 py-8">
+		<!-- Masonry Grid Layout -->
+		{
+			tiles.length > 0 && (
+				<section>
+					<div class="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6" style="grid-auto-rows: minmax(120px, auto);">
+						{tiles.map((tile) => {
+							const colors = get_tile_colors(tile.color);
+							const span_class = get_span_classes(tile.span);
+
+						// bio card - status/tagline with content
+						if (tile.type === "bio") {
+							return (
+								<div
+									class={`relative row-span-2 overflow-hidden rounded-2xl border ${colors.border} ${colors.bg} bg-gradient-to-br ${colors.glow} to-transparent p-6 backdrop-blur-sm ${span_class}`}
+								>
+									<div class="mb-4 flex items-center gap-3">
+										{tile.icon && (
+											<div class={`${colors.icon} flex h-10 w-10 items-center justify-center`}>
+												<Icon name={tile.icon} class="h-7 w-7" />
+											</div>
+										)}
+										<h3 class="text-lg font-bold leading-tight">{tile.title}</h3>
+									</div>
+									<div class="prose prose-sm max-w-none text-sm leading-relaxed">
+										<Content />
+									</div>
+								</div>
+							);
+						}
+
+					// cv card - compact vertical layout with angled icon
+					if (tile.type === "cv") {
+						return (
+							<a
+								href="https://docs.thuvasooriya.me/cv.pdf"
+								target="_blank"
+								rel="noreferrer"
+								class={`card-glow-effect group relative row-span-2 overflow-hidden rounded-2xl border ${colors.border} ${colors.bg} bg-gradient-to-br ${colors.glow} to-transparent backdrop-blur-sm ${span_class}`}
+								style={`--card-glow-color: color-mix(in srgb, ${colors.shadow} 20%, transparent);`}
+							>
+								<div class="flex h-full flex-col items-center justify-center gap-4 p-6">
+									{tile.icon && (
+										<div class={`flex h-16 w-16 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-125 group-hover:rotate-0 -rotate-12`}>
+											<Icon name={tile.icon} class={`${colors.icon} h-12 w-12`} />
+										</div>
+									)}
+									<div class="text-center">
+										<h3 class="text-base font-bold leading-tight">{tile.title}</h3>
+										{tile.description && (
+											<p class="text-muted mt-1 text-xs">{tile.description}</p>
+										)}
+									</div>
+								</div>
+							</a>
+						);
+					}
+
+					// social card - compact half-height icon-only
+					if (tile.type === "social" && tile.link) {
+						const is_social_color = tile.color.startsWith("social-");
+						return (
+							<a
+								href={tile.link}
+								target="_blank"
+								rel="noreferrer"
+								class={`card-glow-effect group relative row-span-1 flex items-center justify-center overflow-hidden rounded-2xl border ${is_social_color ? "" : `${colors.border} ${colors.bg} bg-gradient-to-br ${colors.glow} to-transparent`} backdrop-blur-sm ${span_class}`}
+								style={
+									is_social_color
+										? `--card-glow-color: color-mix(in srgb, ${colors.shadow} 20%, transparent); background: color-mix(in srgb, ${colors.shadow} 5%, transparent); border-color: color-mix(in srgb, ${colors.shadow} 20%, transparent); background-image: linear-gradient(to bottom right, color-mix(in srgb, ${colors.shadow} 10%, transparent), transparent);`
+										: `--card-glow-color: color-mix(in srgb, ${colors.shadow} 20%, transparent);`
+								}
+							>
+								{tile.icon && (
+									<Icon 
+										name={tile.icon} 
+										class={`h-12 w-12 transition-transform group-hover:scale-110 ${is_social_color ? "" : colors.icon}`}
+										style={is_social_color ? `color: ${colors.shadow};` : ""}
+									/>
+								)}
+							</a>
+						);
+					}
+
+						// now card
+						if (tile.type === "now") {
+							return (
+								<div
+									class={`group relative row-span-1 overflow-hidden rounded-2xl border border-transparent bg-gradient-to-br ${colors.glow} to-transparent p-4 transition-all hover:border-${tile.color}/40 hover:shadow-lg ${span_class}`}
+								>
+									<div class="flex h-full flex-col">
+										<div class="mb-3 flex items-center gap-3">
+											<div class={`${colors.bg} flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110 group-hover:rotate-3`}>
+												<Icon name={tile.icon} class={`${colors.icon} h-6 w-6`} />
+											</div>
+											{tile.tag && (
+												<span class={`${colors.icon} text-sm font-bold uppercase tracking-wider`}>
+													{tile.tag}
+												</span>
+											)}
+										</div>
+										<h4 class="mb-1.5 text-base font-bold leading-tight">{tile.title}</h4>
+										{tile.description && (
+											<p class="text-muted text-xs leading-relaxed">{tile.description}</p>
+										)}
+									</div>
+								</div>
+							);
+						}
+
+						// default/custom tile type
+						return (
+							<div
+								class={`group relative overflow-hidden rounded-2xl border ${colors.border} ${colors.bg} bg-gradient-to-br ${colors.glow} to-transparent p-6 backdrop-blur-sm transition-all hover:scale-[1.01] hover:shadow-lg ${span_class} ${!tile.title && !tile.description && !tile.icon ? "hidden" : ""}`}
+							>
+								{tile.icon && (
+									<div class="mb-4 flex items-center gap-3">
+										<div class={`${colors.icon} flex h-12 w-12 items-center justify-center transition-transform group-hover:rotate-12`}>
+											<Icon name={tile.icon} class="h-8 w-8" />
+										</div>
+										<h3 class="text-xl font-bold">{tile.title}</h3>
+									</div>
+								)}
+								{!tile.icon && tile.title && <h3 class="text-xl font-bold mb-3">{tile.title}</h3>}
+								{tile.description && (
+									<p class="text-muted text-sm leading-relaxed">{tile.description}</p>
+								)}
+							</div>
+						);
+						})}
+					</div>
+				</section>
+			)
+		}
+	</div>
+</PageLayout>

@@ -1,0 +1,169 @@
+---
+interface Props {
+	className?: string;
+	textColor?: string;
+	bgColor?: string;
+	cursorColor?: string;
+	typingSpeed?: number;
+	pauseDuration?: number;
+	showLanguage?: boolean;
+	paddingX?: string;
+	paddingY?: string;
+	rounded?: string;
+}
+
+const {
+	className = "text-xl mb-4",
+	textColor = "text-primary",
+	bgColor = "",
+	cursorColor = "bg-primary",
+	typingSpeed = 100,
+	pauseDuration = 1000,
+	showLanguage = false,
+	paddingX = "px-3",
+	paddingY = "py-1.5",
+	rounded = "rounded-sm",
+} = Astro.props;
+
+// Greetings in different languages
+const greetings = [
+	{ language: "english", text: "hello!" },
+	{ language: "japanese", text: "こんにちは!" },
+	{ language: "tamil", text: "வணக்கம்!" },
+	{ language: "sinhala", text: "සුබ දවසක්!" },
+	{ language: "french", text: "bonjour!" },
+	{ language: "spanish", text: "hola!" },
+	{ language: "german", text: "guten tag!" },
+	{ language: "italian", text: "ciao!" },
+	{ language: "chinese", text: "你好!" },
+	{ language: "russian", text: "здравствуйте!" },
+	{ language: "arabic", text: "مرحباً!" },
+];
+
+// Generate unique IDs for this component instance
+const id = `greeting-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<div class={`inline-flex flex-col items-start ${className}`}>
+	<!-- Background box with padding -->
+	<div class={`inline-block ${bgColor} ${paddingX} ${paddingY} ${rounded}`}>
+		<!-- Container for text and cursor with consistent height -->
+		<div id={`container-${id}`} class="relative inline-flex min-h-[3] items-center">
+			<!-- Text element -->
+			<span id={`text-${id}`} class={`whitespace-nowrap ${textColor} z-10 relative`}></span>
+
+			<!-- Full-height cursor that sits behind the text -->
+			<span
+				id={`cursor-${id}`}
+				class={`absolute top-0 bottom-0 w-[2px] ${cursorColor} animate-cursor`}></span>
+		</div>
+	</div>
+
+	{/* Optional language display */}
+	{
+		showLanguage && (
+			<div id={`lang-${id}`} class="mt-1.5 min-h-[1em] text-center text-xs opacity-70" />
+		)
+	}
+</div>
+
+<script is:inline define:vars={{ id, greetings, typingSpeed, pauseDuration, showLanguage }}>
+	document.addEventListener("DOMContentLoaded", () => {
+		const containerEl = document.getElementById(`container-${id}`);
+		const textEl = document.getElementById(`text-${id}`);
+		const cursorEl = document.getElementById(`cursor-${id}`);
+		const langEl = showLanguage ? document.getElementById(`lang-${id}`) : null;
+
+		if (!textEl || !containerEl || !cursorEl) return;
+
+		// Calculate width for longest greeting
+		const longestGreeting = greetings.reduce(
+			(longest, current) => (current.text.length > longest.length ? current.text : longest),
+			"",
+		);
+
+		// Set up size measurement
+		const measurer = document.createElement("span");
+		measurer.style.visibility = "hidden";
+		measurer.style.position = "absolute";
+		measurer.style.whiteSpace = "nowrap";
+		measurer.style.font = window.getComputedStyle(textEl).font;
+		measurer.textContent = longestGreeting;
+		document.body.appendChild(measurer);
+
+		// Set minimum width to prevent layout shifts
+		const width = measurer.getBoundingClientRect().width;
+		containerEl.style.minWidth = `${width}px`;
+		document.body.removeChild(measurer);
+
+		let currentIndex = 0;
+
+		// Function to position cursor after text
+		function positionCursor() {
+			const textWidth = textEl.offsetWidth;
+			cursorEl.style.left = `${textWidth}px`;
+		}
+
+		// Type text character by character
+		function typeText(text, index = 0) {
+			if (index < text.length) {
+				textEl.textContent += text.charAt(index);
+				positionCursor(); // Reposition cursor after adding a character
+				setTimeout(() => typeText(text, index + 1), typingSpeed);
+			} else {
+				setTimeout(eraseText, pauseDuration);
+			}
+		}
+
+		// Erase text character by character
+		function eraseText() {
+			const text = textEl.textContent;
+			if (text.length > 0) {
+				textEl.textContent = text.substring(0, text.length - 1);
+				positionCursor(); // Reposition cursor after removing a character
+				setTimeout(eraseText, typingSpeed / 2);
+			} else {
+				// Move to next greeting
+				currentIndex = (currentIndex + 1) % greetings.length;
+				setTimeout(showNextGreeting, 500);
+			}
+		}
+
+		// Display the next greeting
+		function showNextGreeting() {
+			// Clear text
+			textEl.textContent = "";
+			positionCursor(); // Reset cursor position
+
+			// Update language if shown
+			if (langEl) {
+				langEl.textContent = greetings[currentIndex].language;
+			}
+
+			// Start typing
+			typeText(greetings[currentIndex].text);
+		}
+
+		// Set initial cursor position
+		positionCursor();
+
+		// Start the animation cycle
+		showNextGreeting();
+	});
+</script>
+
+<style>
+	@keyframes blink {
+		from,
+		to {
+			opacity: 0;
+		}
+		50% {
+			opacity: 1;
+		}
+	}
+
+	.animate-cursor {
+		animation: blink 0.75s step-end infinite;
+	}
+</style>

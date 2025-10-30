@@ -1,0 +1,30 @@
+---
+import type { TocItem } from "@/utils";
+
+interface Props {
+	heading: TocItem;
+}
+
+const {
+	heading: { children, depth, slug, text },
+} = Astro.props;
+---
+
+<li class={`${depth > 2 ? "ms-2" : ""}`}>
+	<a
+		class={`toc-link block line-clamp-2 rounded-md py-1 lowercase transition-colors hover:text-accent ${depth <= 2 ? "font-medium first-of-type:mt-0" : "text-sm first-of-type:mt-0"}`}
+		href={`#${slug}`}
+		data-slug={slug}
+	>
+		<span aria-hidden="true" class="me-0.5">#</span>{text}
+	</a>
+	{
+		!!children.length && (
+			<ol class="mt-1">
+				{children.map((subheading: TocItem) => (
+					<Astro.self heading={subheading} />
+				))}
+			</ol>
+		)
+	}
+</li>

@@ -1,0 +1,102 @@
+/* article/blog post pages */
+
+@theme {
+	/* prose/content styles */
+	--article-prose-headings: var(--color-global-text);
+	--article-prose-links: var(--color-link);
+	--article-prose-code: var(--color-accent);
+	--article-prose-quote: var(--color-quote);
+	--article-prose-border: #d4d4d8;
+
+	/* masthead/hero */
+	--article-hero-title-color: var(--color-global-text);
+	--article-hero-meta-color: #71717a;
+	--article-hero-spacing: 1rem;
+
+	/* table of contents */
+	--toc-bg: transparent;
+	--toc-border: var(--article-prose-border);
+	--toc-link-color: var(--color-global-text);
+	--toc-link-hover: var(--color-accent);
+	--toc-active-color: var(--color-accent);
+
+	/* back to top button */
+	--back-to-top-bg: #e4e4e7;
+	--back-to-top-border: transparent;
+	--back-to-top-hover-border: var(--color-link);
+	--back-to-top-color: var(--color-global-text);
+}
+
+@layer base {
+	html[data-theme="dark"] {
+		--article-prose-border: #3f3f46;
+		--article-hero-meta-color: #a1a1aa;
+		--back-to-top-bg: #3f3f46;
+	}
+}
+
+/* article layout */
+.article-container {
+	max-width: var(--layout-article-max-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* prose content wrapper */
+.article-prose {
+	line-height: 1.75;
+	color: var(--color-global-text);
+}
+
+.article-prose h1,
+.article-prose h2,
+.article-prose h3,
+.article-prose h4,
+.article-prose h5,
+.article-prose h6 {
+	color: var(--article-prose-headings);
+	font-weight: 600;
+	margin-top: 1.5em;
+	margin-bottom: 0.75em;
+}
+
+.article-prose a {
+	color: var(--article-prose-links);
+	text-decoration: underline;
+	transition: color 0.2s ease;
+}
+
+.article-prose a:hover {
+	color: var(--color-accent);
+}
+
+.article-prose code {
+	color: var(--article-prose-code);
+	background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+	padding: 0.125rem 0.25rem;
+	border-radius: 0.25rem;
+	font-size: 0.875em;
+}
+
+.article-prose blockquote {
+	border-left: 4px solid var(--article-prose-quote);
+	padding-left: 1rem;
+	margin-left: 0;
+	font-style: italic;
+	color: var(--article-prose-quote);
+}
+
+/* back to top button */
+.back-to-top {
+	background-color: var(--back-to-top-bg);
+	border: 2px solid var(--back-to-top-border);
+	color: var(--back-to-top-color);
+	transition:
+		border-color 0.3s ease,
+		opacity 0.3s ease,
+		transform 0.3s ease;
+}
+
+.back-to-top:hover {
+	border-color: var(--back-to-top-hover-border);
+}

@@ -1,0 +1,49 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import type { GetStaticPaths, Page } from "astro";
+import { Icon } from "astro-icon/components";
+import Note from "@/components/note/Note.astro";
+import Pagination from "@/components/Paginator.astro";
+import PageLayout from "@/layouts/Base.astro";
+import { collectionDateSort, getPaginationProps } from "@/utils";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const MAX_TWEETS_PER_PAGE = 10;
+	const all_tweets = await getCollection("note");
+	return paginate(all_tweets.sort(collectionDateSort), { pageSize: MAX_TWEETS_PER_PAGE });
+}) satisfies GetStaticPaths;
+
+interface Props {
+	page: Page<CollectionEntry<"note">>;
+}
+
+const { page } = Astro.props;
+
+const meta = {
+	description: "read my collection of tweets",
+	title: "tweets",
+};
+
+const paginationProps = getPaginationProps(page);
+---
+
+<PageLayout meta={meta} pageType="listing">
+	<section>
+		<h1 class="title mb-6 flex items-center gap-3">
+			tweets <a class="text-accent" href="/notes/rss.xml" target="_blank">
+				<span class="sr-only">rss feed</span>
+				<Icon aria-hidden="true" class="h-6 w-6" focusable="false" name="mdi:rss" />
+			</a>
+		</h1>
+		<ul class="mt-6 space-y-2">
+			{
+				page.data.map((tweet) => (
+					<li>
+						<Note tweet={tweet} as="article" />
+					</li>
+				))
+			}
+		</ul>
+		<Pagination {...paginationProps} />
+	</section>
+</PageLayout>

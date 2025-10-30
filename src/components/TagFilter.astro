@@ -1,0 +1,358 @@
+---
+export interface Props {
+	all_tags: string[];
+	tag_counts?: Record<string, number>;
+	min_usage?: number;
+}
+
+const { all_tags, tag_counts = {}, min_usage = 2 } = Astro.props;
+
+// filter tags by minimum usage and sort by usage count (descending)
+const filtered_tags = all_tags
+	.filter((tag) => (tag_counts[tag] || 0) >= min_usage)
+	.sort((a, b) => (tag_counts[b] || 0) - (tag_counts[a] || 0));
+---
+
+<tag-filter class="mb-8 block w-full">
+	<!-- tag filter wrapper - independent component without card styling -->
+	<div class="tag-filter-wrapper" data-filter-wrapper>
+		<div class="tag-filter-container" data-tags-wrapper>
+			<div class="tag-filter-tags" data-tags-container>
+				{
+					filtered_tags.map((tag, index) => (
+						<button
+							class="tag-filter-btn"
+							data-tag={tag}
+							data-index={index}
+							type="button"
+						>
+							<span class="tag-filter-hash">#</span>
+							<span>{tag}</span>
+						</button>
+					))
+				}
+			</div>
+		</div>
+		{/* expand button - shown when tags overflow */}
+		<div class="tag-filter-actions">
+			<button class="tag-filter-expand-btn hidden" data-expand-btn type="button" title="">
+				<svg class="tag-filter-chevron" data-chevron fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+				</svg>
+			</button>
+			<button class="tag-filter-clear-icon-btn hidden" data-clear-filters-icon type="button" title="clear filters">
+				<svg class="tag-filter-clear-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+				</svg>
+			</button>
+		</div>
+	</div>
+</tag-filter>
+
+<style>
+	/* tag filter wrapper - independent component */
+	.tag-filter-wrapper {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		width: 100%;
+	}
+
+	/* show buttons on hover for pointer devices */
+	@media (hover: hover) and (pointer: fine) {
+		.tag-filter-wrapper:hover .tag-filter-expand-btn {
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		.tag-filter-wrapper:hover .tag-filter-clear-icon-btn:not(.hidden) {
+			opacity: 1;
+			pointer-events: auto;
+		}
+	}
+
+	/* always show buttons on touch devices */
+	@media (hover: none) and (pointer: coarse) {
+		.tag-filter-expand-btn:not(.hidden) {
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		.tag-filter-clear-icon-btn:not(.hidden) {
+			opacity: 1;
+			pointer-events: auto;
+		}
+	}
+
+	/* actions container */
+	.tag-filter-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	/* tags container - controls expansion */
+	.tag-filter-container {
+		position: relative;
+		overflow: hidden;
+		transition: max-height 0.3s ease-in-out;
+		width: 100%;
+	}
+
+	.tag-filter-container[data-expanded="false"] {
+		max-height: 2rem; /* single line height */
+	}
+
+	.tag-filter-container[data-expanded="true"] {
+		max-height: none;
+	}
+
+	/* fade overlay when collapsed to indicate more content */
+	.tag-filter-container[data-expanded="false"]::after {
+		content: "";
+		position: absolute;
+		bottom: 0;
+		right: 0;
+		width: 6rem;
+		height: 2rem;
+		background: linear-gradient(to right, transparent, var(--theme-bg));
+		pointer-events: none;
+	}
+
+	/* tags flex container - horizontal layout with wrapping */
+	.tag-filter-tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		align-items: center;
+		justify-content: center;
+		width: 100%;
+	}
+
+	/* tag button styles */
+	.tag-filter-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.125rem;
+		padding: 0.25rem 0.625rem;
+		border: 1px solid var(--theme-border);
+		border-radius: 0.25rem;
+		background-color: var(--theme-bg);
+		color: var(--theme-text);
+		font-size: 0.75rem;
+		line-height: 1rem;
+		white-space: nowrap;
+		cursor: pointer;
+		transition:
+			background-color 0.2s ease,
+			border-color 0.2s ease,
+			color 0.2s ease,
+			transform 0.2s ease;
+	}
+
+	.tag-filter-btn:hover {
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+		transform: translateY(-1px);
+	}
+
+	.tag-filter-btn.active {
+		background-color: var(--color-accent);
+		color: var(--color-mocha-base);
+		border-color: var(--color-accent);
+	}
+
+	.tag-filter-hash {
+		opacity: 0.6;
+		font-weight: 500;
+	}
+
+	.tag-filter-btn.active .tag-filter-hash {
+		opacity: 0.9;
+	}
+
+	/* expand button */
+	.tag-filter-expand-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		align-self: center;
+		padding: 0.25rem;
+		border: none;
+		background-color: transparent;
+		color: var(--theme-text-light);
+		cursor: pointer;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.2s ease, color 0.2s ease;
+	}
+
+	.tag-filter-expand-btn:hover {
+		color: var(--color-accent);
+	}
+
+	.tag-filter-chevron {
+		width: 1.25rem;
+		height: 1.25rem;
+		transition: transform 0.3s ease;
+	}
+
+	.tag-filter-expand-btn[data-expanded="true"] .tag-filter-chevron {
+		transform: rotate(180deg);
+	}
+
+	/* clear filters icon button */
+	.tag-filter-clear-icon-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		align-self: center;
+		padding: 0.25rem;
+		border: none;
+		background-color: transparent;
+		color: var(--color-accent);
+		cursor: pointer;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+	}
+
+	.tag-filter-clear-icon-btn:hover {
+		color: var(--color-red);
+		transform: scale(1.1);
+	}
+
+	.tag-filter-clear-icon {
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	/* clear filters button */
+</style>
+
+<script>
+	class TagFilter extends HTMLElement {
+		private selected_tags: Set<string> = new Set();
+		private is_expanded: boolean = false;
+		private tags_container_wrapper: HTMLElement | null = null;
+		private tags_container: HTMLElement | null = null;
+		private expand_btn: HTMLButtonElement | null = null;
+		private clear_icon_btn: HTMLButtonElement | null = null;
+
+		connectedCallback() {
+			const tag_buttons = this.querySelectorAll<HTMLButtonElement>(".tag-filter-btn");
+			const clear_button = this.querySelector<HTMLButtonElement>("[data-clear-filters-icon]");
+			this.tags_container_wrapper = this.querySelector<HTMLElement>("[data-tags-wrapper]");
+			this.tags_container = this.querySelector<HTMLElement>("[data-tags-container]");
+			this.expand_btn = this.querySelector<HTMLButtonElement>("[data-expand-btn]");
+			this.clear_icon_btn = this.querySelector<HTMLButtonElement>("[data-clear-filters-icon]");
+
+			// initialize wrapper state
+			if (this.tags_container_wrapper) {
+				this.tags_container_wrapper.dataset.expanded = "false";
+			}
+
+			if (this.expand_btn) {
+				this.expand_btn.dataset.expanded = "false";
+				this.expand_btn.title = "show more";
+			}
+
+			// check if tags overflow and show expand button if needed
+			this.check_overflow();
+			window.addEventListener("resize", () => this.check_overflow());
+
+			// tag button clicks for filtering
+			tag_buttons.forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const tag = btn.dataset.tag;
+					if (!tag) return;
+
+					if (this.selected_tags.has(tag)) {
+						this.selected_tags.delete(tag);
+						btn.classList.remove("active");
+					} else {
+						this.selected_tags.add(tag);
+						btn.classList.add("active");
+					}
+
+					this.update_clear_visibility();
+					this.filter_content();
+				});
+			});
+
+			// clear button click
+			clear_button?.addEventListener("click", () => {
+				this.selected_tags.clear();
+				tag_buttons.forEach((btn) => btn.classList.remove("active"));
+				this.update_clear_visibility();
+				this.filter_content();
+			});
+
+			// expand button click
+			this.expand_btn?.addEventListener("click", () => {
+				this.toggle_expand();
+			});
+		}
+
+		private toggle_expand() {
+			this.is_expanded = !this.is_expanded;
+
+			if (this.tags_container_wrapper) {
+				this.tags_container_wrapper.dataset.expanded = this.is_expanded.toString();
+			}
+
+			if (this.expand_btn) {
+				this.expand_btn.dataset.expanded = this.is_expanded.toString();
+				this.expand_btn.title = this.is_expanded ? "show less" : "show more";
+			}
+		}
+
+		private check_overflow() {
+			if (!this.tags_container || !this.expand_btn) return;
+
+			// check if tags overflow single line
+			const container_height = this.tags_container.scrollHeight;
+			const wrapper_height = 32; // single line height (2rem)
+
+			if (container_height > wrapper_height) {
+				this.expand_btn.classList.remove("hidden");
+			} else {
+				this.expand_btn.classList.add("hidden");
+			}
+		}
+
+		private update_clear_visibility() {
+			if (!this.clear_icon_btn) return;
+
+			if (this.selected_tags.size > 0) {
+				this.clear_icon_btn.classList.remove("hidden");
+			} else {
+				this.clear_icon_btn.classList.add("hidden");
+			}
+		}
+
+		private filter_content() {
+			const items = document.querySelectorAll<HTMLElement>("[data-filterable-item]");
+
+			items.forEach((item) => {
+				const item_tags_str = item.dataset.tags || "";
+				const item_tags = item_tags_str.split(",").filter((t) => t.trim());
+
+				if (this.selected_tags.size === 0) {
+					item.style.display = "";
+					return;
+				}
+
+				const has_all_tags = Array.from(this.selected_tags).every((selected_tag) =>
+					item_tags.includes(selected_tag),
+				);
+
+				item.style.display = has_all_tags ? "" : "none";
+			});
+		}
+	}
+
+	customElements.define("tag-filter", TagFilter);
+</script>

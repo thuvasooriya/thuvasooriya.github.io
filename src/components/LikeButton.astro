@@ -1,0 +1,292 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"button"> {
+	slug: string;
+	content_type: "post" | "tweet" | "project";
+	show_count?: boolean;
+	icon_size?: "sm" | "md" | "lg";
+}
+
+const {
+	slug,
+	content_type,
+	show_count = true,
+	icon_size = "lg",
+	class: className,
+	...rest
+} = Astro.props;
+
+const icon_classes = {
+	sm: "h-5 w-5",
+	md: "h-6 w-6",
+	lg: "h-7 w-7",
+};
+---
+
+<button
+	type="button"
+	class={`like-button ${className || ""}`}
+	data-slug={slug}
+	data-type={content_type}
+	data-user-likes="0"
+	data-show-count={show_count}
+	aria-label="Like this content"
+	{...rest}
+>
+	{show_count && <span class="like-count">0</span>}
+	<svg class:list={["heart-icon", icon_classes[icon_size]]} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+		<defs>
+			<clipPath id={`heart-clip-${slug}`}>
+				<rect class="heart-fill-rect" x="0" y="24" width="24" height="0" />
+			</clipPath>
+		</defs>
+		<!-- outline heart (always visible) -->
+		<path
+			class="heart-outline"
+			d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+			fill="none"
+			stroke="var(--color-red)"
+			stroke-width="1.5"
+		/>
+		<!-- filled heart (clipped based on likes) -->
+		<path
+			class="heart-fill"
+			d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+			fill="var(--color-red)"
+			clip-path={`url(#heart-clip-${slug})`}
+		/>
+	</svg>
+</button>
+
+<style>
+	.like-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		border-radius: 9999px;
+		outline: none;
+		transition: background 0.2s ease;
+	}
+
+	.like-button:hover {
+		background: color-mix(in srgb, var(--color-red) 10%, transparent);
+	}
+
+	.heart-icon {
+		transition: filter 0.3s ease;
+	}
+
+	.heart-outline,
+	.heart-fill {
+		transition: all 0.3s ease;
+	}
+
+	.heart-fill-rect {
+		transition: height 0.3s ease, y 0.3s ease;
+	}
+
+	/* fully filled with glow (13 likes) */
+	.like-button[data-user-likes="13"] .heart-icon {
+		filter: drop-shadow(0 0 8px var(--color-red));
+	}
+
+	/* bounce animation */
+	.like-button.bounce .heart-icon {
+		animation: heart-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	@keyframes heart-bounce {
+		0%, 100% {
+			transform: scale(1);
+		}
+		25% {
+			transform: scale(1.25);
+		}
+		50% {
+			transform: scale(0.95);
+		}
+		75% {
+			transform: scale(1.1);
+		}
+	}
+
+	.like-count {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-text-body);
+		min-width: 1.5rem;
+		text-align: left;
+		font-variant-numeric: tabular-nums;
+	}
+</style>
+
+<script>
+	interface LikeResponse {
+		user_likes: number;
+		total_likes: number;
+		unique_users: number;
+	}
+
+	const WORKER_URL = import.meta.env.PUBLIC_ANALYTICS_URL || "http://localhost:8787";
+	const MAX_LIKES = 13;
+	const COOKIE_NAME = "user_likes";
+
+	class LikeButtonController {
+		private button: HTMLButtonElement;
+		private count_el: HTMLSpanElement | null;
+		private fill_rect: SVGRectElement | null;
+		private slug: string;
+		private type: string;
+		private user_likes = 0;
+		private is_updating = false;
+
+		constructor(button: HTMLButtonElement) {
+			this.button = button;
+			this.count_el = button.querySelector(".like-count");
+			this.fill_rect = button.querySelector(".heart-fill-rect");
+			this.slug = button.dataset.slug!;
+			this.type = button.dataset.type!;
+
+			this.init();
+		}
+
+		private async init() {
+			// load from cookie first
+			const saved_likes = this.get_cookie_likes();
+			
+			if (saved_likes !== null) {
+				this.user_likes = saved_likes;
+				this.button.dataset.userLikes = String(saved_likes);
+				this.update_fill(saved_likes);
+			}
+
+			// fetch total likes from server
+			await this.fetch_likes();
+
+			this.button.addEventListener("click", (e) => this.handle_click(e));
+		}
+
+	private async fetch_likes() {
+		try {
+			const res = await fetch(`${WORKER_URL}/api/analytics/like/${this.type}/${this.slug}`);
+			if (!res.ok) return;
+
+			const data: LikeResponse = await res.json();
+			this.user_likes = data.user_likes;
+			this.update_ui(data.user_likes, data.total_likes);
+		} catch (error) {
+			console.error("Failed to fetch likes:", error);
+		}
+	}
+
+	private async handle_click(e: MouseEvent) {
+			e.preventDefault();
+			e.stopPropagation();
+			
+			if (this.is_updating) return;
+
+			const new_count = this.user_likes < MAX_LIKES ? this.user_likes + 1 : this.user_likes;
+
+			this.is_updating = true;
+
+			// optimistic update
+			const current_total = this.count_el ? Number.parseInt(this.count_el.textContent || "0") : 0;
+			this.update_ui(new_count, current_total + (new_count > this.user_likes ? 1 : 0));
+			this.animate_bounce();
+
+			try {
+				const res = await fetch(`${WORKER_URL}/api/analytics/like/${this.type}/${this.slug}`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ count: new_count }),
+				});
+
+				if (!res.ok) throw new Error("Failed to update like");
+
+				const data: LikeResponse = await res.json();
+				this.update_ui(data.user_likes, data.total_likes);
+			} catch (error) {
+				console.error("Failed to update like:", error);
+				// revert on error
+				await this.fetch_likes();
+			} finally {
+				this.is_updating = false;
+			}
+		}
+
+		private update_ui(user_likes: number, total_likes: number) {
+			this.user_likes = user_likes;
+			this.button.dataset.userLikes = String(user_likes);
+			if (this.count_el) {
+				this.count_el.textContent = String(total_likes);
+			}
+			this.update_fill(user_likes);
+			this.save_cookie_likes(user_likes);
+		}
+
+		private update_fill(likes: number) {
+			if (!this.fill_rect) return;
+
+			// calculate fill percentage (0 = empty, 100 = full)
+			const fill_percent = (likes / MAX_LIKES) * 100;
+			
+			// viewBox is 24x24, we fill from bottom to top
+			// y starts at 24 (bottom) and moves up as we fill
+			// height grows from 0 to 24
+			const fill_height = (fill_percent / 100) * 24;
+			const y_position = 24 - fill_height;
+
+			this.fill_rect.setAttribute("height", String(fill_height));
+			this.fill_rect.setAttribute("y", String(y_position));
+		}
+
+		private animate_bounce() {
+			this.button.classList.add("bounce");
+			setTimeout(() => {
+				this.button.classList.remove("bounce");
+			}, 500);
+		}
+
+		private get_cookie_likes(): number | null {
+			const cookies = document.cookie.split(";");
+			for (const cookie of cookies) {
+				const [name, value] = cookie.trim().split("=");
+				if (name === `${COOKIE_NAME}_${this.type}_${this.slug}`) {
+					return Number.parseInt(value || "0") || 0;
+				}
+			}
+			return null;
+		}
+
+		private save_cookie_likes(count: number) {
+			const expires = new Date();
+			expires.setFullYear(expires.getFullYear() + 1);
+			document.cookie = `${COOKIE_NAME}_${this.type}_${this.slug}=${count}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+		}
+	}
+
+	// handle both initial load and view transitions
+	function init_like_buttons() {
+		document.querySelectorAll<HTMLButtonElement>(".like-button").forEach((button) => {
+			// skip if already initialized
+			if (button.dataset.initialized === "true") return;
+			button.dataset.initialized = "true";
+			new LikeButtonController(button);
+		});
+	}
+
+	// initial load
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", init_like_buttons);
+	} else {
+		init_like_buttons();
+	}
+
+	// view transitions
+	document.addEventListener("astro:page-load", init_like_buttons);
+</script>

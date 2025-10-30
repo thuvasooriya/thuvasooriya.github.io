@@ -1,0 +1,73 @@
+---
+import { Icon } from "astro-icon/components";
+
+/**
+	Uses https://www.astroicon.dev/getting-started/
+	Find icons via guide: https://www.astroicon.dev/guides/customization/#open-source-icon-sets
+	Only installed pack is: @iconify-json/mdi
+*/
+const socialLinks: {
+	friendlyName: string;
+	isWebmention?: boolean;
+	link: string;
+	name: string;
+}[] = [
+	{
+		friendlyName: "github",
+		link: "https://github.com/thuvasooriya",
+		name: "ri:github-fill",
+	},
+	{
+		friendlyName: "x",
+		link: "https://x.com/thuvasooriya",
+		name: "ri:twitter-x-fill",
+	},
+	// {
+	// 	friendlyName: "reddit",
+	// 	link: "https://reddit.com/u/ohisashiburi13",
+	// 	name: "mdi:reddit",
+	// },
+	{
+		friendlyName: "insta",
+		link: "https://instagram.com/thuvasooriya",
+		name: "mdi:instagram",
+	},
+	// {
+	// 	friendlyName: "linkedin",
+	// 	link: "https://linkedin.com/in/thuvasooriya",
+	// 	name: "mdi:linkedin",
+	// },
+	{
+		friendlyName: "pinterest",
+		link: "https://pinterest.com/thuvasooriya",
+		name: "mdi:pinterest",
+	},
+	{
+		friendlyName: "spotify",
+		link: "https://open.spotify.com/user/31557wv7breljjzr744htxbumd7a",
+		name: "mdi:spotify",
+	},
+];
+---
+
+<div
+	class="bg-variant-3/10 hover:bg-variant-3/20 text-variant-3 flex items-center justify-center gap-2 rounded-lg px-4 py-2 font-medium transition-colors"
+>
+	<ul class="flex flex-1 items-center gap-x-2 sm:flex-initial">
+		{
+			socialLinks.map(({ friendlyName, isWebmention, link, name }) => (
+				<li class="flex">
+					<a
+						class="hover:text-link inline-block"
+						href={link}
+						rel={`noreferrer ${isWebmention ? "me authn" : ""}`}
+						target="_blank"
+					>
+						<Icon aria-hidden="true" class="h-6 w-6" focusable="false" name={name} />
+						<span class="sr-only">{friendlyName}</span>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</div>

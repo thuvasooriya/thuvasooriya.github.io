@@ -1,0 +1,190 @@
+---
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import type { HTMLTag, Polymorphic } from "astro/types";
+import FormattedDate from "@/components/FormattedDate.astro";
+
+type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
+	entry: CollectionEntry<"post"> | CollectionEntry<"proj">;
+	href: string;
+	withDesc?: boolean;
+};
+
+const { as: Tag = "article", entry, href, withDesc = true } = Astro.props;
+const { title, description, publishDate, tags, coverImage, draft } = entry.data;
+---
+
+<Tag class="card group block overflow-hidden @container">
+	<a href={href} class="card-link block p-3" data-astro-prefetch>
+		<!-- mobile layout: vertical stack (< 480px) -->
+		<div class="flex flex-col gap-3 @[480px]:hidden">
+			<!-- image -->
+			<div class="relative w-full aspect-[4/3] overflow-hidden rounded-lg">
+				{
+					coverImage ? (
+						<Image
+							src={coverImage.src}
+							alt={coverImage.alt}
+							class="h-full w-full object-cover"
+							loading="lazy"
+							width={600}
+							height={400}
+						/>
+					) : (
+						<div class="from-accent/20 to-primary/20 flex h-full w-full items-center justify-center bg-gradient-to-br">
+							<svg
+								class="h-12 w-12 text-gray-400"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+								/>
+							</svg>
+						</div>
+					)
+				}
+				{
+					draft && (
+						<div class="bg-warning absolute top-2 left-2 rounded px-2 py-1 text-xs font-semibold tracking-wider text-black uppercase">
+							draft
+						</div>
+					)
+				}
+			</div>
+
+			<!-- title -->
+			<h3 class="card-title line-clamp-2 text-lg font-semibold">
+				{title}
+			</h3>
+
+			<!-- date -->
+			{
+				publishDate && (
+					<FormattedDate
+						class="card-meta text-xs font-medium"
+						date={publishDate}
+					/>
+				)
+			}
+
+			<!-- description -->
+			{
+				withDesc && description && (
+					<p class="card-text line-clamp-3 text-sm leading-relaxed">
+						{description}
+					</p>
+				)
+			}
+
+			<!-- tags -->
+			{
+				tags && tags.length > 0 && (
+					<div class="flex min-w-0 flex-wrap items-center gap-1.5">
+						{tags.slice(0, 3).map((tag: string) => (
+							<span class="card-badge whitespace-nowrap px-2 py-1 text-xs font-medium">
+								#{tag}
+							</span>
+						))}
+						{tags.length > 3 && (
+							<span class="card-badge px-2 py-1 text-xs">
+								+{tags.length - 3}
+							</span>
+						)}
+					</div>
+				)
+			}
+		</div>
+
+		<!-- desktop layout: horizontal (>= 480px) -->
+		<div class="hidden @[480px]:flex @[480px]:gap-4">
+			<!-- image -->
+			<div class="relative w-40 aspect-[4/3] flex-shrink-0 overflow-hidden rounded-lg @[640px]:w-48">
+				{
+					coverImage ? (
+						<Image
+							src={coverImage.src}
+							alt={coverImage.alt}
+							class="h-full w-full object-cover"
+							loading="lazy"
+							width={600}
+							height={400}
+						/>
+					) : (
+						<div class="from-accent/20 to-primary/20 flex h-full w-full items-center justify-center bg-gradient-to-br">
+							<svg
+								class="h-12 w-12 text-gray-400"
+								fill="none"
+								stroke="currentColor"
+								viewBox="0 0 24 24"
+							>
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+								/>
+							</svg>
+						</div>
+					)
+				}
+				{
+					draft && (
+						<div class="bg-warning absolute top-2 left-2 rounded px-2 py-1 text-xs font-semibold tracking-wider text-black uppercase">
+							draft
+						</div>
+					)
+				}
+			</div>
+
+			<!-- content -->
+			<div class="flex min-w-0 flex-1 flex-col gap-2">
+				<!-- title -->
+				<h3 class="card-title line-clamp-2 text-lg font-semibold @[640px]:text-xl">
+					{title}
+				</h3>
+
+				<!-- date -->
+				{
+					publishDate && (
+						<FormattedDate
+							class="card-meta text-xs font-medium"
+							date={publishDate}
+						/>
+					)
+				}
+
+				<!-- description -->
+				{
+					withDesc && description && (
+						<p class="card-text line-clamp-2 text-sm leading-relaxed">
+							{description}
+						</p>
+					)
+				}
+
+				<!-- tags -->
+				{
+					tags && tags.length > 0 && (
+						<div class="flex min-w-0 flex-wrap items-center gap-1.5">
+							{tags.slice(0, 3).map((tag: string) => (
+								<span class="card-badge whitespace-nowrap px-2 py-1 text-xs font-medium">
+									#{tag}
+								</span>
+							))}
+							{tags.length > 3 && (
+								<span class="card-badge px-2 py-1 text-xs">
+									+{tags.length - 3}
+								</span>
+							)}
+						</div>
+					)
+				}
+			</div>
+		</div>
+	</a>
+</Tag>

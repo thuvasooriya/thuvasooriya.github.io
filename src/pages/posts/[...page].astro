@@ -1,0 +1,73 @@
+---
+import type { CollectionEntry } from "astro:content";
+import type { GetStaticPaths, Page } from "astro";
+import { Icon } from "astro-icon/components";
+import Pagination from "@/components/Paginator.astro";
+import PostPreview from "@/components/PostPreview.astro";
+import TagFilter from "@/components/TagFilter.astro";
+import { getAllPosts, getUniqueTags } from "@/data/post";
+import PageLayout from "@/layouts/Base.astro";
+import { filterConfig } from "@/site.config";
+import { collectionDateSort, getPaginationProps } from "@/utils";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const MAX_POSTS_PER_PAGE = 20;
+	const allPosts = await getAllPosts();
+	const allTags = getUniqueTags(allPosts);
+
+	// count tag usage
+	const tag_counts: Record<string, number> = {};
+	allPosts.forEach((post) => {
+		(post.data.tags || []).forEach((tag) => {
+			tag_counts[tag] = (tag_counts[tag] || 0) + 1;
+		});
+	});
+
+	return paginate(allPosts.sort(collectionDateSort), {
+		pageSize: MAX_POSTS_PER_PAGE,
+		props: { allTags, tag_counts },
+	});
+}) satisfies GetStaticPaths;
+
+interface Props {
+	page: Page<CollectionEntry<"post">>;
+	allTags: string[];
+	tag_counts: Record<string, number>;
+}
+
+const { page, allTags, tag_counts } = Astro.props;
+
+const meta = {
+	description: "read my collection of posts and the things that interest me",
+	title: "posts",
+};
+
+const paginationProps = getPaginationProps(page);
+---
+
+<PageLayout meta={meta} pageType="listing">
+	<div class="mb-6 flex items-center gap-3">
+		<h1 class="title">posts</h1>
+		<a class="text-accent" href="/rss.xml" target="_blank">
+			<span class="sr-only">rss feed</span>
+			<Icon aria-hidden="true" class="h-6 w-6" focusable="false" name="mdi:rss" />
+		</a>
+	</div>
+
+	<TagFilter
+		all_tags={allTags}
+		min_usage={filterConfig.min_tag_usage}
+		tag_counts={tag_counts}
+	/>
+
+	<div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+		{
+			page.data.map((post) => (
+				<div data-filterable-item data-tags={post.data.tags?.join(",") || ""}>
+					<PostPreview post={post} />
+				</div>
+			))
+		}
+	</div>
+	<Pagination {...paginationProps} />
+</PageLayout>

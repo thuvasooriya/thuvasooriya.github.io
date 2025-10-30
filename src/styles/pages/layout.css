@@ -1,0 +1,74 @@
+/* layout variables and utilities */
+
+@theme {
+	/* layout widths */
+	--layout-article-max-width: 48rem;
+	--layout-listing-max-width: 80rem;
+	--layout-wide-max-width: 90rem;
+	--layout-full-max-width: 100%;
+
+	/* spacing */
+	--layout-padding-x-sm: 1rem;
+	--layout-padding-x-md: 2rem;
+	--layout-padding-x-lg: 4rem;
+	--layout-padding-y: 4rem;
+	--layout-gap-sm: 1rem;
+	--layout-gap-md: 1.5rem;
+	--layout-gap-lg: 2rem;
+
+	/* grid columns */
+	--grid-cols-projects-sm: 1;
+	--grid-cols-projects-md: 2;
+	--grid-cols-projects-lg: 3;
+	--grid-cols-posts: 1;
+
+	/* responsive breakpoints (for reference) */
+	--breakpoint-sm: 640px;
+	--breakpoint-md: 768px;
+	--breakpoint-lg: 1024px;
+	--breakpoint-xl: 1280px;
+	--breakpoint-2xl: 1536px;
+}
+
+/* layout type classes */
+.layout-article {
+	max-width: var(--layout-article-max-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.layout-listing {
+	max-width: var(--layout-listing-max-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.layout-wide {
+	max-width: var(--layout-wide-max-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.layout-full {
+	max-width: var(--layout-full-max-width);
+}
+
+/* responsive padding utilities */
+.layout-padding-x {
+	padding-left: var(--layout-padding-x-sm);
+	padding-right: var(--layout-padding-x-sm);
+}
+
+@media (min-width: 640px) {
+	.layout-padding-x {
+		padding-left: var(--layout-padding-x-md);
+		padding-right: var(--layout-padding-x-md);
+	}
+}
+
+@media (min-width: 1024px) {
+	.layout-padding-x {
+		padding-left: var(--layout-padding-x-lg);
+		padding-right: var(--layout-padding-x-lg);
+	}
+}

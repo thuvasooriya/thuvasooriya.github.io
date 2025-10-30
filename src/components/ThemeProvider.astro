@@ -1,0 +1,51 @@
+{/* Inlined to avoid FOUC. This is a parser blocking script. */}
+<script is:inline>
+	(function() {
+		function getUserThemePref() {
+			const storedTheme = typeof localStorage !== "undefined" && localStorage.getItem("theme");
+			if (storedTheme) return storedTheme;
+			
+			// default to dark mode unless system explicitly prefers light
+			const lightModePref = window.matchMedia("(prefers-color-scheme: light)");
+			return lightModePref.matches ? "light" : "dark";
+		}
+
+		function setTheme(newTheme) {
+			if (newTheme !== "light" && newTheme !== "dark") {
+				return console.warn(
+					`Invalid theme value '${newTheme}' received. Expected 'light' or 'dark'.`,
+				);
+			}
+
+			const root = document.documentElement;
+
+			// root already set to newTheme, exit early
+			if (newTheme === root.getAttribute("data-theme")) {
+				return;
+			}
+
+			root.setAttribute("data-theme", newTheme);
+
+			if (typeof localStorage !== "undefined") {
+				localStorage.setItem("theme", newTheme);
+			}
+		}
+
+		// initial setup - apply immediately
+		setTheme(getUserThemePref());
+
+		// listen for theme-change custom event, fired in src/components/ThemeToggle.astro
+		document.addEventListener("theme-change", (e) => {
+			setTheme(e.detail.theme);
+		});
+
+		// listen for prefers-color-scheme change.
+		window.matchMedia("(prefers-color-scheme: light)").addEventListener("change", (e) => setTheme(e.matches ? "light" : "dark"));
+
+		// persist theme across view transitions
+		document.addEventListener("astro:before-swap", (e) => {
+			const theme = getUserThemePref();
+			e.newDocument.documentElement.setAttribute("data-theme", theme);
+		});
+	})();
+</script>

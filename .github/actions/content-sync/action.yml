@@ -1,0 +1,104 @@
+name: sync content from private repository
+description: clone private content repository and sync to local directory
+
+inputs:
+  token:
+    description: github personal access token with repo scope
+    required: true
+  repo-url:
+    description: private repository url
+    required: true
+  content-dir:
+    description: destination directory for content
+    required: true
+    default: src/content
+
+runs:
+  using: composite
+  steps:
+    - name: clone private content repository
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        REPO_URL: ${{ inputs.repo-url }}
+      run: |
+        # configure git to use token authentication
+        git config --global url."https://${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+        # clone the private repository
+        git clone --depth 1 "${REPO_URL}" /tmp/content-repo
+
+        echo "content repository cloned successfully"
+
+    - name: sync content to destination
+      shell: bash
+      env:
+        CONTENT_DIR: ${{ inputs.content-dir }}
+      run: |
+        # create destination directory if it doesn't exist
+        mkdir -p "${CONTENT_DIR}"
+
+        # sync content (copy all files from private repo to content dir)
+        rsync -av --delete \
+          --exclude='.git' \
+          --exclude='.github' \
+          --exclude='README.md' \
+          --exclude='tmp/' \
+          --exclude='lists/' \
+          --exclude='.DS_Store' \
+          --exclude='*.log' \
+          /tmp/content-repo/ "${CONTENT_DIR}/"
+
+        echo "content synced to ${CONTENT_DIR}"
+
+        # list synced directories for verification
+        echo ""
+        echo "synced directories:"
+        ls -lh "${CONTENT_DIR}" | grep '^d' || echo "no directories found"
+
+    - name: validate content structure
+      shell: bash
+      env:
+        CONTENT_DIR: ${{ inputs.content-dir }}
+      run: |
+        echo "validating content structure..."
+        
+        # check required directories
+        for dir in posts tweets pages proj; do
+          if [ ! -d "${CONTENT_DIR}/${dir}" ]; then
+            echo "warning: ${dir} directory not found"
+          else
+            echo "✓ ${dir} directory found"
+          fi
+        done
+        
+        # count markdown files in each collection
+        post_count=$(find "${CONTENT_DIR}/posts" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
+        tweet_count=$(find "${CONTENT_DIR}/tweets" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
+        page_count=$(find "${CONTENT_DIR}/pages" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
+        proj_count=$(find "${CONTENT_DIR}/proj" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
+        
+        echo ""
+        echo "content summary:"
+        echo "  posts:   ${post_count} files"
+        echo "  tweets:  ${tweet_count} files"
+        echo "  pages:   ${page_count} files"
+        echo "  proj:    ${proj_count} files"
+        
+        # calculate total
+        total=$((post_count + tweet_count + page_count + proj_count))
+        echo "  total:   ${total} content files"
+        
+        # warn if no content found
+        if [ "$total" -eq 0 ]; then
+          echo ""
+          echo "⚠️  warning: no content files found!"
+          exit 1
+        fi
+
+    - name: clean up temporary files
+      shell: bash
+      if: always()
+      run: |
+        rm -rf /tmp/content-repo
+        echo "temporary files cleaned up"

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://thuvasooriya.me/sitemap-index.xml

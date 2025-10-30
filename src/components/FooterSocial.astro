@@ -1,0 +1,89 @@
+---
+import { Icon } from "astro-icon/components";
+
+const social_links: {
+	friendly_name: string;
+	link: string;
+	icon: string;
+	color: string;
+}[] = [
+	{
+		friendly_name: "github",
+		link: "https://github.com/thuvasooriya",
+		icon: "ri:github-fill",
+		color: "var(--color-social-github)",
+	},
+	{
+		friendly_name: "x",
+		link: "https://x.com/thuvasooriya",
+		icon: "ri:twitter-x-fill",
+		color: "var(--color-social-x)",
+	},
+	{
+		friendly_name: "instagram",
+		link: "https://instagram.com/thuvasooriya",
+		icon: "mdi:instagram",
+		color: "var(--color-social-instagram)",
+	},
+	{
+		friendly_name: "pinterest",
+		link: "https://pinterest.com/thuvasooriya",
+		icon: "mdi:pinterest",
+		color: "var(--color-social-pinterest)",
+	},
+	{
+		friendly_name: "spotify",
+		link: "https://open.spotify.com/user/31557wv7breljjzr744htxbumd7a",
+		icon: "mdi:spotify",
+		color: "var(--color-social-spotify)",
+	},
+];
+---
+
+<div class="flex items-center gap-2">
+	<a
+		href="/rss.xml"
+		class="footer-social-icon"
+		title="rss feed"
+		aria-label="rss feed"
+		style="--icon-color: var(--color-social-rss)"
+	>
+		<Icon name="mdi:rss" class="h-4 w-4" />
+	</a>
+	{
+		social_links.map(({ friendly_name, link, icon, color }) => (
+			<a
+				href={link}
+				class="footer-social-icon"
+				title={friendly_name}
+				aria-label={friendly_name}
+				target="_blank"
+				rel="noreferrer"
+				style={`--icon-color: ${color}`}
+			>
+				<Icon name={icon} class="h-4 w-4" />
+			</a>
+		))
+	}
+</div>
+
+<style>
+	.footer-social-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition:
+			transform var(--ease-snappy) 200ms,
+			color 200ms ease;
+		color: inherit;
+	}
+
+	.footer-social-icon:hover {
+		transform: scale(1.2) translateY(-2px);
+		color: var(--icon-color);
+	}
+
+	.footer-social-icon:active {
+		transform: scale(0.95);
+	}
+</style>

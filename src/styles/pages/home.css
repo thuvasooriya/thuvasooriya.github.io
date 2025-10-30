@@ -1,0 +1,94 @@
+/* home page specific styles */
+
+@theme {
+	/* gradient/blur effects */
+	--home-gradient-1: var(--color-accent);
+	--home-gradient-2: var(--color-primary);
+	--home-gradient-3: var(--color-variant-2);
+	--home-blur-size: 100px;
+
+	/* section backgrounds */
+	--home-section-bg: color-mix(in srgb, var(--color-accent) 5%, transparent);
+	--home-section-border: color-mix(in srgb, var(--color-accent) 20%, transparent);
+
+	/* button/link styles */
+	--home-btn-primary-bg: color-mix(in srgb, var(--color-primary) 5%, transparent);
+	--home-btn-primary-text: var(--color-primary);
+	--home-btn-primary-hover: color-mix(in srgb, var(--color-primary) 10%, transparent);
+
+	--home-btn-accent-bg: color-mix(in srgb, var(--color-accent) 10%, transparent);
+	--home-btn-accent-text: var(--color-accent);
+	--home-btn-accent-hover: color-mix(in srgb, var(--color-accent) 20%, transparent);
+
+	/* card hover effects */
+	--home-card-hover-bg: color-mix(in srgb, var(--color-accent) 3%, transparent);
+	--home-card-hover-shadow: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+
+/* home page layout - wider than article pages */
+.home-layout {
+	max-width: var(--layout-listing-max-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+/* gradient blurs */
+.home-gradient-blur {
+	position: absolute;
+	border-radius: 50%;
+	filter: blur(60px);
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+.home-gradient-blur-1 {
+	background-color: var(--home-gradient-1);
+	width: 6rem;
+	height: 6rem;
+	top: 1rem;
+	left: 0;
+}
+
+.home-gradient-blur-2 {
+	background-color: var(--home-gradient-2);
+	width: 8rem;
+	height: 8rem;
+	top: 1rem;
+	right: 0;
+}
+
+.home-gradient-blur-3 {
+	background-color: var(--home-gradient-3);
+	width: 16rem;
+	height: 16rem;
+	top: 12.5rem;
+	right: 0.5rem;
+}
+
+/* section styles */
+.home-section {
+	background-color: var(--home-section-bg);
+	border: 1px solid var(--home-section-border);
+	backdrop-filter: blur(8px);
+}
+
+/* button styles */
+.home-btn-primary {
+	background-color: var(--home-btn-primary-bg);
+	color: var(--home-btn-primary-text);
+	transition: background-color 0.2s ease;
+}
+
+.home-btn-primary:hover {
+	background-color: var(--home-btn-primary-hover);
+}
+
+.home-btn-accent {
+	background-color: var(--home-btn-accent-bg);
+	color: var(--home-btn-accent-text);
+	transition: background-color 0.2s ease;
+}
+
+.home-btn-accent:hover {
+	background-color: var(--home-btn-accent-hover);
+}

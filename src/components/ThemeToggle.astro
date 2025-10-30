@@ -1,0 +1,102 @@
+<theme-toggle class="ms-2 sm:ms-4">
+	<button class="hover:text-primary relative h-9 w-9 cursor-pointer rounded-md p-2" type="button">
+		<span class="sr-only">Toggle theme</span>
+		<svg
+			aria-hidden="true"
+			class="absolute start-1/2 top-1/2 h-7 w-7 -translate-x-1/2 -translate-y-1/2"
+			fill="currentColor"
+			focusable="false"
+			viewBox="0 0 24 24"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<mask id="moon-mask">
+				<rect x="0" y="0" width="24" height="24" fill="white"></rect>
+				<circle id="moon-mask-circle" cx="24" cy="10" r="6" fill="black"></circle>
+			</mask>
+			<circle id="sun-moon-circle" cx="12" cy="12" r="5" mask="url(#moon-mask)"></circle>
+			<g id="sun-rays">
+				<line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"></line>
+				<line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"></line>
+				<line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2"></line>
+				<line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2"></line>
+				<line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2"></line>
+				<line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"></line>
+				<line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2"></line>
+				<line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2"></line>
+			</g>
+		</svg>
+	</button>
+</theme-toggle>
+
+<style>
+	#sun-rays {
+		transition: opacity 400ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	#moon-mask-circle {
+		transition: cx 400ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+</style>
+
+<script>
+	import { rootInDarkMode } from "@/utils";
+
+	function init_theme_toggle() {
+		const toggle = document.querySelector("theme-toggle");
+		if (!toggle) return;
+
+		const button = toggle.querySelector<HTMLButtonElement>("button")!;
+		const sun_rays = toggle.querySelector<SVGGElement>("#sun-rays")!;
+		const moon_mask_circle = toggle.querySelector<SVGCircleElement>("#moon-mask-circle")!;
+
+		// set initial state based on current theme
+		const is_dark = rootInDarkMode();
+		sun_rays.style.opacity = is_dark ? "0" : "1";
+		moon_mask_circle.setAttribute("cx", is_dark ? "18" : "24");
+
+		// set aria attributes
+		button.setAttribute("role", "switch");
+		button.setAttribute("aria-checked", String(is_dark));
+
+		// remove existing listener to avoid duplicates
+		const new_button = button.cloneNode(true) as HTMLButtonElement;
+		button.replaceWith(new_button);
+
+		// button click handler
+		new_button.addEventListener("click", () => {
+			const current_dark = rootInDarkMode();
+			const new_sun_rays = toggle.querySelector<SVGGElement>("#sun-rays")!;
+			const new_moon_mask_circle = toggle.querySelector<SVGCircleElement>("#moon-mask-circle")!;
+
+			// animate sun rays opacity and moon mask position
+			if (current_dark) {
+				// switching to light mode
+				new_sun_rays.style.opacity = "1";
+				new_moon_mask_circle.setAttribute("cx", "24");
+			} else {
+				// switching to dark mode
+				new_sun_rays.style.opacity = "0";
+				new_moon_mask_circle.setAttribute("cx", "18");
+			}
+
+			// dispatch theme change event
+			const theme_change_event = new CustomEvent("theme-change", {
+				detail: {
+					theme: current_dark ? "light" : "dark",
+				},
+			});
+			document.dispatchEvent(theme_change_event);
+
+			// update aria-checked after theme changes
+			setTimeout(() => {
+				new_button.setAttribute("aria-checked", String(rootInDarkMode()));
+			}, 50);
+		});
+	}
+
+	// initialize on load
+	init_theme_toggle();
+
+	// reinitialize after view transitions
+	document.addEventListener("astro:page-load", init_theme_toggle);
+</script>

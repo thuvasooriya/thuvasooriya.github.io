@@ -1,0 +1,48 @@
+name: deploy website
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: build the site
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: checkout your repository using git
+        uses: actions/checkout@v4
+
+      - name: sync private content
+        uses: ./.github/actions/content-sync
+        with:
+          token: ${{ secrets.CONTENT_REPO_TOKEN }}
+          repo-url: ${{ secrets.CONTENT_REPO_URL }}
+          content-dir: src/content
+
+      - name: install, build, and upload your site
+        uses: withastro/action@v2
+        with:
+          package-manager: bun
+        env:
+          PUBLIC_ANALYTICS_URL: ${{ vars.PUBLIC_ANALYTICS_URL }}
+
+  deploy:
+    needs: build
+    name: deploy the built site to github-pages
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: deploy to github pages
+        id: deployment
+        uses: actions/deploy-pages@v4

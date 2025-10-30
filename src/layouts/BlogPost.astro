@@ -1,0 +1,146 @@
+---
+import { type CollectionEntry, render } from "astro:content";
+import LikeButton from "@/components/LikeButton.astro";
+import Masthead from "@/components/Masthead.astro";
+import TOC from "@/components/TOC.astro";
+
+import BaseLayout from "./Base.astro";
+
+interface Props {
+	post: CollectionEntry<"post">;
+}
+
+const { post } = Astro.props;
+const { ogImage, title, description, updatedDate, publishDate } = post.data;
+const socialImage = ogImage ?? `/og-image/${post.id}.png`;
+const articleDate = updatedDate?.toISOString() ?? publishDate.toISOString();
+const { headings, remarkPluginFrontmatter } = await render(post);
+const readingTime: string = remarkPluginFrontmatter.readingTime;
+---
+
+<BaseLayout
+	meta={{
+		articleDate,
+		description,
+		ogImage: socialImage,
+		title,
+	}}
+>
+	<article class="grow break-words" data-pagefind-body>
+		<div id="blog-hero" class="mb-4"><Masthead content={post} readingTime={readingTime} postId={post.id} /></div>
+		{!!headings.length && <TOC headings={headings} />}
+		<div class="prose prose-sm max-w-none">
+			<slot />
+		</div>
+		<div class="mt-12 flex justify-end border-t border-zinc-200 pt-3 dark:border-zinc-700">
+			<LikeButton slug={post.id} content_type="post" />
+		</div>
+	</article>
+	<button
+		class="back-to-top-btn fixed bottom-8 left-1/2 z-50 -translate-x-1/2 translate-y-28 cursor-pointer opacity-0 transition-all duration-300 data-[show=true]:translate-y-0 data-[show=true]:opacity-100"
+		data-show="false"
+		id="to-top-btn"
+	>
+		<span class="sr-only">back to top</span>
+		<svg
+			aria-hidden="true"
+			class="glow-arrow h-10 w-10"
+			fill="none"
+			focusable="false"
+			stroke="var(--color-accent)"
+			stroke-width="2.5"
+			viewBox="0 0 24 24"
+			xmlns="http://www.w3.org/2000/svg"
+		>
+			<path d="M4.5 15.75l7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+		</svg>
+	</button>
+</BaseLayout>
+
+<script is:inline>
+	(function() {
+		var observer = null;
+		var click_listener = null;
+		var touch_listener = null;
+
+		function cleanup_back_to_top() {
+			if (observer) {
+				observer.disconnect();
+				observer = null;
+			}
+			var btn = document.getElementById("to-top-btn");
+			if (btn) {
+				if (click_listener) {
+					btn.removeEventListener("click", click_listener);
+				}
+				if (touch_listener) {
+					btn.removeEventListener("touchend", touch_listener);
+				}
+			}
+			click_listener = null;
+			touch_listener = null;
+		}
+
+		function init_back_to_top() {
+			cleanup_back_to_top();
+
+			var scroll_btn = document.getElementById("to-top-btn");
+			var target_header = document.getElementById("blog-hero");
+
+			if (!scroll_btn || !target_header) {
+				return;
+			}
+
+			// reset state
+			scroll_btn.dataset.show = "false";
+
+			function callback(entries) {
+				entries.forEach(function(entry) {
+					scroll_btn.dataset.show = (!entry.isIntersecting).toString();
+				});
+			}
+
+			function scroll_to_top(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				window.scrollTo({ behavior: "smooth", top: 0 });
+			}
+
+			click_listener = scroll_to_top;
+			touch_listener = scroll_to_top;
+
+			scroll_btn.addEventListener("click", click_listener);
+			scroll_btn.addEventListener("touchend", touch_listener, { passive: false });
+
+			observer = new IntersectionObserver(callback);
+			observer.observe(target_header);
+		}
+
+		// initial load
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", init_back_to_top);
+		} else {
+			init_back_to_top();
+		}
+
+		// view transitions
+		document.addEventListener("astro:page-load", init_back_to_top);
+		document.addEventListener("astro:before-swap", cleanup_back_to_top);
+	})();
+</script>
+
+<style>
+	.glow-arrow {
+		filter: drop-shadow(0 0 12px var(--color-accent)) drop-shadow(0 0 24px var(--color-accent));
+		transition: all 0.3s ease;
+	}
+
+	.back-to-top-btn:hover .glow-arrow {
+		filter: drop-shadow(0 0 16px var(--color-accent)) drop-shadow(0 0 32px var(--color-accent));
+		transform: translateY(-4px);
+	}
+
+	.back-to-top-btn:active .glow-arrow {
+		transform: translateY(0);
+	}
+</style>

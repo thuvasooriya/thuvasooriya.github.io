@@ -1,0 +1,143 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"div"> {
+	slug: string;
+	content_type: "post" | "tweet" | "project";
+}
+
+const { slug, content_type, class: className, ...rest } = Astro.props;
+---
+
+<div class={`view-counter flex items-center gap-1.5 ${className || ""}`} data-slug={slug} data-type={content_type} {...rest}>
+	<span class="view-count">0</span>
+	<span>Views</span>
+</div>
+
+<style>
+	.view-count {
+		font-variant-numeric: tabular-nums;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.view-count.updating {
+			animation: blink 0.3s ease-in-out;
+		}
+	}
+
+	@keyframes blink {
+		0%, 100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.5;
+		}
+	}
+</style>
+
+<script>
+	interface ViewResponse {
+		views: number;
+	}
+
+	const WORKER_URL = import.meta.env.PUBLIC_ANALYTICS_URL || "http://localhost:8787";
+
+	class ViewCounter {
+		private wrapper: HTMLElement;
+		private count_el: HTMLSpanElement;
+		private slug: string;
+		private type: string;
+		private has_incremented = false;
+
+		constructor(wrapper: HTMLElement) {
+			this.wrapper = wrapper;
+			this.count_el = wrapper.querySelector(".view-count")!;
+			this.slug = wrapper.dataset.slug!;
+			this.type = wrapper.dataset.type!;
+
+			this.init();
+		}
+
+		private async init() {
+			await this.fetch_views();
+			this.setup_intersection_observer();
+		}
+
+		private async fetch_views() {
+			try {
+				const url = `${WORKER_URL}/api/analytics/view/${this.type}/${this.slug}`;
+				const res = await fetch(url);
+				if (!res.ok) return;
+
+				const data: ViewResponse = await res.json();
+				this.update_count(data.views);
+			} catch (error) {
+				console.error("Failed to fetch views:", error);
+				this.count_el.textContent = "—";
+			}
+		}
+
+		private async increment_view() {
+			if (this.has_incremented) return;
+			this.has_incremented = true;
+
+			try {
+				const url = `${WORKER_URL}/api/analytics/view/${this.type}/${this.slug}`;
+				const res = await fetch(url, {
+					method: "POST",
+				});
+
+				if (!res.ok) return;
+
+				const data: ViewResponse = await res.json();
+				this.update_count(data.views);
+			} catch (error) {
+				console.error("Failed to increment view:", error);
+			}
+		}
+
+		private update_count(count: number) {
+			this.count_el.classList.add("updating");
+			this.count_el.textContent = String(count);
+			setTimeout(() => {
+				this.count_el.classList.remove("updating");
+			}, 300);
+		}
+
+		private setup_intersection_observer() {
+			const observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+							this.increment_view();
+							observer.disconnect();
+						}
+					});
+				},
+				{ threshold: 0.5 },
+			);
+
+			observer.observe(this.wrapper);
+		}
+	}
+
+	// handle both initial load and view transitions
+	function init_view_counters() {
+		document.querySelectorAll<HTMLElement>(".view-counter").forEach((wrapper) => {
+			// skip if already initialized
+			if (wrapper.dataset.initialized === "true") return;
+			wrapper.dataset.initialized = "true";
+			new ViewCounter(wrapper);
+		});
+	}
+
+	// initial load
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", init_view_counters);
+	} else {
+		init_view_counters();
+	}
+
+	// view transitions
+	document.addEventListener("astro:page-load", init_view_counters);
+</script>

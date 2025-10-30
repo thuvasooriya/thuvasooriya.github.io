@@ -1,0 +1,145 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+import { Icon } from "astro-icon/components";
+// import { Image } from "astro:assets";
+import LanguageGreeting from "@/components/LanguageGreeting.astro";
+import Note from "@/components/note/Note.astro";
+import PostPreview from "@/components/PostPreview.astro";
+import { PAGINATION } from "@/constants";
+import { getAllPosts } from "@/data/post";
+import PageLayout from "@/layouts/Base.astro";
+import { collectionDateSort } from "@/utils";
+
+const allPosts = await getAllPosts();
+const allPostsByDate = allPosts
+	.sort(collectionDateSort)
+	.slice(0, PAGINATION.MAX_POSTS_HOME) as CollectionEntry<"post">[];
+
+const all_tweets = await getCollection("note");
+const latest_tweets = all_tweets.sort(collectionDateSort).slice(0, 2);
+---
+
+<PageLayout meta={{ title: "home" }} pageType="home">
+	<!-- blur/gradients -->
+	<section class="z-0">
+		<!-- where we'll have the background magic and effects -->
+		<div aria-hidden="true" class="home-gradient-blur home-gradient-blur-1"></div>
+		<div aria-hidden="true" class="home-gradient-blur home-gradient-blur-2"></div>
+		<div aria-hidden="true" class="home-gradient-blur home-gradient-blur-3"></div>
+	</section>
+
+	<!-- greeting at top left -->
+	<section class="relative z-10 mb-8">
+		<div class="flex w-full justify-start">
+			<LanguageGreeting className="text-4xl md:text-5xl" paddingX="px-6" paddingY="py-4" rounded="rounded-lg" />
+		</div>
+	</section>
+
+	<!-- posts and tweets side by side -->
+	<div class="grid gap-6 md:grid-cols-2">
+		<!-- recent posts -->
+		<section aria-label="blog">
+			<div class="mb-6 flex items-center justify-between">
+				<h2 class="title text-accent text-xl">posts</h2>
+				<a
+					href="/posts/"
+					class="group text-accent transition-all hover:translate-x-0.5"
+					title="view all posts"
+				>
+					<Icon
+						name="mdi:arrow-right"
+						class="h-6 w-6 transition-transform group-hover:translate-x-1"
+					/>
+				</a>
+			</div>
+
+			<ul class="grid gap-4">
+				{
+					allPostsByDate.map((post) => (
+						<li class="home-post-preview group relative rounded-xl transition-all">
+							<PostPreview post={post} />
+						</li>
+					))
+				}
+			</ul>
+		</section>
+
+		<!-- recent tweets -->
+		{
+			latest_tweets.length > 0 && (
+				<section>
+					<div class="mb-6 flex items-center justify-between">
+						<h2 class="title text-accent text-xl">tweets</h2>
+						<a
+							href="/tweets/"
+							class="group text-accent transition-all hover:translate-x-0.5"
+							title="view all tweets"
+						>
+							<Icon
+								name="mdi:arrow-right"
+								class="h-6 w-6 transition-transform group-hover:translate-x-1"
+							/>
+						</a>
+					</div>
+					<ul class="space-y-4" role="list">
+						{latest_tweets.map((tweet) => (
+							<li class="transform transition-transform hover:-translate-y-0.5">
+								<Note tweet={tweet} as="h3" />
+							</li>
+						))}
+					</ul>
+				</section>
+			)
+		}
+	</div>
+</PageLayout>
+
+<script>
+	// Optional: Add subtle scroll animations with Intersection Observer API
+	document.addEventListener("DOMContentLoaded", () => {
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add("fade-in");
+					}
+				});
+			},
+			{
+				threshold: 0.1,
+			},
+		);
+
+		document.querySelectorAll("section").forEach((section) => {
+			observer.observe(section);
+		});
+	});
+</script>
+
+<style>
+	/* Optional: Add subtle animations */
+	section {
+		opacity: 0.8;
+		transform: translateY(10px);
+		transition:
+			opacity 600ms ease,
+			transform 600ms ease;
+	}
+
+	.fade-in {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	@keyframes float {
+		0% {
+			transform: translateY(0px);
+		}
+		50% {
+			transform: translateY(-5px);
+		}
+		100% {
+			transform: translateY(0px);
+		}
+	}
+</style>

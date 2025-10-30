@@ -1,0 +1,66 @@
+---
+import { ClientRouter } from "astro:transitions";
+import { AstroFont } from "astro-font";
+import BaseHead from "@/components/BaseHead.astro";
+import Footer from "@/components/layout/Footer.astro";
+import Header from "@/components/layout/Header.astro";
+import SkipLink from "@/components/SkipLink.astro";
+import ThemeProvider from "@/components/ThemeProvider.astro";
+import { siteConfig } from "@/site.config";
+import type { SiteMeta } from "@/types";
+
+// import "@/styles/global.css";
+
+interface Props {
+	meta: SiteMeta;
+	pageType?: "article" | "listing" | "home" | "wide";
+}
+
+const {
+	meta: { articleDate, description = siteConfig.description, ogImage, title },
+	pageType = "article",
+} = Astro.props;
+
+const layoutClass =
+	pageType === "article"
+		? "layout-article"
+		: pageType === "listing"
+			? "layout-listing"
+			: pageType === "home"
+				? "layout-listing"
+				: "layout-wide";
+---
+
+<html class="scroll-smooth" lang={siteConfig.lang} data-theme="dark">
+	<head>
+		<ThemeProvider />
+		<BaseHead articleDate={articleDate} description={description} ogImage={ogImage} title={title} />
+		<ClientRouter />
+		<AstroFont
+			config={[
+				{
+					src: [],
+					name: "JetBrains Mono",
+					googleFontsURL:
+						"https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap",
+					preload: true,
+					display: "swap",
+					selector: "body",
+					fallback: "monospace",
+					cssVariable: "astro-font-jetbrains-mono",
+				},
+			]}
+		/>
+	</head>
+	<body
+		class={`bg-global-bg text-global-text flex min-h-screen flex-col px-4 pt-16 font-mono text-sm antialiased sm:px-8`}
+	>
+		<div id="theme-transition-overlay" aria-hidden="true"></div>
+		<SkipLink />
+		<Header />
+		<main id="main" class={layoutClass}>
+			<slot />
+		</main>
+		<Footer />
+	</body>
+</html>

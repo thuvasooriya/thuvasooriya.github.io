@@ -1,0 +1,14 @@
+{
+  "name": "worker",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251014.0",
+    "@types/bun": "latest",
+    "wrangler": "^4.45.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}

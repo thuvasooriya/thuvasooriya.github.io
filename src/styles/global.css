@@ -1,0 +1,273 @@
+@import "tailwindcss";
+@import "./catppuccin.css";
+@import "./markdown.css";
+@import "./blocks/card.css";
+@import "./pages/layout.css";
+@import "./pages/listing.css";
+@import "./pages/article.css";
+@import "./pages/home.css";
+@plugin "@tailwindcss/typography";
+
+@theme {
+	--color-global-bg: var(--color-latte-base);
+	--color-global-text: var(--color-latte-text);
+	--color-primary: var(--color-variant-0);
+	--color-accent: var(--color-variant-1);
+	--color-link: var(--color-sky);
+	--color-quote: var(--color-rosewater);
+	--color-warning: var(--color-latte-red);
+
+	/* shadow colors for 3d effects */
+	--color-nav-shadow: var(--color-latte-peach);
+	--color-logo-shadow: var(--color-latte-overlay2);
+
+	--color-variant-0: var(--color-yellow);
+	--color-variant-1: var(--color-blue);
+	--color-variant-2: var(--color-green);
+	--color-variant-3: var(--color-mauve);
+	--color-variant-4: var(--color-peach);
+	--color-variant-5: var(--color-teal);
+	--color-variant-6: var(--color-pink);
+	--color-variant-7: var(--color-sapphire);
+	--color-variant-8: var(--color-maroon);
+	--color-variant-9: var(--color-lavender);
+
+	/* social brand colors */
+	--color-social-github: var(--color-primary);
+	--color-social-x: var(--color-global-text);
+	--color-social-instagram: var(--color-peach);
+	--color-social-pinterest: var(--color-red);
+	--color-social-spotify: var(--color-green);
+	--color-social-rss: var(--color-variant-4);
+
+	--color-rosewater: var(--color-latte-rosewater);
+	--color-flamingo: var(--color-latte-flamingo);
+	--color-pink: var(--color-latte-pink);
+	--color-mauve: var(--color-latte-mauve);
+	--color-red: var(--color-latte-red);
+	--color-maroon: var(--color-latte-maroon);
+	--color-peach: var(--color-latte-peach);
+	--color-yellow: var(--color-latte-yellow);
+	--color-green: var(--color-latte-green);
+	--color-teal: var(--color-latte-teal);
+	--color-sky: var(--color-latte-sky);
+	--color-sapphire: var(--color-latte-sapphire);
+	--color-blue: var(--color-latte-blue);
+	--color-lavender: var(--color-latte-lavender);
+
+	--font-mono: JetBrains Mono, monospace;
+	--font-script: cursive;
+	--font-sans: Inter, sans-serif;
+
+	--ease-fluid: cubic-bezier(0.3, 0, 0, 1);
+	--ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+
+	--animate-float-slow: float 18s ease-in-out infinite;
+	--animate-float-medium: float 12s ease-in-out infinite 1s;
+	--animate-float-fast: float 10s ease-in-out infinite 2s;
+
+	@keyframes float {
+		0%,
+		100% {
+			transform: translateY(0) translateX(0);
+		}
+		25% {
+			transform: translateY(-10px) translateX(10px);
+		}
+		50% {
+			transform: translateY(10px) translateX(-5px);
+		}
+		75% {
+			transform: translateY(-5px) translateX(-10px);
+		}
+	}
+}
+
+@layer utilities {
+	/* snappy nav link effect */
+	.nav-link {
+		text-decoration: none;
+		font-weight: 600;
+		letter-spacing: 0.05em;
+		text-transform: lowercase;
+		position: relative;
+		transition: all 0.2s var(--ease-snappy);
+	}
+
+	.nav-link::after {
+		content: "";
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		width: 0;
+		height: 2px;
+		background-color: var(--color-primary);
+		transition: all 0.2s var(--ease-snappy);
+		transform: translateX(-50%);
+	}
+
+	.nav-link:hover {
+		color: var(--color-primary);
+		transform: translateY(-2px);
+	}
+
+	.nav-link:hover::after {
+		width: 100%;
+	}
+
+	.nav-link:active {
+		transform: translateY(0);
+	}
+
+	/* hide current page link */
+	.nav-link[aria-current="page"] {
+		display: none;
+	}
+
+	/* 3D shadow logo text effect - matches nav-link styling */
+	.logo-text {
+		text-decoration: none;
+		font-weight: 700;
+		letter-spacing: 0.025em;
+		transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+	}
+
+	.logo-link:hover .logo-text {
+		filter: drop-shadow(1px 1px 0 var(--color-logo-shadow))
+			drop-shadow(2px 2px 0 var(--color-logo-shadow));
+		transform: translate(-2px, -2px);
+	}
+
+	.logo-link:active .logo-text {
+		filter: drop-shadow(1px 1px 0 var(--color-logo-shadow));
+		transform: translate(-1px, -1px);
+	}
+
+	/* glow and grow card effect for interactive cards */
+	.card-glow-effect {
+		transition: all 0.2s var(--ease-snappy);
+	}
+
+	.card-glow-effect:hover {
+		transform: scale(1.03);
+		box-shadow: 0 8px 24px var(--card-glow-color, color-mix(in srgb, var(--color-accent) 20%, transparent));
+	}
+
+	.card-glow-effect:active {
+		transform: scale(0.98);
+		box-shadow: 0 2px 8px var(--card-glow-color, color-mix(in srgb, var(--color-accent) 15%, transparent));
+	}
+}
+
+/* line-clamp utilities for better browser support */
+.line-clamp-1 {
+	display: -webkit-box;
+	line-clamp: 1;
+	-webkit-line-clamp: 1;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.line-clamp-2 {
+	display: -webkit-box;
+	line-clamp: 2;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+.line-clamp-3 {
+	display: -webkit-box;
+	line-clamp: 3;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+
+@layer base {
+	html {
+		color-scheme: light dark;
+		accent-color: var(--color-accent);
+		transition: background-color 0.2s ease;
+
+		&[data-theme="light"] {
+			color-scheme: light;
+		}
+
+		&[data-theme="dark"] {
+			color-scheme: dark;
+			--color-global-bg: var(--color-mocha-crust);
+			--color-global-text: var(--color-mocha-text);
+			--color-primary: var(--color-variant-0);
+			--color-accent: var(--color-variant-1);
+			--color-link: var(--color-sky);
+			--color-quote: var(--color-rosewater);
+			--color-warning: var(--color-red);
+
+			/* shadow colors for 3d effects */
+			--color-nav-shadow: var(--color-mocha-peach);
+			--color-logo-shadow: var(--color-mocha-overlay2);
+
+			--color-variant-0: var(--color-yellow);
+			--color-variant-1: var(--color-blue);
+			--color-variant-2: var(--color-green);
+			--color-variant-3: var(--color-mauve);
+			--color-variant-4: var(--color-peach);
+			--color-variant-5: var(--color-teal);
+			--color-variant-6: var(--color-pink);
+			--color-variant-7: var(--color-sapphire);
+			--color-variant-8: var(--color-maroon);
+			--color-variant-9: var(--color-lavender);
+
+		/* social brand colors */
+		--color-social-github: var(--color-primary);
+		--color-social-x: var(--color-global-text);
+		--color-social-instagram: var(--color-peach);
+		--color-social-pinterest: var(--color-red);
+		--color-social-spotify: var(--color-green);
+		--color-social-rss: var(--color-variant-4);
+
+			--color-rosewater: var(--color-mocha-rosewater);
+			--color-flamingo: var(--color-mocha-flamingo);
+			--color-pink: var(--color-mocha-pink);
+			--color-mauve: var(--color-mocha-mauve);
+			--color-red: var(--color-mocha-red);
+			--color-maroon: var(--color-mocha-maroon);
+			--color-peach: var(--color-mocha-peach);
+			--color-yellow: var(--color-mocha-yellow);
+			--color-green: var(--color-mocha-green);
+			--color-teal: var(--color-mocha-teal);
+			--color-sky: var(--color-mocha-sky);
+			--color-sapphire: var(--color-mocha-sapphire);
+			--color-blue: var(--color-mocha-blue);
+			--color-lavender: var(--color-mocha-lavender);
+		}
+	}
+
+	body,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	p,
+	a,
+	blockquote,
+	code,
+	pre {
+		transition:
+			color 0.2s ease,
+			background-color 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	/* utility classes */
+	.text-muted {
+		color: theme("colors.zinc.600");
+
+		&:is(:where([data-theme="dark"], [data-theme="dark"] *)) {
+			color: theme("colors.zinc.400");
+		}
+	}
+}
