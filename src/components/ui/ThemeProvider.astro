@@ -1,0 +1,114 @@
+<script is:inline>
+	(function() {
+		const VALID_THEMES = ["hollowknight", "catppuccin-mocha", "radiant", "tokyo-night", "dracula", "onedark"];
+		const VALID_TYPOGRAPHY = ["mono", "sans", "serif"];
+		const DEFAULT_DARK = "hollowknight";
+		const DEFAULT_LIGHT = "radiant";
+		const DEFAULT_TYPOGRAPHY = "mono";
+
+		function getStoredTheme() {
+			if (typeof localStorage === "undefined") return null;
+			const stored = localStorage.getItem("theme");
+			return stored && VALID_THEMES.includes(stored) ? stored : null;
+		}
+
+		function getStoredTypography() {
+			if (typeof localStorage === "undefined") return DEFAULT_TYPOGRAPHY;
+			const stored = localStorage.getItem("typography");
+			return stored && VALID_TYPOGRAPHY.includes(stored) ? stored : DEFAULT_TYPOGRAPHY;
+		}
+
+		function getSystemTheme() {
+			const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+			return prefersDark ? DEFAULT_DARK : DEFAULT_LIGHT;
+		}
+
+		function applyTheme(newTheme) {
+			const root = document.documentElement;
+			root.setAttribute("data-theme", newTheme);
+			if (typeof localStorage !== "undefined") {
+				localStorage.setItem("theme", newTheme);
+			}
+			document.dispatchEvent(new CustomEvent("theme-applied"));
+		}
+
+		function applyTypography(typo) {
+			document.documentElement.setAttribute("data-typography", typo);
+			if (typeof localStorage !== "undefined") {
+				localStorage.setItem("typography", typo);
+			}
+			document.dispatchEvent(new CustomEvent("typography-applied"));
+		}
+
+		function withTransition(callback) {
+			if (!document.startViewTransition) {
+				fallbackTransition(callback);
+				return;
+			}
+			document.startViewTransition(callback);
+		}
+
+		function fallbackTransition(callback) {
+			const root = document.documentElement;
+			root.style.opacity = "0.92";
+			root.style.transition = "opacity 100ms ease-out";
+			setTimeout(() => {
+				callback();
+				root.style.opacity = "1";
+				setTimeout(() => {
+					root.style.transition = "";
+				}, 100);
+			}, 100);
+		}
+
+		function setTheme(newTheme, animate) {
+			if (!VALID_THEMES.includes(newTheme)) {
+				console.warn(`Invalid theme: ${newTheme}. Expected one of: ${VALID_THEMES.join(", ")}`);
+				return;
+			}
+			if (newTheme === document.documentElement.getAttribute("data-theme")) return;
+
+			if (animate) {
+				withTransition(() => applyTheme(newTheme));
+			} else {
+				applyTheme(newTheme);
+			}
+		}
+
+		function setTypography(typo, animate) {
+			if (!VALID_TYPOGRAPHY.includes(typo)) return;
+			if (typo === document.documentElement.getAttribute("data-typography")) return;
+
+			if (animate) {
+				withTransition(() => applyTypography(typo));
+			} else {
+				applyTypography(typo);
+			}
+		}
+
+		const storedTheme = getStoredTheme();
+		setTheme(storedTheme || getSystemTheme(), false);
+		setTypography(getStoredTypography(), false);
+
+		document.addEventListener("theme-change", (e) => {
+			setTheme(e.detail.theme, true);
+		});
+
+		document.addEventListener("typography-change", (e) => {
+			setTypography(e.detail.typography, true);
+		});
+
+		window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+			if (!getStoredTheme()) {
+				setTheme(e.matches ? DEFAULT_DARK : DEFAULT_LIGHT, true);
+			}
+		});
+
+		document.addEventListener("astro:before-swap", (e) => {
+			const theme = getStoredTheme() || getSystemTheme();
+			const typo = getStoredTypography();
+			e.newDocument.documentElement.setAttribute("data-theme", theme);
+			e.newDocument.documentElement.setAttribute("data-typography", typo);
+		});
+	})();
+</script>

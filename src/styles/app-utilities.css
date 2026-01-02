@@ -1,0 +1,51 @@
+@layer utilities {
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .card-glow-effect {
+    transition: all 0.2s var(--ease-snappy);
+  }
+
+  .card-glow-effect:hover {
+    transform: scale(1.03);
+    box-shadow: 0 8px 24px
+      var(
+        --card-glow-color,
+        color-mix(in srgb, var(--color-accent) 20%, transparent)
+      );
+  }
+
+  .card-glow-effect:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px
+      var(
+        --card-glow-color,
+        color-mix(in srgb, var(--color-accent) 15%, transparent)
+      );
+  }
+}
+
+.line-clamp-1 {
+  display: -webkit-box;
+  line-clamp: 1;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

@@ -1,0 +1,173 @@
+---
+import { Icon } from "astro-icon/components";
+import FormattedDate from "@/components/content/FormattedDate.astro";
+import LikeCounter from "@/components/social/LikeCounter.astro";
+import ViewCounter from "@/components/social/ViewCounter.astro";
+
+type WikiStatus = "seed" | "growing" | "evergreen";
+
+interface Props {
+	slug: string;
+	status: WikiStatus;
+	updated?: Date | undefined;
+	tags?: string[] | undefined;
+}
+
+const { slug, status, updated, tags } = Astro.props;
+
+const statusConfig = {
+	seed: { label: "seed", icon: "mdi:seed" },
+	growing: { label: "grow", icon: "mdi:sprout" },
+	evergreen: { label: "green", icon: "mdi:leaf" },
+};
+
+const { label, icon } = statusConfig[status];
+
+const dateTimeOptions: Intl.DateTimeFormatOptions = {
+	month: "short",
+};
+---
+
+<div class="wiki-doc-header">
+	<div class="wiki-doc-meta">
+		<span class:list={["status-badge", `status-${status}`]}>
+			<span class="status-indicator">
+				<Icon name={icon} class="status-icon" />
+			</span>
+			<span class="status-label">{label}</span>
+		</span>
+		{updated && (
+			<>
+				<span aria-hidden="true" class="text-primary">•</span>
+				<span class="meta-item">
+					updated: <FormattedDate date={updated} dateTimeOptions={dateTimeOptions} />
+				</span>
+			</>
+		)}
+		<span aria-hidden="true" class="text-primary">•</span>
+		<ViewCounter slug={slug} content_type="wiki" format="text" />
+		<span aria-hidden="true" class="text-primary">•</span>
+		<LikeCounter slug={slug} content_type="wiki" format="text" />
+	</div>
+	{tags && tags.length > 0 && (
+		<div class="wiki-doc-tags">
+			<svg
+				aria-hidden="true"
+				class="tag-icon"
+				fill="none"
+				focusable="false"
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="1.5"
+				viewBox="0 0 24 24"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path d="M0 0h24v24H0z" fill="none" stroke="none" />
+				<path d="M7.859 6h-2.834a2.025 2.025 0 0 0 -2.025 2.025v2.834c0 .537 .213 1.052 .593 1.432l6.116 6.116a2.025 2.025 0 0 0 2.864 0l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-6.117 -6.116a2.025 2.025 0 0 0 -1.431 -.593z" />
+				<path d="M17.573 18.407l2.834 -2.834a2.025 2.025 0 0 0 0 -2.864l-7.117 -7.116" />
+				<path d="M6 9h-.01" />
+			</svg>
+			{tags.map((tag, i) => (
+				<span class="contents">
+					<a class="cactus-link inline-block before:content-['#']" href={`/tags/${tag}/`}>{tag}</a>{i < tags.length - 1 && ", "}
+				</span>
+			))}
+		</div>
+	)}
+</div>
+
+<style>
+	.wiki-doc-header {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		padding-bottom: 1rem;
+		margin-bottom: 1.5rem;
+		border-bottom: 1px solid var(--color-border-default);
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		text-transform: lowercase;
+	}
+
+	.wiki-doc-meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		column-gap: 0.75rem;
+		row-gap: 0.25rem;
+	}
+
+	.meta-item {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.status-badge {
+		display: inline-flex;
+		align-items: stretch;
+		border-radius: 0.25rem;
+		overflow: hidden;
+		font-weight: 500;
+	}
+
+	.status-indicator {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.25rem;
+		flex-shrink: 0;
+	}
+
+	.status-icon {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.status-label {
+		padding: 0.125rem 0.5rem;
+	}
+
+	.status-seed .status-indicator {
+		background: var(--color-yellow);
+		color: var(--color-global-bg);
+	}
+
+	.status-seed .status-label {
+		background: color-mix(in srgb, var(--color-yellow) 15%, transparent);
+		color: var(--color-yellow);
+	}
+
+	.status-growing .status-indicator {
+		background: var(--color-blue);
+		color: var(--color-global-bg);
+	}
+
+	.status-growing .status-label {
+		background: color-mix(in srgb, var(--color-blue) 15%, transparent);
+		color: var(--color-blue);
+	}
+
+	.status-evergreen .status-indicator {
+		background: var(--color-green);
+		color: var(--color-global-bg);
+	}
+
+	.status-evergreen .status-label {
+		background: color-mix(in srgb, var(--color-green) 15%, transparent);
+		color: var(--color-green);
+	}
+
+	.wiki-doc-tags {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.tag-icon {
+		width: 1rem;
+		height: 1rem;
+	}
+</style>

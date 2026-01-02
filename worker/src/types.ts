@@ -4,7 +4,7 @@ export interface Env {
 	DB: D1Database;
 }
 
-export type ContentType = "post" | "tweet" | "project";
+export type ContentType = "post" | "tweet" | "project" | "wiki";
 
 export interface ViewResponse {
 	slug: string;

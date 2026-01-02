@@ -1,0 +1,28 @@
+:root {
+	--hk-rosewater: #f5e0dc;
+	--hk-flamingo: #f2cdcd;
+	--hk-pink: #f5c2e7;
+	--hk-mauve: #cba6f7;
+	--hk-red: #f38ba8;
+	--hk-maroon: #eba0ac;
+	--hk-peach: #fab387;
+	--hk-yellow: #f9e2af;
+	--hk-green: #a6e3a1;
+	--hk-teal: #94e2d5;
+	--hk-sky: #89dceb;
+	--hk-sapphire: #74c7ec;
+	--hk-blue: #89b4fa;
+	--hk-lavender: #b4befe;
+	--hk-text: #cdd6f4;
+	--hk-subtext1: #bac2de;
+	--hk-subtext0: #a6adc8;
+	--hk-overlay2: #9399b2;
+	--hk-overlay1: #7f849c;
+	--hk-overlay0: #6c7086;
+	--hk-surface2: #585b70;
+	--hk-surface1: #45475a;
+	--hk-surface0: #313244;
+	--hk-base: #1e1e2e;
+	--hk-mantle: #181825;
+	--hk-crust: #11111b;
+}

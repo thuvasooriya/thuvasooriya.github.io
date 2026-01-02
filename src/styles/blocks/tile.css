@@ -1,0 +1,47 @@
+/* Usage: Set --tile-color via style, apply variant class
+ * <div class="tile tile-interactive" style="--tile-color: var(--color-primary)">
+ */
+
+.tile {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.5rem;
+  backdrop-filter: blur(4px);
+  background: color-mix(in srgb, var(--tile-color) 5%, transparent);
+  background-image: linear-gradient(
+    to bottom right,
+    color-mix(in srgb, var(--tile-color) 10%, transparent),
+    transparent
+  );
+  border: 1px solid color-mix(in srgb, var(--tile-color) 20%, transparent);
+}
+
+.tile-static {
+}
+
+.tile-interactive {
+  border-color: transparent;
+  transition:
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+.tile-interactive:hover {
+  border-color: color-mix(in srgb, var(--tile-color) 40%, transparent);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.tile-glow {
+  --card-glow-color: color-mix(in srgb, var(--tile-color) 20%, transparent);
+  transition: all 0.2s var(--ease-snappy);
+}
+
+.tile-glow:hover {
+  transform: scale(1.03);
+  box-shadow: 0 8px 24px var(--card-glow-color);
+}
+
+.tile-glow:active {
+  transform: scale(0.98);
+  box-shadow: 0 2px 8px var(--card-glow-color);
+}

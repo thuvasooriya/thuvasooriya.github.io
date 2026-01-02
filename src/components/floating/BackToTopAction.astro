@@ -1,0 +1,47 @@
+---
+interface Props {
+	class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<button
+	type="button"
+	class:list={["floating-action back-to-top-action", className]}
+	aria-label="Back to top"
+	data-action="back-to-top"
+>
+	<span class="action-tooltip">back to top</span>
+	<svg
+		aria-hidden="true"
+		class="action-icon"
+		fill="none"
+		stroke="currentColor"
+		stroke-width="2.5"
+		viewBox="0 0 24 24"
+		xmlns="http://www.w3.org/2000/svg"
+	>
+		<path d="M4.5 15.75l7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round" />
+	</svg>
+</button>
+
+<style>
+	.back-to-top-action {
+		color: var(--color-primary);
+	}
+
+	.back-to-top-action .action-icon {
+		filter: drop-shadow(0 0 4px var(--color-primary));
+		transition: filter 0.3s ease, transform 0.3s ease;
+	}
+
+	.back-to-top-action:hover .action-icon {
+		filter: drop-shadow(0 0 12px var(--color-primary)) drop-shadow(0 0 20px var(--color-primary));
+		transform: translateY(-2px);
+	}
+
+	.back-to-top-action:active .action-icon {
+		transform: translateY(0);
+	}
+</style>

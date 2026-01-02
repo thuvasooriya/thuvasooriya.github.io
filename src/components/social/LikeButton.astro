@@ -1,0 +1,447 @@
+---
+import type { HTMLAttributes } from "astro/types";
+import HeartIcon from "@/components/icons/HeartIcon.astro";
+
+interface Props extends HTMLAttributes<"button"> {
+	slug: string;
+	content_type: "post" | "tweet" | "project" | "wiki";
+	show_count?: boolean;
+	icon_size?: "sm" | "md" | "lg";
+}
+
+const {
+	slug,
+	content_type,
+	show_count = true,
+	icon_size = "lg",
+	class: className,
+	...rest
+} = Astro.props;
+---
+
+<button
+	type="button"
+	class={`like-button ${className || ""}`}
+	data-slug={slug}
+	data-type={content_type}
+	data-user-likes="0"
+	data-show-count={show_count}
+	aria-label="Like this content"
+	{...rest}
+>
+	{show_count && <span class="like-count">0</span>}
+	<div class="heart-wrapper">
+		<HeartIcon id={slug} size={icon_size} />
+		<div class="popup-container"></div>
+		<div class="particles-container"></div>
+	</div>
+</button>
+
+<style>
+	.like-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 0.75rem;
+		border: none;
+		background: transparent;
+		cursor: pointer;
+		border-radius: 9999px;
+		outline: none;
+		transition: background 0.2s ease;
+		position: relative;
+	}
+
+	.like-button:hover {
+		background: transparent;
+	}
+
+	.like-button:active {
+		transform: scale(0.95);
+	}
+
+	.heart-wrapper {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.like-button:hover :global(.heart-icon) {
+		transform: scale(1.1);
+	}
+
+	.like-button:hover :global(.heart-outline) {
+		stroke-width: 2;
+	}
+
+	.like-button[data-user-likes="13"] :global(.heart-icon) {
+		filter: drop-shadow(0 0 6px var(--color-red)) drop-shadow(0 0 12px var(--color-pink));
+		animation: pulse-glow 2s ease-in-out infinite;
+	}
+
+	@keyframes pulse-glow {
+		0%, 100% {
+			filter: drop-shadow(0 0 6px var(--color-red)) drop-shadow(0 0 12px var(--color-pink));
+		}
+		50% {
+			filter: drop-shadow(0 0 10px var(--color-red)) drop-shadow(0 0 20px var(--color-pink));
+		}
+	}
+
+	.like-button.bounce :global(.heart-icon) {
+		animation: heart-bounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	@keyframes heart-bounce {
+		0% { transform: scale(1); }
+		30% { transform: scale(1.3); }
+		60% { transform: scale(0.9); }
+		100% { transform: scale(1); }
+	}
+
+	.popup-container {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		pointer-events: none;
+		z-index: 10;
+	}
+
+	:global(.like-popup) {
+		position: absolute;
+		font-size: 0.875rem;
+		font-weight: 700;
+		color: var(--color-red);
+		white-space: nowrap;
+		pointer-events: none;
+		animation: popup-float 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+		text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	}
+
+	:global(.like-popup.max-popup) {
+		font-size: 1rem;
+		background: linear-gradient(135deg, var(--color-red), var(--color-pink));
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+		animation: max-popup-float 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+	}
+
+	@keyframes max-popup-float {
+		0% {
+			opacity: 1;
+			transform: translateY(0) scale(0.5) rotate(-10deg);
+		}
+		30% {
+			opacity: 1;
+			transform: translateY(-15px) scale(1.4) rotate(5deg);
+		}
+		60% {
+			opacity: 1;
+			transform: translateY(-25px) scale(1.2) rotate(-3deg);
+		}
+		100% {
+			opacity: 0;
+			transform: translateY(-40px) scale(1) rotate(0deg);
+		}
+	}
+
+	@keyframes popup-float {
+		0% {
+			opacity: 1;
+			transform: translateY(0) scale(0.5);
+		}
+		50% {
+			opacity: 1;
+			transform: translateY(-20px) scale(1.2);
+		}
+		100% {
+			opacity: 0;
+			transform: translateY(-35px) scale(1);
+		}
+	}
+
+	.particles-container {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		pointer-events: none;
+		z-index: 5;
+	}
+
+	:global(.heart-particle) {
+		position: absolute;
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--color-red);
+		pointer-events: none;
+		animation: particle-burst 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+	}
+
+	@keyframes particle-burst {
+		0% {
+			opacity: 1;
+			transform: translate(0, 0) scale(1);
+		}
+		100% {
+			opacity: 0;
+			transform: var(--particle-end, translate(20px, -20px)) scale(0);
+		}
+	}
+
+	.like-count {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--color-global-text);
+		min-width: 1.5rem;
+		text-align: left;
+		font-variant-numeric: tabular-nums;
+		transition: transform 0.2s ease, color 0.2s ease;
+	}
+
+	.like-button:hover .like-count {
+		color: var(--color-red);
+	}
+
+	.like-button.count-bump .like-count {
+		animation: count-bump 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+
+	@keyframes count-bump {
+		0% { transform: scale(1); }
+		50% { transform: scale(1.3); }
+		100% { transform: scale(1); }
+	}
+</style>
+
+<script>
+	interface LikeResponse {
+		user_likes: number;
+		total_likes: number;
+		unique_users: number;
+	}
+
+	const WORKER_URL = import.meta.env.PUBLIC_ANALYTICS_URL || "http://localhost:8787";
+	const MAX_LIKES = 13;
+	const COOKIE_NAME = "user_likes";
+
+	class LikeButtonController {
+		private button: HTMLButtonElement;
+		private count_el: HTMLSpanElement | null;
+		private fill_rect: SVGRectElement | null;
+		private popup_container: HTMLDivElement | null;
+		private particles_container: HTMLDivElement | null;
+		private slug: string;
+		private type: string;
+		private user_likes = 0;
+		private is_updating = false;
+
+		constructor(button: HTMLButtonElement) {
+			this.button = button;
+			this.count_el = button.querySelector(".like-count");
+			this.fill_rect = button.querySelector(".heart-fill-rect");
+			this.popup_container = button.querySelector(".popup-container");
+			this.particles_container = button.querySelector(".particles-container");
+			this.slug = button.dataset.slug!;
+			this.type = button.dataset.type!;
+
+			this.init();
+		}
+
+		private async init() {
+			const saved_likes = this.get_cookie_likes();
+
+			if (saved_likes !== null) {
+				this.user_likes = saved_likes;
+				this.button.dataset.userLikes = String(saved_likes);
+				this.update_fill(saved_likes);
+			}
+
+			await this.fetch_likes();
+			this.button.addEventListener("click", (e) => this.handle_click(e));
+		}
+
+		private async fetch_likes() {
+			try {
+				const res = await fetch(`${WORKER_URL}/api/analytics/like/${this.type}/${this.slug}`);
+				if (!res.ok) return;
+
+				const data: LikeResponse = await res.json();
+				this.user_likes = data.user_likes;
+				this.update_ui(data.user_likes, data.total_likes);
+			} catch (error) {
+				console.error("Failed to fetch likes:", error);
+			}
+		}
+
+		private async handle_click(e: MouseEvent) {
+			e.preventDefault();
+			e.stopPropagation();
+
+			if (this.is_updating) return;
+			if (this.user_likes >= MAX_LIKES) {
+				this.shake_animation();
+				this.show_max_popup();
+				return;
+			}
+
+			const new_count = this.user_likes + 1;
+			this.is_updating = true;
+
+			const current_total = this.count_el ? Number.parseInt(this.count_el.textContent || "0") : 0;
+			this.update_ui(new_count, current_total + 1);
+			this.animate_like();
+
+			try {
+				const res = await fetch(`${WORKER_URL}/api/analytics/like/${this.type}/${this.slug}`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ count: new_count }),
+				});
+
+				if (!res.ok) throw new Error("Failed to update like");
+
+				const data: LikeResponse = await res.json();
+				this.update_ui(data.user_likes, data.total_likes);
+			} catch (error) {
+				console.error("Failed to update like:", error);
+				await this.fetch_likes();
+			} finally {
+				this.is_updating = false;
+			}
+		}
+
+		private update_ui(user_likes: number, total_likes: number) {
+			this.user_likes = user_likes;
+			this.button.dataset.userLikes = String(user_likes);
+			if (this.count_el) {
+				this.count_el.textContent = String(total_likes);
+			}
+			this.update_fill(user_likes);
+			this.save_cookie_likes(user_likes);
+		}
+
+		private update_fill(likes: number) {
+			if (!this.fill_rect) return;
+
+			const fill_percent = (likes / MAX_LIKES) * 100;
+			const fill_height = (fill_percent / 100) * 24;
+			const y_position = 24 - fill_height;
+
+			this.fill_rect.setAttribute("height", String(fill_height));
+			this.fill_rect.setAttribute("y", String(y_position));
+		}
+
+		private animate_like() {
+			this.button.classList.add("bounce");
+			setTimeout(() => this.button.classList.remove("bounce"), 400);
+
+			this.button.classList.add("count-bump");
+			setTimeout(() => this.button.classList.remove("count-bump"), 300);
+
+			this.show_popup();
+			this.show_particles();
+		}
+
+		private show_popup(text = "+1", is_max = false) {
+			if (!this.popup_container) return;
+
+			const popup = document.createElement("span");
+			popup.className = is_max ? "like-popup max-popup" : "like-popup";
+			popup.textContent = text;
+
+			const offset_x = is_max ? 20 : (Math.random() - 0.5) * 20;
+			popup.style.left = `${offset_x}px`;
+			popup.style.top = is_max ? "-5px" : "0";
+
+			this.popup_container.appendChild(popup);
+			setTimeout(() => popup.remove(), is_max ? 1200 : 800);
+		}
+
+		private show_max_popup() {
+			this.show_popup("max!", true);
+		}
+
+		private show_particles() {
+			if (!this.particles_container) return;
+
+			const particle_count = 6;
+			for (let i = 0; i < particle_count; i++) {
+				const particle = document.createElement("span");
+				particle.className = "heart-particle";
+
+				const angle = (i / particle_count) * Math.PI * 2;
+				const distance = 20 + Math.random() * 10;
+				const x = Math.cos(angle) * distance;
+				const y = Math.sin(angle) * distance;
+
+				particle.style.setProperty("--particle-end", `translate(${x}px, ${y}px)`);
+				particle.style.background = i % 2 === 0 ? "var(--color-red)" : "var(--color-pink)";
+
+				this.particles_container.appendChild(particle);
+				setTimeout(() => particle.remove(), 600);
+			}
+		}
+
+		private shake_animation() {
+			this.button.style.animation = "none";
+			this.button.offsetHeight;
+			this.button.style.animation = "shake 0.3s ease";
+			setTimeout(() => {
+				this.button.style.animation = "";
+			}, 300);
+		}
+
+		private get_cookie_likes(): number | null {
+			const cookies = document.cookie.split(";");
+			for (const cookie of cookies) {
+				const [name, value] = cookie.trim().split("=");
+				if (name === `${COOKIE_NAME}_${this.type}_${this.slug}`) {
+					return Number.parseInt(value || "0") || 0;
+				}
+			}
+			return null;
+		}
+
+		private save_cookie_likes(count: number) {
+			const expires = new Date();
+			expires.setFullYear(expires.getFullYear() + 1);
+			document.cookie = `${COOKIE_NAME}_${this.type}_${this.slug}=${count}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+		}
+	}
+
+	if (!document.getElementById("like-button-keyframes")) {
+		const style = document.createElement("style");
+		style.id = "like-button-keyframes";
+		style.textContent = `
+			@keyframes shake {
+				0%, 100% { transform: translateX(0); }
+				20% { transform: translateX(-3px); }
+				40% { transform: translateX(3px); }
+				60% { transform: translateX(-2px); }
+				80% { transform: translateX(2px); }
+			}
+		`;
+		document.head.appendChild(style);
+	}
+
+	function init_like_buttons() {
+		document.querySelectorAll<HTMLButtonElement>(".like-button").forEach((button) => {
+			if (button.dataset.initialized === "true") return;
+			button.dataset.initialized = "true";
+			new LikeButtonController(button);
+		});
+	}
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", init_like_buttons);
+	} else {
+		init_like_buttons();
+	}
+
+	document.addEventListener("astro:page-load", init_like_buttons);
+</script>

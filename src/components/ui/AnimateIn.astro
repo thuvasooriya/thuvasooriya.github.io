@@ -1,0 +1,37 @@
+---
+---
+
+<script>
+	function initAnimations() {
+		const elements = document.querySelectorAll<HTMLElement>("[data-animate]:not(.animate-in)");
+		if (!elements.length) return;
+
+		if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+			elements.forEach((el) => el.classList.add("animate-in"));
+			return;
+		}
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					if (entry.isIntersecting) {
+						entry.target.classList.add("animate-in");
+						observer.unobserve(entry.target);
+					}
+				});
+			},
+			{ threshold: 0.1, rootMargin: "0px 0px -20px 0px" },
+		);
+
+		elements.forEach((el) => {
+			if (el.hasAttribute("data-animate-immediate")) {
+				el.classList.add("animate-in");
+			} else {
+				observer.observe(el);
+			}
+		});
+	}
+
+	initAnimations();
+	document.addEventListener("astro:page-load", initAnimations);
+</script>

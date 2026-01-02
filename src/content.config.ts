@@ -14,23 +14,23 @@ const post = defineCollection({
 	schema: ({ image }) =>
 		baseSchema.extend({
 			description: z.string(),
-			coverImage: z
+			cover_image: z
 				.object({
 					alt: z.string(),
 					src: image(),
 				})
 				.optional(),
 			draft: z.boolean().default(false),
-			ogImage: z.string().optional(),
 			tags: z.array(z.string()).default([]).transform(removeDupsAndLowerCase),
-			publishDate: z
+			published: z
 				.string()
 				.or(z.date())
 				.transform((val) => new Date(val)),
-			updatedDate: z
+			updated: z
 				.string()
+				.or(z.date())
 				.optional()
-				.transform((str) => (str ? new Date(str) : undefined)),
+				.transform((val) => (val ? new Date(val) : undefined)),
 		}),
 });
 
@@ -38,10 +38,15 @@ const note = defineCollection({
 	loader: glob({ base: "./src/content/tweets", pattern: "**/*.{md,mdx}" }),
 	schema: baseSchema.extend({
 		description: z.string().optional(),
-		publishDate: z
+		published: z
 			.string()
-			.datetime({ offset: true }) // Ensures ISO 8601 format with offsets allowed (e.g. "2024-01-01T00:00:00Z" and "2024-01-01T00:00:00+02:00")
+			.or(z.date())
 			.transform((val) => new Date(val)),
+		updated: z
+			.string()
+			.or(z.date())
+			.optional()
+			.transform((val) => (val ? new Date(val) : undefined)),
 	}),
 });
 
@@ -128,45 +133,82 @@ const page = defineCollection({
 
 const proj = defineCollection({
 	loader: glob({ base: "./src/content/proj", pattern: "**/*.{md,mdx}" }),
-	schema: ({ image }) =>
-		z.object({
-			title: z.string(),
-			description: z.string().optional(),
-			// post-like fields for articles and logs
-			publishDate: z
-				.string()
-				.or(z.date())
-				.optional()
-				.transform((val) => (val ? new Date(val) : undefined)),
-			updatedDate: z
-				.string()
-				.optional()
-				.transform((str) => (str ? new Date(str) : undefined)),
-			draft: z.boolean().default(false),
-			// project-specific fields (primarily for index.md)
-			demoLink: z.string().url().optional(),
-			github: z.string().url().optional(),
-			status: z.enum(["active", "archived", "planning", "paused", "draft"]).optional(),
-			tags: z.array(z.string()).default([]).transform(removeDupsAndLowerCase),
-			coverImage: z
-				.object({
-					alt: z.string(),
-					src: image(),
-				})
-				.optional(),
-			startDate: z
-				.string()
-				.optional()
-				.transform((str) => (str ? new Date(str) : undefined)),
-			links: z
-				.array(
-					z.object({
-						label: z.string(),
-						url: z.string().url(),
-					}),
-				)
-				.optional(),
-		}),
+	schema: z.object({
+		title: z.string(),
+		description: z.string().optional(),
+		tags: z.array(z.string()).default([]).transform(removeDupsAndLowerCase),
+		code: z.string().optional(),
+		status: z.enum(["init", "plan", "exec", "hold", "done"]).optional(),
+		started: z
+			.string()
+			.or(z.date())
+			.optional()
+			.transform((val) => (val ? new Date(val) : undefined)),
+		updated: z
+			.string()
+			.or(z.date())
+			.optional()
+			.transform((val) => (val ? new Date(val) : undefined)),
+		date: z
+			.string()
+			.or(z.date())
+			.optional()
+			.transform((val) => (val ? new Date(val) : undefined)),
+		publishDate: z
+			.string()
+			.or(z.date())
+			.optional()
+			.transform((val) => (val ? new Date(val) : undefined)),
+		github: z.string().url().optional().nullable().or(z.literal("")),
+		demo: z.string().url().optional().nullable().or(z.literal("")),
+		cover: z.string().optional().nullable(),
+		links: z
+			.array(
+				z.object({
+					label: z.string(),
+					url: z.string().url(),
+				}),
+			)
+			.optional(),
+	}),
 });
 
-export const collections = { post, note, page, proj };
+const wiki = defineCollection({
+	loader: glob({ base: "./src/content/wiki", pattern: "**/*.{md,mdx}" }),
+	schema: z.object({
+		title: z.string(),
+		description: z.string().optional(),
+		status: z.enum(["seed", "growing", "evergreen"]).default("seed"),
+		template: z.enum(["doc", "splash"]).default("doc"),
+		tags: z.array(z.string()).optional(),
+		updated: z
+			.string()
+			.or(z.date())
+			.optional()
+			.transform((val) => (val ? new Date(val) : undefined)),
+		sidebar: z
+			.object({
+				order: z.number().optional(),
+				label: z.string().optional(),
+				hidden: z.boolean().default(false),
+			})
+			.default({}),
+		hero: z
+			.object({
+				tagline: z.string().optional(),
+				actions: z
+					.array(
+						z.object({
+							text: z.string(),
+							link: z.string(),
+							icon: z.string().optional(),
+							variant: z.enum(["primary", "secondary", "minimal"]).default("primary"),
+						}),
+					)
+					.optional(),
+			})
+			.optional(),
+	}),
+});
+
+export const collections = { post, note, page, proj, wiki };

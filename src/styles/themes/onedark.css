@@ -1,0 +1,22 @@
+:root {
+	--od-bg: #282c34;
+	--od-bg-dark: #21252b;
+	--od-bg-highlight: #2c313c;
+	--od-fg: #abb2bf;
+	--od-comment: #5c6370;
+	--od-gutter: #636d83;
+	--od-selection: #3e4451;
+	--od-accent: #528bff;
+	--od-cyan: #56b6c2;
+	--od-blue: #61afef;
+	--od-purple: #c678dd;
+	--od-green: #98c379;
+	--od-red: #e06c75;
+	--od-red2: #be5046;
+	--od-orange: #d19a66;
+	--od-yellow: #e5c07b;
+	--od-surface0: #31353f;
+	--od-surface1: #393f4a;
+	--od-overlay0: #5c6370;
+	--od-overlay1: #828997;
+}

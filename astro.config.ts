@@ -6,6 +6,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 import expressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
+import rehypeAstroRelativeMarkdownLinks from "astro-rehype-relative-markdown-links";
 import robotsTxt from "astro-robots-txt";
 import webmanifest from "astro-webmanifest";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
@@ -14,7 +15,9 @@ import rehypeMathjax from "rehype-mathjax";
 import rehypeUnwrapImages from "rehype-unwrap-images";
 import remarkDirective from "remark-directive";
 import remarkMath from "remark-math";
+import { rehypeObsidianImages } from "./src/plugins/rehype-obsidian-images";
 import { remarkAdmonitions } from "./src/plugins/remark-admonitions";
+import { remarkObsidianImages } from "./src/plugins/remark-obsidian-images";
 import { remarkReadingTime } from "./src/plugins/remark-reading-time";
 import { expressiveCodeOptions, siteConfig } from "./src/site.config";
 
@@ -75,8 +78,21 @@ export default defineConfig({
 			],
 			rehypeUnwrapImages,
 			rehypeMathjax,
+			[
+				rehypeAstroRelativeMarkdownLinks,
+				{
+					collectionBase: "name",
+				},
+			],
+			rehypeObsidianImages,
 		],
-		remarkPlugins: [remarkReadingTime, remarkDirective, remarkAdmonitions, remarkMath],
+		remarkPlugins: [
+			remarkObsidianImages,
+			remarkReadingTime,
+			remarkDirective,
+			remarkAdmonitions,
+			remarkMath,
+		],
 		remarkRehype: {
 			footnoteLabelProperties: {
 				className: ["lowercase"],

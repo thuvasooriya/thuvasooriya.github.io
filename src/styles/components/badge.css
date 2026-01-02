@@ -1,0 +1,24 @@
+.status-init {
+	background-color: var(--color-status-info);
+	color: var(--color-status-dark-text);
+}
+
+.status-plan {
+	background-color: var(--color-status-warning);
+	color: var(--color-status-dark-text);
+}
+
+.status-exec {
+	background-color: var(--color-status-success);
+	color: var(--color-status-dark-text);
+}
+
+.status-hold {
+	background-color: var(--color-status-archived-bg);
+	color: var(--color-status-archived-text);
+}
+
+.status-done {
+	background-color: var(--color-status-success);
+	color: var(--color-status-dark-text);
+}

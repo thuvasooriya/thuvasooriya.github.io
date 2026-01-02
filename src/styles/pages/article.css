@@ -1,38 +1,26 @@
 /* article/blog post pages */
 
 @theme {
-	/* prose/content styles */
 	--article-prose-headings: var(--color-global-text);
 	--article-prose-links: var(--color-link);
 	--article-prose-code: var(--color-accent);
 	--article-prose-quote: var(--color-quote);
-	--article-prose-border: #d4d4d8;
+	--article-prose-border: var(--color-border-default);
 
-	/* masthead/hero */
 	--article-hero-title-color: var(--color-global-text);
-	--article-hero-meta-color: #71717a;
+	--article-hero-meta-color: var(--color-text-muted);
 	--article-hero-spacing: 1rem;
 
-	/* table of contents */
 	--toc-bg: transparent;
 	--toc-border: var(--article-prose-border);
 	--toc-link-color: var(--color-global-text);
 	--toc-link-hover: var(--color-accent);
 	--toc-active-color: var(--color-accent);
 
-	/* back to top button */
-	--back-to-top-bg: #e4e4e7;
+	--back-to-top-bg: var(--color-surface-2);
 	--back-to-top-border: transparent;
 	--back-to-top-hover-border: var(--color-link);
 	--back-to-top-color: var(--color-global-text);
-}
-
-@layer base {
-	html[data-theme="dark"] {
-		--article-prose-border: #3f3f46;
-		--article-hero-meta-color: #a1a1aa;
-		--back-to-top-bg: #3f3f46;
-	}
 }
 
 /* article layout */

@@ -1,0 +1,50 @@
+---
+import type { MarkdownHeading } from "astro";
+import FloatingActions from "@/components/floating/FloatingActions.astro";
+import AnimateIn from "@/components/ui/AnimateIn.astro";
+import type { SiteMeta } from "@/types";
+import BaseLayout from "./Base.astro";
+
+interface Props {
+	meta: SiteMeta;
+	headings?: MarkdownHeading[];
+	heroId?: string;
+	showToc?: boolean;
+	showBackToTop?: boolean;
+	pagefindBody?: boolean;
+	likeButton?: { slug: string; contentType: "post" | "project" | "tweet" | "wiki" };
+	pageType?: "article" | "wide";
+}
+
+const {
+	meta,
+	headings = [],
+	heroId = "article-hero",
+	showToc = true,
+	showBackToTop = true,
+	pagefindBody = true,
+	likeButton,
+	pageType = "article",
+} = Astro.props;
+---
+
+<BaseLayout meta={meta} pageType={pageType}>
+	<article class="grow break-words" data-pagefind-body={pagefindBody}>
+		<slot name="before-hero" />
+		<div id={heroId} class="mb-4" data-animate data-animate-immediate>
+			<slot name="hero" />
+		</div>
+		<div class="prose prose-sm max-w-none" data-animate data-animate-immediate data-delay="1">
+			<slot />
+		</div>
+		<slot name="footer" />
+	</article>
+	<FloatingActions
+		targetId={heroId}
+		showBackToTop={showBackToTop}
+		showToc={showToc && headings.length > 0}
+		headings={headings}
+		like={likeButton}
+	/>
+	<AnimateIn />
+</BaseLayout>

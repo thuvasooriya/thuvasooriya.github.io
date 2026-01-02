@@ -1,0 +1,239 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+	logs: CollectionEntry<"proj">[];
+	projectFolder: string;
+	currentSlug?: string;
+}
+
+const { logs, projectFolder, currentSlug = "" } = Astro.props;
+
+const sortedLogs = [...logs].sort((a, b) => {
+	const dateA = a.data.date;
+	const dateB = b.data.date;
+	if (!dateA || !dateB) return 0;
+	return dateB.getTime() - dateA.getTime();
+});
+
+function getLogSlug(log: CollectionEntry<"proj">): string {
+	return log.id.replace(`${projectFolder}/`, "");
+}
+
+function isActive(logSlug: string): boolean {
+	return currentSlug === `${projectFolder}/${logSlug}`;
+}
+---
+
+{logs.length > 0 && (
+	<nav class="project-sidebar" aria-label="Project logs" id="project-sidebar" data-open="false">
+		<ul class="sidebar-list">
+			{sortedLogs.map((log) => {
+				const logSlug = getLogSlug(log);
+				const href = `/projects/${projectFolder}/${logSlug}/`;
+				const active = isActive(logSlug);
+
+				return (
+					<li>
+						<a
+							href={href}
+							class:list={["sidebar-link", { active }]}
+							aria-current={active ? "page" : undefined}
+						>
+							{log.data.title}
+						</a>
+					</li>
+				);
+			})}
+		</ul>
+	</nav>
+)}
+
+<button
+	class="project-sidebar-toggle"
+	data-show="false"
+	data-open="false"
+	id="project-sidebar-toggle"
+	type="button"
+	aria-label="Toggle project logs"
+>
+	<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+		<path d="M4 6h16M4 12h10M4 18h14" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+	</svg>
+</button>
+
+<style>
+	.project-sidebar {
+		width: var(--layout-sidebar-width);
+		flex-shrink: 0;
+		position: sticky;
+		top: 10rem;
+		height: fit-content;
+		max-height: calc(100vh - 12rem);
+		overflow-y: auto;
+		transition: top 0.1s ease-out, max-height 0.1s ease-out;
+	}
+
+	.sidebar-list {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.sidebar-link {
+		display: block;
+		padding: 0.25rem 0.5rem;
+		color: var(--color-global-text);
+		text-decoration: none;
+		border-radius: 0.25rem;
+		font-size: 0.8125rem;
+		line-height: 1.4;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		transition: background-color 0.15s ease, color 0.15s ease;
+	}
+
+	.sidebar-link:hover {
+		background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		color: var(--color-accent);
+	}
+
+	.sidebar-link.active {
+		background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+		color: var(--color-accent);
+		font-weight: 500;
+	}
+
+	@media (max-width: 1023px) {
+		.project-sidebar {
+			position: fixed;
+			left: 0;
+			top: 0;
+			height: 100vh;
+			max-height: 100vh;
+			width: 16rem;
+			padding: 5rem 1rem 2rem;
+			background: var(--color-global-bg);
+			border-right: 1px solid var(--color-border-default);
+			box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+			z-index: 80;
+			transform: translateX(-100%);
+			transition: transform 0.3s ease;
+		}
+
+		.project-sidebar[data-open="true"] {
+			transform: translateX(0);
+		}
+	}
+
+	.project-sidebar-toggle {
+		display: none;
+		position: fixed;
+		left: 1rem;
+		top: 50%;
+		transform: translateY(-50%) translateX(-100%);
+		opacity: 0;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		z-index: 90;
+		transition: transform 0.3s ease, opacity 0.3s ease;
+	}
+
+	.project-sidebar-toggle[data-show="true"] {
+		transform: translateY(-50%) translateX(0);
+		opacity: 1;
+	}
+
+	.project-sidebar-toggle[data-open="true"] {
+		transform: translateY(-50%) translateX(-100%);
+		opacity: 0;
+	}
+
+	.project-sidebar-toggle svg {
+		filter: drop-shadow(0 0 8px var(--color-primary)) drop-shadow(0 0 12px var(--color-primary));
+		transition: filter 0.3s ease, transform 0.3s ease;
+	}
+
+	.project-sidebar-toggle:hover svg {
+		filter: drop-shadow(0 0 12px var(--color-primary)) drop-shadow(0 0 16px var(--color-primary));
+		transform: translateX(4px);
+	}
+
+	@media (max-width: 1023px) {
+		.project-sidebar-toggle {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+	}
+</style>
+
+<script>
+function initProjectSidebar() {
+	const sidebar = document.getElementById("project-sidebar") as HTMLElement | null;
+	const toggleBtn = document.getElementById("project-sidebar-toggle") as HTMLButtonElement | null;
+	if (!sidebar || !toggleBtn) return;
+
+	const updatePosition = () => {
+		if (window.innerWidth < 1024) return;
+		
+		const navHeight = 80;
+		const baseTop = 80;
+		const scrollY = window.scrollY;
+		const dynamicTop = Math.max(16, baseTop + navHeight - scrollY);
+		sidebar.style.top = `${dynamicTop}px`;
+		sidebar.style.maxHeight = `${window.innerHeight - dynamicTop - 32}px`;
+	};
+
+	updatePosition();
+	window.addEventListener("scroll", updatePosition, { passive: true });
+	window.addEventListener("resize", updatePosition);
+
+	const checkVisibility = () => {
+		const isMobile = window.innerWidth < 1024;
+		toggleBtn.dataset.show = isMobile ? "true" : "false";
+		if (!isMobile) {
+			sidebar.dataset.open = "false";
+			toggleBtn.dataset.open = "false";
+			updatePosition();
+		} else {
+			sidebar.style.top = "";
+			sidebar.style.maxHeight = "";
+		}
+	};
+
+	checkVisibility();
+	window.addEventListener("resize", checkVisibility);
+
+	toggleBtn.addEventListener("click", () => {
+		const isOpen = sidebar.dataset.open === "true";
+		sidebar.dataset.open = (!isOpen).toString();
+		toggleBtn.dataset.open = (!isOpen).toString();
+	});
+
+	document.addEventListener("click", (e) => {
+		if (
+			sidebar.dataset.open === "true" &&
+			!sidebar.contains(e.target as Node) &&
+			!toggleBtn.contains(e.target as Node)
+		) {
+			sidebar.dataset.open = "false";
+			toggleBtn.dataset.open = "false";
+		}
+	});
+
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape" && sidebar.dataset.open === "true") {
+			sidebar.dataset.open = "false";
+			toggleBtn.dataset.open = "false";
+		}
+	});
+}
+
+initProjectSidebar();
+document.addEventListener("astro:after-swap", initProjectSidebar);
+</script>

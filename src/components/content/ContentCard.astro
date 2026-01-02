@@ -1,0 +1,168 @@
+---
+import { Image } from "astro:assets";
+import type { CollectionEntry } from "astro:content";
+import FormattedDate from "@/components/content/FormattedDate.astro";
+import Card from "@/components/ui/Card.astro";
+
+type ContentEntry = CollectionEntry<"post"> | CollectionEntry<"proj">;
+
+export interface Props {
+	as?: string;
+	entry: ContentEntry;
+	href?: string;
+	withDesc?: boolean;
+}
+
+const { as: Tag = "article", entry, href, withDesc = true } = Astro.props;
+
+function getDefaultHref(e: ContentEntry): string {
+	if (e.collection === "post") {
+		return `/posts/${e.id}/`;
+	}
+	return `/projects/${e.id}/`;
+}
+
+const resolvedHref = href ?? getDefaultHref(entry);
+
+const title = entry.data.title;
+const description = entry.data.description;
+const tags = entry.data.tags;
+
+const publishDate = entry.collection === "post" ? entry.data.published : entry.data.date;
+const coverImage = entry.collection === "post" ? entry.data.cover_image : undefined;
+const isDraft = entry.collection === "post" ? entry.data.draft : entry.data.status === "init";
+---
+
+<Card as={Tag} class="group block @container">
+	<a href={resolvedHref} class="card-link block p-4" data-astro-prefetch>
+		<div class="content-card-layout">
+			{coverImage && (
+				<div class="content-card-image card-image">
+					<Image
+						src={coverImage.src}
+						alt={coverImage.alt}
+						class="h-full w-full object-cover"
+						loading="lazy"
+						width={600}
+						height={400}
+					/>
+					{isDraft && (
+						<span class="draft-badge">draft</span>
+					)}
+				</div>
+			)}
+
+			<div class="content-card-body">
+				{!coverImage && isDraft && (
+					<div class="inline-flex">
+						<span class="draft-badge-inline">draft</span>
+					</div>
+				)}
+
+				<h3 class="card-title line-clamp-2 text-lg font-semibold @[640px]:text-xl">
+					{title}
+				</h3>
+
+				{publishDate && (
+					<FormattedDate
+						class="card-meta text-xs font-medium lowercase"
+						date={publishDate}
+					/>
+				)}
+
+				{withDesc && description && (
+					<p class="card-text line-clamp-1 text-sm leading-relaxed">
+						{description}
+					</p>
+				)}
+
+				{tags && tags.length > 0 && (
+					<div class="flex min-w-0 flex-wrap items-center gap-1.5">
+						{tags.slice(0, 3).map((tag: string) => (
+							<span class="card-badge whitespace-nowrap px-2 py-1 text-xs font-medium">
+								#{tag}
+							</span>
+						))}
+						{tags.length > 3 && (
+							<span class="card-badge px-2 py-1 text-xs">
+								+{tags.length - 3}
+							</span>
+						)}
+					</div>
+				)}
+			</div>
+		</div>
+	</a>
+</Card>
+
+<style>
+	.content-card-layout {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	.content-card-image {
+		position: relative;
+		aspect-ratio: 16 / 9;
+		width: 100%;
+		overflow: hidden;
+		border-radius: 0.375rem;
+		border: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+	}
+
+	.content-card-body {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		min-width: 0;
+	}
+
+	.draft-badge {
+		position: absolute;
+		left: 0.5rem;
+		top: 0.5rem;
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.25rem;
+		background-color: var(--color-warning);
+		color: black;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.draft-badge-inline {
+		padding: 0.25rem 0.5rem;
+		border-radius: 0.25rem;
+		background-color: var(--color-warning);
+		color: black;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	@container (min-width: 480px) {
+		.content-card-layout {
+			flex-direction: row;
+			gap: 1rem;
+		}
+
+		.content-card-image {
+			aspect-ratio: 4 / 3;
+			width: 10rem;
+			flex-shrink: 0;
+		}
+
+		.content-card-body {
+			flex: 1;
+		}
+	}
+
+	@container (min-width: 640px) {
+		.content-card-image {
+			width: 12rem;
+		}
+	}
+</style>

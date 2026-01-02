@@ -68,13 +68,15 @@ const id = `greeting-${Math.random().toString(36).substring(2, 9)}`;
 </div>
 
 <script is:inline define:vars={{ id, greetings, typingSpeed, pauseDuration, showLanguage }}>
-	document.addEventListener("DOMContentLoaded", () => {
+	(function initGreeting() {
 		const containerEl = document.getElementById(`container-${id}`);
 		const textEl = document.getElementById(`text-${id}`);
 		const cursorEl = document.getElementById(`cursor-${id}`);
 		const langEl = showLanguage ? document.getElementById(`lang-${id}`) : null;
 
 		if (!textEl || !containerEl || !cursorEl) return;
+		if (textEl.dataset.initialized === "true") return;
+		textEl.dataset.initialized = "true";
 
 		// Calculate width for longest greeting
 		const longestGreeting = greetings.reduce(
@@ -149,7 +151,7 @@ const id = `greeting-${Math.random().toString(36).substring(2, 9)}`;
 
 		// Start the animation cycle
 		showNextGreeting();
-	});
+	})();
 </script>
 
 <style>

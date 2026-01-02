@@ -1,0 +1,116 @@
+---
+import type { MarkdownHeading } from "astro";
+import TOCHeading from "@/components/content/TOCHeading.astro";
+import { generateToc, type TocItem } from "@/utils";
+
+interface Props {
+	headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+const toc = generateToc(headings);
+---
+
+<aside
+	class="toc-sidebar"
+	data-open="false"
+	id="toc-sidebar"
+>
+	<nav class="toc-nav">
+		<ol class="toc-list">
+			{toc.map((heading: TocItem) => <TOCHeading heading={heading} />)}
+		</ol>
+	</nav>
+</aside>
+
+<style>
+	.toc-sidebar {
+		position: fixed;
+		left: 100%;
+		top: 50%;
+		max-height: 60vh;
+		width: min(18rem, 90vw);
+		transform: translateY(-50%) translateX(1rem);
+		overflow-y: auto;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-border-default);
+		background: var(--color-global-bg);
+		box-shadow:
+			0 20px 25px -5px rgb(0 0 0 / 0.1),
+			0 8px 10px -6px rgb(0 0 0 / 0.1);
+		transition: transform 0.3s var(--ease-snappy), visibility 0s 0.3s;
+		z-index: 80;
+		visibility: hidden;
+	}
+
+	.toc-sidebar[data-open="true"] {
+		transform: translateY(-50%) translateX(calc(-100% - 1rem));
+		visibility: visible;
+		transition: transform 0.3s var(--ease-snappy), visibility 0s 0s;
+	}
+
+	.toc-nav {
+		padding: 1.5rem 1rem;
+	}
+
+	.toc-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+	}
+
+	:global(.toc-link.active) {
+		color: var(--color-accent);
+		background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		font-weight: 600;
+	}
+
+	@media (max-width: 640px) {
+		.toc-sidebar {
+			width: min(16rem, 85vw);
+		}
+
+		.toc-sidebar[data-open="true"] {
+			transform: translateY(-50%) translateX(calc(-100% - 0.5rem));
+		}
+	}
+</style>
+
+<script>
+	function initTOCSidebar() {
+		const sidebar = document.getElementById("toc-sidebar");
+		if (!sidebar) return;
+
+		const headings = document.querySelectorAll("article h2, article h3, article h4");
+		const tocLinks = sidebar.querySelectorAll<HTMLAnchorElement>(".toc-link");
+
+		if (!headings.length || !tocLinks.length) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				entries.forEach((entry) => {
+					const slug = entry.target.id;
+					const link = sidebar.querySelector<HTMLAnchorElement>(`.toc-link[data-slug="${slug}"]`);
+
+					if (entry.isIntersecting) {
+						tocLinks.forEach((l) => l.classList.remove("active"));
+						if (link) link.classList.add("active");
+					}
+				});
+			},
+			{ rootMargin: "-100px 0px -66%" }
+		);
+
+		headings.forEach((heading) => observer.observe(heading));
+
+		document.addEventListener("astro:before-swap", () => observer.disconnect(), { once: true });
+	}
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", initTOCSidebar);
+	} else {
+		initTOCSidebar();
+	}
+
+	document.addEventListener("astro:page-load", initTOCSidebar);
+</script>

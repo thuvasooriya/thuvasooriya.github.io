@@ -4,8 +4,10 @@ import { AstroFont } from "astro-font";
 import BaseHead from "@/components/BaseHead.astro";
 import Footer from "@/components/layout/Footer.astro";
 import Header from "@/components/layout/Header.astro";
-import SkipLink from "@/components/SkipLink.astro";
-import ThemeProvider from "@/components/ThemeProvider.astro";
+import MobileNav from "@/components/layout/MobileNav.astro";
+import Search from "@/components/ui/Search.astro";
+import SkipLink from "@/components/ui/SkipLink.astro";
+import ThemeProvider from "@/components/ui/ThemeProvider.astro";
 import { siteConfig } from "@/site.config";
 import type { SiteMeta } from "@/types";
 
@@ -13,12 +15,14 @@ import type { SiteMeta } from "@/types";
 
 interface Props {
 	meta: SiteMeta;
-	pageType?: "article" | "listing" | "home" | "wide";
+	pageType?: "article" | "listing" | "home" | "wide" | "wiki";
+	hideFooter?: boolean;
 }
 
 const {
 	meta: { articleDate, description = siteConfig.description, ogImage, title },
 	pageType = "article",
+	hideFooter = false,
 } = Astro.props;
 
 const layoutClass =
@@ -28,7 +32,9 @@ const layoutClass =
 			? "layout-listing"
 			: pageType === "home"
 				? "layout-listing"
-				: "layout-wide";
+				: pageType === "wiki"
+					? "layout-wiki"
+					: "layout-wide";
 ---
 
 <html class="scroll-smooth" lang={siteConfig.lang} data-theme="dark">
@@ -45,15 +51,34 @@ const layoutClass =
 						"https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap",
 					preload: true,
 					display: "swap",
-					selector: "body",
+					selector: "html[data-typography='mono'] body",
 					fallback: "monospace",
-					cssVariable: "astro-font-jetbrains-mono",
+				},
+				{
+					src: [],
+					name: "Inter",
+					googleFontsURL:
+						"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+					preload: false,
+					display: "swap",
+					selector: "html[data-typography='sans'] body",
+					fallback: "sans-serif",
+				},
+				{
+					src: [],
+					name: "Merriweather",
+					googleFontsURL:
+						"https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap",
+					preload: false,
+					display: "swap",
+					selector: "html[data-typography='serif'] body",
+					fallback: "serif",
 				},
 			]}
 		/>
 	</head>
 	<body
-		class={`bg-global-bg text-global-text flex min-h-screen flex-col px-4 pt-16 font-mono text-sm antialiased sm:px-8`}
+		class={`bg-global-bg text-global-text font-body flex min-h-screen flex-col px-4 pb-16 pt-4 text-sm antialiased sm:px-8 sm:pb-0 sm:pt-16`}
 	>
 		<div id="theme-transition-overlay" aria-hidden="true"></div>
 		<SkipLink />
@@ -61,6 +86,27 @@ const layoutClass =
 		<main id="main" class={layoutClass}>
 			<slot />
 		</main>
-		<Footer />
+		{!hideFooter && <Footer />}
+		<Search />
+		<MobileNav />
+		<script>
+			function wrapImagesWithFigure() {
+				const prose = document.querySelectorAll('.prose');
+				prose.forEach(container => {
+					const images = container.querySelectorAll<HTMLImageElement>('img[alt]:not([alt=""])');
+					images.forEach(img => {
+						if (img.closest('figure')) return;
+						const figure = document.createElement('figure');
+						figure.className = 'image-figure';
+						const figcaption = document.createElement('figcaption');
+						figcaption.textContent = img.alt;
+						img.parentNode?.insertBefore(figure, img);
+						figure.appendChild(img);
+						figure.appendChild(figcaption);
+					});
+				});
+			}
+			document.addEventListener('astro:page-load', wrapImagesWithFigure);
+		</script>
 	</body>
 </html>

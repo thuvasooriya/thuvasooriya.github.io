@@ -1,5 +1,5 @@
 import type { AstroExpressiveCodeOptions } from "astro-expressive-code";
-import type { SiteConfig } from "@/types";
+import type { SiteConfig, ThemeConfig } from "@/types";
 
 export const siteConfig: SiteConfig = {
 	author: "thuvasooriya",
@@ -7,7 +7,6 @@ export const siteConfig: SiteConfig = {
 	description: "[me to me]: shut up, i'm thinking...",
 	lang: "en-US",
 	ogLocale: "en_US",
-	// Date.prototype.toLocaleDateString() parameters, found in src/utils/date.ts.
 	date: {
 		locale: "en-US",
 		options: {
@@ -17,6 +16,21 @@ export const siteConfig: SiteConfig = {
 		},
 	},
 	url: "https://thuvasooriya.me",
+};
+
+export const themeConfig: ThemeConfig = {
+	themes: [
+		{ name: "hollowknight", label: "hollow knight", isDark: true },
+		{ name: "catppuccin-mocha", label: "catppuccin mocha", isDark: true },
+		{ name: "radiant", label: "radiant", isDark: false },
+		{ name: "tokyo-night", label: "tokyo night", isDark: true },
+		{ name: "dracula", label: "dracula", isDark: true },
+		{ name: "onedark", label: "one dark", isDark: true },
+	],
+	defaultDark: "hollowknight",
+	defaultLight: "radiant",
+	typography: ["mono", "sans", "serif"],
+	defaultTypography: "mono",
 };
 
 // Used to generate links in both the Header & Footer.
@@ -37,6 +51,10 @@ export const menuLinks: Array<{ title: string; path: string }> = [
 		title: "projects",
 		path: "/projects/",
 	},
+	{
+		title: "wiki",
+		path: "/wiki/",
+	},
 ];
 
 // https://expressive-code.com/reference/configuration/
@@ -44,6 +62,14 @@ export const filterConfig = {
 	min_tag_usage: 1,
 	initial_tags_to_show: 8,
 };
+
+const darkThemes = new Set([
+	"hollowknight",
+	"catppuccin-mocha",
+	"tokyo-night",
+	"dracula",
+	"onedark",
+]);
 
 export const expressiveCodeOptions: AstroExpressiveCodeOptions = {
 	styleOverrides: {
@@ -57,15 +83,25 @@ export const expressiveCodeOptions: AstroExpressiveCodeOptions = {
 		},
 		uiLineHeight: "inherit",
 	},
-	themeCssSelector(theme, { styleVariants }) {
-		if (styleVariants.length >= 2) {
-			const baseTheme = styleVariants[0]?.theme;
-			const altTheme = styleVariants.find((v) => v.theme.type !== baseTheme?.type)?.theme;
-			if (theme === baseTheme || theme === altTheme) return `[data-theme='${theme.type}']`;
-		}
-		// return default selector
-		return `[data-theme="${theme.name}"]`;
+	themeCssSelector(theme) {
+		const isDarkTheme = theme.type === "dark";
+		const themeSelectors = isDarkTheme
+			? [...darkThemes].map((t) => `[data-theme="${t}"]`).join(", ")
+			: `[data-theme="radiant"]`;
+		return themeSelectors;
 	},
 	themes: ["catppuccin-mocha", "catppuccin-latte"],
 	useThemedScrollbars: false,
+	shiki: {
+		langAlias: {
+			just: "make",
+			ld: "asm",
+			ls: "asm",
+			linker: "asm",
+			sv: "system-verilog",
+			systemverilog: "system-verilog",
+			verilog: "verilog",
+			assembly: "asm",
+		},
+	},
 };

@@ -1,0 +1,235 @@
+---
+import type { CollectionEntry } from "astro:content";
+import type { MarkdownHeading } from "astro";
+import { Icon } from "astro-icon/components";
+import FormattedDate from "@/components/content/FormattedDate.astro";
+import FloatingActions from "@/components/floating/FloatingActions.astro";
+import ProjectSidebar from "@/components/project/ProjectSidebar.astro";
+import LikeCounter from "@/components/social/LikeCounter.astro";
+import ViewCounter from "@/components/social/ViewCounter.astro";
+import AnimateIn from "@/components/ui/AnimateIn.astro";
+import IconLink from "@/components/ui/IconLink.astro";
+import BaseLayout from "./Base.astro";
+import PostLayout from "./Post.astro";
+
+interface Props {
+	entry: CollectionEntry<"proj">;
+	headings: MarkdownHeading[];
+	isLog?: boolean;
+	projectFolder?: string | undefined;
+	relatedLogs?: CollectionEntry<"proj">[];
+}
+
+const { entry, headings, isLog = false, projectFolder, relatedLogs = [] } = Astro.props;
+const hasLogs = relatedLogs.length > 0 && !isLog && !!projectFolder;
+
+const meta = {
+	description: entry.data.description || `project: ${entry.data.title}`,
+	title: entry.data.title,
+};
+
+const dateTimeOptions: Intl.DateTimeFormatOptions = {
+	month: "short",
+};
+---
+
+{hasLogs ? (
+	<BaseLayout meta={meta} pageType="wide">
+		<div class="project-layout">
+			<ProjectSidebar logs={relatedLogs} projectFolder={projectFolder!} currentSlug={entry.id} />
+			<article class="project-content grow break-words" data-pagefind-body>
+				<div id="project-hero" class="mb-4" data-animate data-animate-immediate>
+					<div class="mb-3 flex flex-wrap items-start justify-between gap-3">
+						<h1 class="title text-accent">{entry.data.title}</h1>
+						{entry.data.status && (
+							<span class:list={[
+								"rounded-full px-3 py-1 text-sm font-medium",
+								`status-${entry.data.status}`
+							]}>
+								{entry.data.status}
+							</span>
+						)}
+					</div>
+
+					{entry.data.description && (
+						<div class="text-variant-6 my-4 italic">
+							{entry.data.description}
+						</div>
+					)}
+
+					<div class="text-variant-4 flex flex-col gap-1.5 lowercase">
+						<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+							{entry.data.started && (
+								<p>
+									started: <FormattedDate date={entry.data.started} dateTimeOptions={dateTimeOptions} />
+								</p>
+							)}
+							{entry.data.updated && (
+								<>
+									<span aria-hidden="true" class="text-primary">-</span>
+									<span class="bg-quote/5 text-quote flex items-center gap-1.5 rounded-lg px-2 py-1">
+										updated: <FormattedDate class="ms-1" date={entry.data.updated} dateTimeOptions={dateTimeOptions} />
+									</span>
+								</>
+							)}
+						</div>
+
+						<div class="flex flex-wrap items-center gap-x-3 gap-y-1 font-semibold">
+							<ViewCounter slug={entry.id} content_type="project" format="text" />
+							<span aria-hidden="true" class="text-primary">-</span>
+							<LikeCounter slug={entry.id} content_type="project" format="text" />
+							{entry.data.demo && (
+								<>
+									<span aria-hidden="true" class="text-primary">-</span>
+									<IconLink href={entry.data.demo} label="demo" icon="demo" />
+								</>
+							)}
+							{entry.data.github && (
+								<>
+									<span aria-hidden="true" class="text-primary">-</span>
+									<IconLink href={entry.data.github} label="github" icon="github" />
+								</>
+							)}
+							{entry.data.links?.map((link) => (
+								<>
+									<span aria-hidden="true" class="text-primary">-</span>
+									<IconLink href={link.url} label={link.label} icon="link" />
+								</>
+							))}
+						</div>
+					</div>
+
+					{entry.data.tags && entry.data.tags.length > 0 && (
+						<div class="mt-2">
+							<Icon name="mdi:tag-multiple" class="inline-block h-6 w-6" aria-hidden="true" />
+							{entry.data.tags.map((tag, i) => (
+								<span class="contents">
+									<a class="cactus-link inline-block before:content-['#']" href={`/tags/${tag}/`}>{tag}</a>{i < entry.data.tags.length - 1 && ", "}
+								</span>
+							))}
+						</div>
+					)}
+				</div>
+				<div class="prose prose-sm max-w-none" data-animate data-animate-immediate data-delay="1">
+					<slot />
+				</div>
+			</article>
+			<div class="project-spacer" aria-hidden="true"></div>
+		</div>
+		<FloatingActions
+			targetId="project-hero"
+			showBackToTop={true}
+			showToc={headings.length > 0}
+			headings={headings}
+			like={{ slug: entry.id, contentType: "project" }}
+		/>
+		<AnimateIn />
+	</BaseLayout>
+) : (
+	<PostLayout
+		meta={meta}
+		headings={headings}
+		heroId="project-hero"
+		likeButton={{ slug: entry.id, contentType: "project" }}
+	>
+		<Fragment slot="hero">
+			{isLog && projectFolder && (
+				<div class="mb-4">
+					<a
+						class="hover:text-accent inline-flex items-center gap-1 text-sm transition-colors"
+						href={`/projects/${projectFolder}/`}
+					>
+						<Icon name="mdi:arrow-left" class="h-4 w-4" />
+						back to {projectFolder}
+					</a>
+				</div>
+			)}
+
+			<div class="mb-3 flex flex-wrap items-start justify-between gap-3">
+				<h1 class="title text-accent">{entry.data.title}</h1>
+				{!isLog && entry.data.status && (
+					<span class:list={[
+						"rounded-full px-3 py-1 text-sm font-medium",
+						`status-${entry.data.status}`
+					]}>
+						{entry.data.status}
+					</span>
+				)}
+			</div>
+
+			{entry.data.description && (
+				<div class="text-variant-6 my-4 italic">
+					{entry.data.description}
+				</div>
+			)}
+
+			<div class="text-variant-4 flex flex-col gap-1.5 lowercase">
+				{isLog && entry.data.date && (
+					<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+						<p>
+							published: <FormattedDate date={entry.data.date} dateTimeOptions={dateTimeOptions} />
+						</p>
+					</div>
+				)}
+
+				{!isLog && (
+					<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+						{entry.data.started && (
+							<p>
+								started: <FormattedDate date={entry.data.started} dateTimeOptions={dateTimeOptions} />
+							</p>
+						)}
+						{entry.data.updated && (
+							<>
+								<span aria-hidden="true" class="text-primary">-</span>
+								<span class="bg-quote/5 text-quote flex items-center gap-1.5 rounded-lg px-2 py-1">
+									updated: <FormattedDate class="ms-1" date={entry.data.updated} dateTimeOptions={dateTimeOptions} />
+								</span>
+							</>
+						)}
+					</div>
+				)}
+
+				<div class="flex flex-wrap items-center gap-x-3 gap-y-1 font-semibold">
+					<ViewCounter slug={entry.id} content_type="project" format="text" />
+					<span aria-hidden="true" class="text-primary">-</span>
+					<LikeCounter slug={entry.id} content_type="project" format="text" />
+					{!isLog && (
+						<>
+							{entry.data.demo && (
+								<>
+									<span aria-hidden="true" class="text-primary">-</span>
+									<IconLink href={entry.data.demo} label="demo" icon="demo" />
+								</>
+							)}
+							{entry.data.github && (
+								<>
+									<span aria-hidden="true" class="text-primary">-</span>
+									<IconLink href={entry.data.github} label="github" icon="github" />
+								</>
+							)}
+							{entry.data.links?.map((link) => (
+								<>
+									<span aria-hidden="true" class="text-primary">-</span>
+									<IconLink href={link.url} label={link.label} icon="link" />
+								</>
+							))}
+						</>
+					)}
+				</div>
+			</div>
+
+			{entry.data.tags && entry.data.tags.length > 0 && (
+				<div class="mt-2">
+					<Icon name="mdi:tag-multiple" class="inline-block h-6 w-6" aria-hidden="true" />
+					{entry.data.tags.map((tag, i) => (
+						<span class="contents">
+							<a class="cactus-link inline-block before:content-['#']" href={`/tags/${tag}/`}>{tag}</a>{i < entry.data.tags.length - 1 && ", "}
+						</span>
+					))}
+				</div>
+			)}
+		</Fragment>
+		<slot />
+	</PostLayout>
+)}

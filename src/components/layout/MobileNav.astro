@@ -1,0 +1,376 @@
+---
+import Logo from "@/components/ui/Logo.astro";
+import { menuLinks, themeConfig } from "@/site.config";
+---
+
+<mobile-nav
+	class="fixed inset-x-0 bottom-0 z-50 sm:hidden"
+	data-visible="true"
+>
+	<div class="mobile-nav-bar flex h-14 items-center justify-around px-2">
+		<a
+			aria-label="Home"
+			class="mobile-home-link flex h-11 w-11 items-center justify-center"
+			href="/"
+		>
+			<Logo class="pointer-events-none fill-primary h-7 w-7" />
+		</a>
+
+		<button
+			aria-label="Search"
+			class="mobile-nav-btn mobile-search-trigger flex h-11 w-11 items-center justify-center rounded-full"
+			type="button"
+		>
+			<svg
+				aria-hidden="true"
+				class="h-5 w-5"
+				fill="none"
+				stroke="currentColor"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				stroke-width="1.5"
+				viewBox="0 0 24 24"
+			>
+				<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+			</svg>
+		</button>
+
+		<button
+			aria-label="Theme settings"
+			class="mobile-nav-btn mobile-theme-trigger flex h-11 w-11 items-center justify-center rounded-full"
+			type="button"
+		>
+			<svg
+				aria-hidden="true"
+				class="h-5 w-5"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				viewBox="0 0 24 24"
+			>
+				<path
+					d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42"
+					stroke-linecap="round"
+					stroke-linejoin="round"></path>
+			</svg>
+		</button>
+
+		<button
+			aria-expanded="false"
+			aria-label="Open navigation menu"
+			class="mobile-nav-btn mobile-menu-trigger flex h-11 w-11 items-center justify-center rounded-full"
+			type="button"
+		>
+			<svg
+				aria-hidden="true"
+				class="menu-icon h-5 w-5"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				viewBox="0 0 24 24"
+			>
+				<path d="M3.75 9h16.5m-16.5 6.75h16.5" stroke-linecap="round" stroke-linejoin="round"></path>
+			</svg>
+			<svg
+				aria-hidden="true"
+				class="close-icon hidden h-5 w-5"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.5"
+				viewBox="0 0 24 24"
+			>
+				<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path>
+			</svg>
+		</button>
+	</div>
+
+	<div
+		class="mobile-menu bg-surface-0/95 border-border-muted absolute inset-x-0 bottom-full hidden border-t backdrop-blur-sm"
+		role="menu"
+	>
+		<nav aria-label="Mobile navigation" class="flex flex-col p-2">
+			{
+				menuLinks.map((link) => (
+					<a
+						aria-current={Astro.url.pathname === link.path ? "page" : false}
+						class="text-primary font-body hover:bg-surface-1 rounded-md px-4 py-3 text-center text-sm font-semibold lowercase tracking-wide"
+						data-astro-prefetch
+						href={link.path}
+					>
+						{link.title}
+					</a>
+				))
+			}
+		</nav>
+	</div>
+
+	<div
+		class="mobile-theme-panel bg-surface-0/95 border-border-muted absolute inset-x-0 bottom-full hidden border-t backdrop-blur-sm"
+		role="menu"
+	>
+		<div class="p-4">
+			<div class="mb-4">
+				<div class="text-text-muted mb-2 text-xs lowercase">typography</div>
+				<div class="flex gap-2">
+					<button
+						class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 font-mono text-sm transition-colors"
+						data-typography="mono"
+						title="monospace"
+						type="button"
+					>
+						Aa
+					</button>
+					<button
+						class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 text-sm transition-colors"
+						data-typography="sans"
+						title="sans-serif"
+						type="button"
+						style="font-family: Inter, system-ui, sans-serif;"
+					>
+						Aa
+					</button>
+					<button
+						class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 text-sm transition-colors"
+						data-typography="serif"
+						title="serif"
+						type="button"
+						style="font-family: Merriweather, Georgia, serif;"
+					>
+						Aa
+					</button>
+				</div>
+			</div>
+			<div>
+				<div class="text-text-muted mb-2 text-xs lowercase">theme</div>
+				<div class="grid grid-cols-2 gap-2">
+					{
+						themeConfig.themes.map((theme) => (
+							<button
+								class="theme-btn bg-surface-1 hover:bg-surface-2 flex items-center gap-2 rounded-md px-3 py-2 text-start text-sm lowercase transition-colors"
+								data-theme={theme.name}
+								type="button"
+							>
+								<span
+									class={`h-2 w-2 rounded-full ${theme.isDark ? "bg-surface-3 border-border-muted border" : "bg-yellow"}`}
+								/>
+								{theme.label}
+							</button>
+						))
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</mobile-nav>
+
+<style>
+	mobile-nav {
+		transition: transform 300ms ease-out;
+	}
+
+	mobile-nav[data-visible="false"] {
+		transform: translateY(100%);
+	}
+
+	.mobile-nav-bar {
+		background: linear-gradient(
+			120deg,
+			color-mix(in oklch, var(--color-primary) 8%, var(--color-surface-0)) 0%,
+			var(--color-surface-0) 40%,
+			var(--color-surface-0) 60%,
+			color-mix(in oklch, var(--color-accent) 8%, var(--color-surface-0)) 100%
+		);
+		backdrop-filter: blur(20px);
+		-webkit-backdrop-filter: blur(20px);
+	}
+
+	.mobile-home-link {
+		color: var(--color-primary);
+	}
+
+	.mobile-nav-btn {
+		color: var(--color-text-muted);
+		transition: all 150ms ease-out;
+	}
+
+	.mobile-nav-btn:hover,
+	.mobile-nav-btn:active {
+		color: var(--color-primary);
+		background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+	}
+
+	.mobile-menu,
+	.mobile-theme-panel {
+		animation: slide-up 150ms ease-out;
+	}
+
+	@keyframes slide-up {
+		from {
+			opacity: 0;
+			transform: translateY(8px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.typo-btn[aria-pressed="true"],
+	.theme-btn[aria-current="true"] {
+		background-color: var(--color-primary);
+		color: var(--color-surface-0);
+	}
+</style>
+
+<script>
+	class MobileNavController extends HTMLElement {
+		#lastScrollY = 0;
+		#isMenuOpen = false;
+		#isThemeOpen = false;
+		#abortController: AbortController | null = null;
+		#initialized = false;
+
+		connectedCallback() {
+			this.#setup();
+		}
+
+		#setup() {
+			if (this.#initialized) return;
+			this.#initialized = true;
+			this.#init();
+			document.addEventListener("astro:page-load", () => this.#init());
+		}
+
+		#init() {
+			this.#abortController?.abort();
+			this.#abortController = new AbortController();
+			const signal = this.#abortController.signal;
+
+			this.#isMenuOpen = false;
+			this.#isThemeOpen = false;
+			this.#lastScrollY = window.scrollY;
+
+			const menuTrigger = this.querySelector<HTMLButtonElement>(".mobile-menu-trigger");
+			const themeTrigger = this.querySelector<HTMLButtonElement>(".mobile-theme-trigger");
+			const searchTrigger = this.querySelector<HTMLButtonElement>(".mobile-search-trigger");
+			const menu = this.querySelector<HTMLDivElement>(".mobile-menu");
+			const themePanel = this.querySelector<HTMLDivElement>(".mobile-theme-panel");
+			const menuIcon = this.querySelector<SVGElement>(".menu-icon");
+			const closeIcon = this.querySelector<SVGElement>(".close-icon");
+
+			if (!menuTrigger || !themeTrigger || !searchTrigger || !menu || !themePanel) {
+				console.warn("MobileNav: Missing required elements");
+				return;
+			}
+
+			const closeAll = () => {
+				this.#isMenuOpen = false;
+				this.#isThemeOpen = false;
+				menu.classList.add("hidden");
+				themePanel.classList.add("hidden");
+				menuTrigger.setAttribute("aria-expanded", "false");
+				menuIcon?.classList.remove("hidden");
+				closeIcon?.classList.add("hidden");
+			};
+
+			const toggleMenu = () => {
+				if (this.#isMenuOpen) {
+					closeAll();
+				} else {
+					closeAll();
+					this.#isMenuOpen = true;
+					menu.classList.remove("hidden");
+					menuTrigger.setAttribute("aria-expanded", "true");
+					menuIcon?.classList.add("hidden");
+					closeIcon?.classList.remove("hidden");
+				}
+			};
+
+			const toggleTheme = () => {
+				if (this.#isThemeOpen) {
+					closeAll();
+				} else {
+					closeAll();
+					this.#isThemeOpen = true;
+					themePanel.classList.remove("hidden");
+					this.#updateActiveStates();
+				}
+			};
+
+		const openSearch = () => {
+			closeAll();
+			const dialog = document.querySelector<HTMLDialogElement>("site-search dialog");
+			dialog?.showModal();
+		};
+
+			menuTrigger.addEventListener("click", toggleMenu, { signal });
+			themeTrigger.addEventListener("click", toggleTheme, { signal });
+			searchTrigger.addEventListener("click", openSearch, { signal });
+
+			menu.querySelectorAll("a").forEach(link => {
+				link.addEventListener("click", closeAll, { signal });
+			});
+
+			const typoButtons = themePanel.querySelectorAll<HTMLButtonElement>(".typo-btn");
+			const themeButtons = themePanel.querySelectorAll<HTMLButtonElement>(".theme-btn");
+
+			typoButtons.forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const typo = btn.dataset.typography;
+					if (!typo) return;
+					document.dispatchEvent(new CustomEvent("typography-change", { detail: { typography: typo } }));
+				}, { signal });
+			});
+
+			themeButtons.forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const theme = btn.dataset.theme;
+					if (!theme) return;
+					document.dispatchEvent(new CustomEvent("theme-change", { detail: { theme } }));
+				}, { signal });
+			});
+
+			document.addEventListener("theme-applied", () => this.#updateActiveStates(), { signal });
+			document.addEventListener("typography-applied", () => this.#updateActiveStates(), { signal });
+
+			window.addEventListener("scroll", () => this.#handleScroll(), { passive: true, signal });
+		}
+
+		#handleScroll() {
+			const currentScrollY = window.scrollY;
+			const isAtTop = currentScrollY < 50;
+			const isScrollingUp = currentScrollY < this.#lastScrollY;
+
+			if (isAtTop || isScrollingUp) {
+				this.setAttribute("data-visible", "true");
+			} else {
+				this.setAttribute("data-visible", "false");
+				const menu = this.querySelector<HTMLDivElement>(".mobile-menu");
+				const themePanel = this.querySelector<HTMLDivElement>(".mobile-theme-panel");
+				menu?.classList.add("hidden");
+				themePanel?.classList.add("hidden");
+				this.#isMenuOpen = false;
+				this.#isThemeOpen = false;
+			}
+
+			this.#lastScrollY = currentScrollY;
+		}
+
+		#updateActiveStates() {
+			const themePanel = this.querySelector<HTMLDivElement>(".mobile-theme-panel");
+			if (!themePanel) return;
+
+			const currentTheme = document.documentElement.getAttribute("data-theme");
+			const currentTypo = document.documentElement.getAttribute("data-typography") || "mono";
+
+			themePanel.querySelectorAll<HTMLButtonElement>(".typo-btn").forEach((btn) => {
+				btn.setAttribute("aria-pressed", String(btn.dataset.typography === currentTypo));
+			});
+			themePanel.querySelectorAll<HTMLButtonElement>(".theme-btn").forEach((btn) => {
+				btn.setAttribute("aria-current", String(btn.dataset.theme === currentTheme));
+			});
+		}
+	}
+
+	customElements.define("mobile-nav", MobileNavController);
+</script>

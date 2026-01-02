@@ -7,6 +7,10 @@
 	--layout-wide-max-width: 90rem;
 	--layout-full-max-width: 100%;
 
+	/* body spacing */
+	--layout-body-padding-x: 1rem;
+	--layout-body-padding-top: 4rem;
+
 	/* spacing */
 	--layout-padding-x-sm: 1rem;
 	--layout-padding-x-md: 2rem;
@@ -15,6 +19,10 @@
 	--layout-gap-sm: 1rem;
 	--layout-gap-md: 1.5rem;
 	--layout-gap-lg: 2rem;
+
+	/* header/nav */
+	--layout-nav-height: 5rem;
+	--layout-sidebar-width: 16rem;
 
 	/* grid columns */
 	--grid-cols-projects-sm: 1;
@@ -30,20 +38,39 @@
 	--breakpoint-2xl: 1536px;
 }
 
+@media (min-width: 640px) {
+	:root {
+		--layout-body-padding-x: 2rem;
+	}
+}
+
 /* layout type classes */
 .layout-article {
+	width: 100%;
+	min-width: 0;
 	max-width: var(--layout-article-max-width);
 	margin-left: auto;
 	margin-right: auto;
 }
 
 .layout-listing {
+	width: 100%;
+	min-width: 0;
 	max-width: var(--layout-listing-max-width);
 	margin-left: auto;
 	margin-right: auto;
 }
 
 .layout-wide {
+	width: 100%;
+	min-width: 0;
+	max-width: var(--layout-wide-max-width);
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.layout-wiki {
+	width: 100%;
 	max-width: var(--layout-wide-max-width);
 	margin-left: auto;
 	margin-right: auto;

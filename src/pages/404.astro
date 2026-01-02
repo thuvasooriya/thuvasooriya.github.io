@@ -1,4 +1,5 @@
 ---
+import AnimateIn from "@/components/ui/AnimateIn.astro";
 import PageLayout from "@/layouts/Base.astro";
 
 const meta = {
@@ -8,6 +9,10 @@ const meta = {
 ---
 
 <PageLayout meta={meta}>
-	<h1 class="title mb-6">404 | oops something went wrong</h1>
-	<p class="mb-8">please use the navigation to find your way back</p>
+	<div data-animate>
+		<h1 class="title mb-6">404 | oops something went wrong</h1>
+		<p class="mb-8">please use the navigation to find your way back</p>
+	</div>
 </PageLayout>
+
+<AnimateIn />

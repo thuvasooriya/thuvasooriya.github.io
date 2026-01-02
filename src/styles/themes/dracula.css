@@ -1,0 +1,19 @@
+:root {
+	--drac-bg: #282a36;
+	--drac-bg-dark: #21222c;
+	--drac-bg-darker: #191a21;
+	--drac-fg: #f8f8f2;
+	--drac-comment: #6272a4;
+	--drac-selection: #44475a;
+	--drac-cyan: #8be9fd;
+	--drac-green: #50fa7b;
+	--drac-orange: #ffb86c;
+	--drac-pink: #ff79c6;
+	--drac-purple: #bd93f9;
+	--drac-red: #ff5555;
+	--drac-yellow: #f1fa8c;
+	--drac-surface0: #343746;
+	--drac-surface1: #424450;
+	--drac-overlay0: #6272a4;
+	--drac-overlay1: #7c8cad;
+}

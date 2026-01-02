@@ -18,7 +18,7 @@ export function generate_rss<t extends "post" | "note">({
 		items: items.map((item) => ({
 			title: item.data.title,
 			description: "description" in item.data ? item.data.description : undefined,
-			pubDate: item.data.publishDate,
+			pubDate: item.data.published,
 			link: `${path_prefix}/${item.id}/`,
 		})),
 	});

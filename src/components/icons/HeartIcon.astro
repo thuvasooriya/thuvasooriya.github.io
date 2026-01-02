@@ -1,0 +1,65 @@
+---
+interface Props {
+	id: string;
+	size?: "sm" | "md" | "lg";
+	class?: string;
+}
+
+const { id, size = "md", class: className } = Astro.props;
+
+const size_classes = {
+	sm: "h-4 w-4",
+	md: "h-6 w-6",
+	lg: "h-7 w-7",
+};
+---
+
+<svg
+	class:list={["heart-icon", size_classes[size], className]}
+	viewBox="0 0 24 24"
+	xmlns="http://www.w3.org/2000/svg"
+>
+	<defs>
+		<clipPath id={`heart-clip-${id}`}>
+			<rect class="heart-fill-rect" x="0" y="24" width="24" height="0" />
+		</clipPath>
+		<linearGradient id={`heart-gradient-${id}`} x1="0%" y1="100%" x2="0%" y2="0%">
+			<stop offset="0%" stop-color="var(--color-red)" />
+			<stop offset="100%" stop-color="var(--color-pink)" />
+		</linearGradient>
+	</defs>
+	<path
+		class="heart-outline"
+		d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+		fill="none"
+		stroke="var(--color-red)"
+		stroke-width="1.5"
+	/>
+	<path
+		class="heart-fill"
+		d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
+		fill={`url(#heart-gradient-${id})`}
+		clip-path={`url(#heart-clip-${id})`}
+	/>
+</svg>
+
+<style>
+	.heart-icon {
+		transition: transform 0.15s ease;
+		position: relative;
+	}
+
+	.heart-outline {
+		transition: stroke-width 0.2s ease, stroke 0.2s ease;
+	}
+
+	.heart-fill {
+		transition: opacity 0.3s ease;
+	}
+
+	.heart-fill-rect {
+		transition:
+			height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+			y 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+	}
+</style>

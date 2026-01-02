@@ -41,9 +41,3 @@ export const SOCIAL_PLATFORMS = {
 	LINKEDIN: "linkedin",
 	EMAIL: "email",
 } as const;
-
-export const THEME_MODES = {
-	LIGHT: "light",
-	DARK: "dark",
-	SYSTEM: "system",
-} as const;

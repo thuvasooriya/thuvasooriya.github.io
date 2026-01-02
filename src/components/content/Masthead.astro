@@ -1,8 +1,9 @@
 ---
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
-import FormattedDate from "@/components/FormattedDate.astro";
-import ViewCounter from "@/components/ViewCounter.astro";
+import FormattedDate from "@/components/content/FormattedDate.astro";
+import LikeCounter from "@/components/social/LikeCounter.astro";
+import ViewCounter from "@/components/social/ViewCounter.astro";
 
 interface Props {
 	content: CollectionEntry<"post">;
@@ -22,14 +23,14 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 ---
 
 {
-	data.coverImage && (
+	data.cover_image && (
 		<div class="mb-6">
 			<Image
-				alt={data.coverImage.alt}
+				alt={data.cover_image.alt}
 				class="rounded-md object-cover"
 				fetchpriority="high"
 				loading="eager"
-				src={data.coverImage.src}
+				src={data.cover_image.src}
 			/>
 		</div>
 	)
@@ -45,24 +46,26 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 <div class="text-variant-4 flex flex-col gap-1.5 lowercase">
 	<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
 		<p>
-			published: <FormattedDate date={data.publishDate} dateTimeOptions={dateTimeOptions} />
+			published: <FormattedDate date={data.published} dateTimeOptions={dateTimeOptions} />
 		</p>
 		{
-			data.updatedDate && (
+			data.updated && (
 				<>
 					<span aria-hidden="true" class="text-primary">•</span>
 					<span class="bg-quote/5 text-quote flex items-center gap-1.5 rounded-lg px-2 py-1">
 						updated:
-						<FormattedDate class="ms-1" date={data.updatedDate} dateTimeOptions={dateTimeOptions} />
+						<FormattedDate class="ms-1" date={data.updated} dateTimeOptions={dateTimeOptions} />
 					</span>
 				</>
 			)
 		}
 	</div>
-	<div class="flex flex-wrap items-center gap-x-3 gap-y-1 font-semibold">
+	<div class="masthead-stats flex flex-wrap items-center gap-x-3 gap-y-1 font-semibold">
 		<p>{readingTime}</p>
 		<span aria-hidden="true" class="text-primary">•</span>
-		<ViewCounter slug={postId} content_type="post" class="view-counter-inline" />
+		<ViewCounter slug={postId} content_type="post" format="text" />
+		<span aria-hidden="true" class="text-primary">•</span>
+		<LikeCounter slug={postId} content_type="post" format="text" />
 	</div>
 </div>
 {
@@ -97,3 +100,4 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 		</div>
 	)
 }
+

@@ -1,20 +1,20 @@
 ---
 import { Icon } from "astro-icon/components";
-import FooterSocial from "@/components/FooterSocial.astro";
+import FooterSocial from "@/components/social/FooterSocial.astro";
 import { menuLinks, siteConfig } from "@/site.config";
 
 const year = new Date().getFullYear();
 ---
 
 <footer
-	class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 pt-20 pb-4 text-center align-top font-semibold text-gray-600 sm:flex-row sm:justify-between sm:text-xs dark:text-gray-400"
+	class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 pt-20 pb-4 text-center align-top font-semibold text-text-muted sm:flex-row sm:justify-between sm:text-xs"
 >
 	<div class="me-0 sm:me-4 flex items-center gap-1">
 		<Icon name="mdi:copyright" class="h-3.5 w-3.5" />
 		{siteConfig.author}
 		{year}
 	</div>
-	<nav aria-label="More on this site" class="sm:divide-accent flex gap-x-2 sm:gap-x-0 sm:divide-x">
+	<nav aria-label="More on this site" class="sm:divide-accent hidden gap-x-2 sm:flex sm:gap-x-0 sm:divide-x">
 		{
 			menuLinks.map((link) => (
 				<a

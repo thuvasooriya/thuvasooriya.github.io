@@ -1,0 +1,212 @@
+---
+import { themeConfig } from "@/site.config";
+---
+
+<theme-panel class="relative ms-2 sm:ms-4">
+	<button
+		aria-expanded="false"
+		aria-haspopup="menu"
+		class="panel-trigger hover:text-primary relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-md p-2"
+		type="button"
+	>
+		<span class="sr-only">Theme settings</span>
+		<svg
+			aria-hidden="true"
+			class="h-5 w-5"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.5"
+			viewBox="0 0 24 24"
+		>
+			<path
+				d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42"
+				stroke-linecap="round"
+				stroke-linejoin="round"></path>
+		</svg>
+	</button>
+
+	<div
+		class="panel-dropdown bg-surface-0 border-border-muted absolute end-0 top-full z-50 mt-2 hidden min-w-44 rounded-md border p-2 shadow-lg"
+		role="menu"
+	>
+		<div class="mb-2">
+			<div class="text-text-muted mb-1.5 px-1 text-xs lowercase">
+				typography
+			</div>
+			<div class="flex gap-1">
+				<button
+					class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 font-mono text-sm transition-colors"
+					data-typography="mono"
+					title="monospace"
+					type="button"
+				>
+					Aa
+				</button>
+				<button
+					class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 text-sm transition-colors"
+					data-typography="sans"
+					title="sans-serif"
+					type="button"
+					style="font-family: Inter, system-ui, sans-serif;"
+				>
+					Aa
+				</button>
+				<button
+					class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 text-sm transition-colors"
+					data-typography="serif"
+					title="serif"
+					type="button"
+					style="font-family: Merriweather, Georgia, serif;"
+				>
+					Aa
+				</button>
+			</div>
+		</div>
+
+		<div>
+			<div class="text-text-muted mb-1.5 px-1 text-xs lowercase">
+				theme
+			</div>
+			<div class="flex flex-col gap-0.5">
+				{
+					themeConfig.themes.map((theme) => (
+						<button
+							class="theme-btn bg-surface-1 hover:bg-surface-2 flex items-center gap-2 rounded px-2 py-1.5 text-start text-sm lowercase transition-colors"
+							data-theme={theme.name}
+							type="button"
+						>
+							<span
+								class={`h-2 w-2 rounded-full ${theme.isDark ? "bg-surface-3 border-border-muted border" : "bg-yellow"}`}
+							/>
+							{theme.label}
+						</button>
+					))
+				}
+			</div>
+		</div>
+	</div>
+</theme-panel>
+
+<style>
+	.panel-trigger {
+		transition: transform 100ms ease-out;
+	}
+
+	.panel-trigger:hover {
+		transform: scale(1.05);
+	}
+
+	.panel-trigger:active {
+		transform: scale(0.92);
+	}
+
+	.panel-dropdown {
+		animation: fade-in 150ms ease-out;
+	}
+
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+			transform: translateY(-4px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
+	}
+
+	.typo-btn[aria-pressed="true"],
+	.theme-btn[aria-current="true"] {
+		background-color: var(--color-primary);
+		color: var(--color-surface-0);
+	}
+</style>
+
+<script>
+	let controller: AbortController | null = null;
+
+	function init_theme_panel() {
+		if (controller) controller.abort();
+		controller = new AbortController();
+		const signal = controller.signal;
+
+		const panel = document.querySelector("theme-panel");
+		if (!panel) return;
+
+		const trigger = panel.querySelector<HTMLButtonElement>(".panel-trigger");
+		const dropdown = panel.querySelector<HTMLDivElement>(".panel-dropdown");
+		const typoButtons = panel.querySelectorAll<HTMLButtonElement>(".typo-btn");
+		const themeButtons = panel.querySelectorAll<HTMLButtonElement>(".theme-btn");
+
+		if (!trigger || !dropdown) return;
+
+		const updateActiveStates = () => {
+			const currentTheme = document.documentElement.getAttribute("data-theme");
+			const currentTypo = document.documentElement.getAttribute("data-typography") || "mono";
+
+			typoButtons.forEach((btn) => {
+				btn.setAttribute("aria-pressed", String(btn.dataset.typography === currentTypo));
+			});
+			themeButtons.forEach((btn) => {
+				btn.setAttribute("aria-current", String(btn.dataset.theme === currentTheme));
+			});
+		};
+
+		const togglePanel = (open?: boolean) => {
+			const isOpen = open ?? dropdown.classList.contains("hidden");
+			dropdown.classList.toggle("hidden", !isOpen);
+			trigger.setAttribute("aria-expanded", String(isOpen));
+			if (isOpen) updateActiveStates();
+		};
+
+		trigger.addEventListener("click", () => togglePanel(), { signal });
+
+		document.addEventListener(
+			"click",
+			(e) => {
+				if (!panel.contains(e.target as Node)) togglePanel(false);
+			},
+			{ signal },
+		);
+
+		document.addEventListener(
+			"keydown",
+			(e) => {
+				if (e.key === "Escape") togglePanel(false);
+			},
+			{ signal },
+		);
+
+		typoButtons.forEach((btn) => {
+			btn.addEventListener(
+				"click",
+				() => {
+					const typo = btn.dataset.typography;
+					if (!typo) return;
+					document.dispatchEvent(new CustomEvent("typography-change", { detail: { typography: typo } }));
+				},
+				{ signal },
+			);
+		});
+
+		themeButtons.forEach((btn) => {
+			btn.addEventListener(
+				"click",
+				() => {
+					const theme = btn.dataset.theme;
+					if (!theme) return;
+					document.dispatchEvent(new CustomEvent("theme-change", { detail: { theme } }));
+				},
+				{ signal },
+			);
+		});
+
+		document.addEventListener("theme-applied", updateActiveStates, { signal });
+		document.addEventListener("typography-applied", updateActiveStates, { signal });
+
+		updateActiveStates();
+	}
+
+	init_theme_panel();
+	document.addEventListener("astro:page-load", init_theme_panel);
+</script>

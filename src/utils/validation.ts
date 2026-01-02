@@ -87,19 +87,16 @@ export function validatePostFrontmatter(frontmatter: Record<string, unknown>): V
 		errors.push(`Description must be 1-${CONTENT_LIMITS.DESCRIPTION_MAX_LENGTH} characters`);
 	}
 
-	if (!frontmatter.publishDate) {
+	if (!frontmatter.published) {
 		errors.push("Publish date is required");
-	} else if (
-		typeof frontmatter.publishDate === "string" &&
-		!isValidISODate(frontmatter.publishDate)
-	) {
+	} else if (typeof frontmatter.published === "string" && !isValidISODate(frontmatter.published)) {
 		errors.push("Publish date must be a valid ISO date string");
 	}
 
 	if (
-		frontmatter.updatedDate &&
-		typeof frontmatter.updatedDate === "string" &&
-		!isValidISODate(frontmatter.updatedDate)
+		frontmatter.updated &&
+		typeof frontmatter.updated === "string" &&
+		!isValidISODate(frontmatter.updated)
 	) {
 		errors.push("Updated date must be a valid ISO date string");
 	}
@@ -135,12 +132,9 @@ export function validateNoteFrontmatter(frontmatter: Record<string, unknown>): V
 		errors.push(`Title must be 1-${CONTENT_LIMITS.TITLE_MAX_LENGTH} characters`);
 	}
 
-	if (!frontmatter.publishDate) {
+	if (!frontmatter.published) {
 		errors.push("Publish date is required");
-	} else if (
-		typeof frontmatter.publishDate === "string" &&
-		!isValidISODate(frontmatter.publishDate)
-	) {
+	} else if (typeof frontmatter.published === "string" && !isValidISODate(frontmatter.published)) {
 		errors.push("Publish date must be a valid ISO date string");
 	}
 

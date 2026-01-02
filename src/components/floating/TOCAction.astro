@@ -1,0 +1,47 @@
+---
+interface Props {
+	class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<button
+	type="button"
+	class:list={["floating-action toc-action", className]}
+	aria-label="Toggle table of contents"
+	data-action="toggle-toc"
+>
+	<span class="action-tooltip">contents</span>
+	<svg
+		aria-hidden="true"
+		class="action-icon"
+		fill="none"
+		viewBox="0 0 24 24"
+		xmlns="http://www.w3.org/2000/svg"
+	>
+		<path
+			d="M4 6h16M4 12h8M4 18h16"
+			stroke="currentColor"
+			stroke-linecap="round"
+			stroke-linejoin="round"
+			stroke-width="2"
+		/>
+	</svg>
+</button>
+
+<style>
+	.toc-action {
+		color: var(--color-primary);
+	}
+
+	.toc-action .action-icon {
+		filter: drop-shadow(0 0 4px var(--color-primary));
+		transition: filter 0.3s ease, transform 0.3s ease;
+	}
+
+	.toc-action:hover .action-icon {
+		filter: drop-shadow(0 0 12px var(--color-primary)) drop-shadow(0 0 20px var(--color-primary));
+		transform: translateX(-2px);
+	}
+</style>

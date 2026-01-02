@@ -1,4 +1,5 @@
 ---
+import AnimateIn from "@/components/ui/AnimateIn.astro";
 import { getAllPosts, getUniqueTagsWithCount } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
 
@@ -12,8 +13,8 @@ const meta = {
 ---
 
 <PageLayout meta={meta} pageType="listing">
-	<h1 class="title mb-6">tags</h1>
-	<ul class="space-y-4">
+	<h1 class="title mb-6" data-animate>tags</h1>
+	<ul class="space-y-4" data-animate data-delay="1">
 		{
 			allTags.map(([tag, val]) => (
 				<li class="flex items-center gap-x-2">
@@ -33,3 +34,5 @@ const meta = {
 		}
 	</ul>
 </PageLayout>
+
+<AnimateIn />

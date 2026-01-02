@@ -1,0 +1,457 @@
+---
+import type { MarkdownHeading } from "astro";
+import BackToTopAction from "./BackToTopAction.astro";
+import LikeAction from "./LikeAction.astro";
+import TOCAction from "./TOCAction.astro";
+import TOCSidebar from "./TOCSidebar.astro";
+
+interface Props {
+	targetId?: string | undefined;
+	showBackToTop?: boolean | undefined;
+	showToc?: boolean | undefined;
+	headings?: MarkdownHeading[] | undefined;
+	like?:
+		| {
+				slug: string;
+				contentType: "post" | "tweet" | "project" | "wiki";
+		  }
+		| undefined;
+}
+
+const {
+	targetId = "article-hero",
+	showBackToTop = true,
+	showToc = false,
+	headings = [],
+	like,
+} = Astro.props;
+
+const hasToc = showToc && headings.length > 0;
+---
+
+<div
+	class="floating-actions"
+	data-target-id={targetId}
+	aria-hidden="true"
+>
+	<div class="floating-actions-container">
+		{hasToc && <TOCAction />}
+		{like && <LikeAction slug={like.slug} contentType={like.contentType} />}
+		{showBackToTop && <BackToTopAction />}
+	</div>
+</div>
+
+{hasToc && <TOCSidebar headings={headings} />}
+
+<style>
+	.floating-actions {
+		position: fixed;
+		bottom: 2rem;
+		right: 1.5rem;
+		z-index: 50;
+		opacity: 0;
+		visibility: hidden;
+		transform: translateY(1rem);
+		transition:
+			opacity 0.3s var(--ease-snappy),
+			visibility 0.3s var(--ease-snappy),
+			transform 0.3s var(--ease-snappy);
+	}
+
+	.floating-actions.visible {
+		opacity: 1;
+		visibility: visible;
+		transform: translateY(0);
+	}
+
+	.floating-actions.like-only :global(.back-to-top-action),
+	.floating-actions.like-only :global(.toc-action) {
+		display: none;
+	}
+
+	.floating-actions-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	:global(.floating-action) {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.5rem;
+		height: 2.5rem;
+		background: transparent;
+		border: none;
+		cursor: pointer;
+		transition: transform 0.2s ease;
+	}
+
+	:global(.floating-action:hover) {
+		transform: scale(1.1);
+	}
+
+	:global(.floating-action .action-tooltip) {
+		position: absolute;
+		right: 100%;
+		top: 50%;
+		transform: translateY(-50%);
+		margin-right: 0.5rem;
+		padding: 0.25rem 0.5rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		white-space: nowrap;
+		color: var(--color-text-heading);
+		background: var(--color-surface-2);
+		border: 1px solid var(--color-border-default);
+		border-radius: 0.25rem;
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity 0.2s ease, visibility 0.2s ease;
+		pointer-events: none;
+	}
+
+	:global(.floating-action:hover .action-tooltip) {
+		opacity: 1;
+		visibility: visible;
+		transition-delay: 0.5s;
+	}
+
+	:global(.floating-action .action-icon) {
+		width: 1.5rem;
+		height: 1.5rem;
+	}
+
+	@media (max-width: 640px) {
+		.floating-actions {
+			bottom: 1.5rem;
+			right: 1rem;
+		}
+
+		:global(.floating-action) {
+			width: 2.25rem;
+			height: 2.25rem;
+		}
+
+		:global(.floating-action .action-icon) {
+			width: 1.25rem;
+			height: 1.25rem;
+		}
+
+		:global(.floating-action .action-tooltip) {
+			display: none;
+		}
+	}
+</style>
+
+<script>
+	interface LikeResponse {
+		user_likes: number;
+		total_likes: number;
+		unique_users: number;
+	}
+
+	const WORKER_URL = import.meta.env.PUBLIC_ANALYTICS_URL || "http://localhost:8787";
+	const MAX_LIKES = 13;
+	const COOKIE_NAME = "user_likes";
+
+	class FloatingActionsController {
+		private container: HTMLDivElement;
+		private targetId: string;
+		private observer: IntersectionObserver | null = null;
+		private fallbackTimer: number | null = null;
+		private hasScrolledPastHero = false;
+		private likeButton: HTMLButtonElement | null;
+		private tocButton: HTMLButtonElement | null;
+		private backToTopButton: HTMLButtonElement | null;
+		private tocSidebar: HTMLElement | null;
+
+		constructor(container: HTMLDivElement) {
+			this.container = container;
+			this.targetId = container.dataset.targetId || "article-hero";
+			this.likeButton = container.querySelector('[data-action="like"]');
+			this.tocButton = container.querySelector('[data-action="toggle-toc"]');
+			this.backToTopButton = container.querySelector('[data-action="back-to-top"]');
+			this.tocSidebar = document.getElementById("toc-sidebar");
+
+			this.init();
+		}
+
+		private init() {
+			this.setupVisibility();
+			this.setupBackToTop();
+			this.setupTOC();
+			this.setupLike();
+		}
+
+		private setupVisibility() {
+			const target = document.getElementById(this.targetId);
+			if (!target) return;
+
+			this.observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (entry.isIntersecting) {
+							if (this.hasScrolledPastHero) {
+								this.container.classList.remove("visible");
+								this.container.classList.remove("like-only");
+							}
+						} else {
+							this.hasScrolledPastHero = true;
+							if (this.fallbackTimer) {
+								clearTimeout(this.fallbackTimer);
+								this.fallbackTimer = null;
+							}
+							this.container.classList.remove("like-only");
+							this.container.classList.add("visible");
+						}
+					});
+				},
+				{ threshold: 0, rootMargin: "-100px 0px 0px 0px" }
+			);
+
+			this.observer.observe(target);
+
+			if (this.likeButton) {
+				this.fallbackTimer = window.setTimeout(() => {
+					if (!this.hasScrolledPastHero) {
+						this.container.classList.add("visible", "like-only");
+					}
+				}, 2000);
+			}
+		}
+
+		private setupBackToTop() {
+			if (!this.backToTopButton) return;
+
+			const handler = (e: Event) => {
+				e.preventDefault();
+				e.stopPropagation();
+				window.scrollTo({ behavior: "smooth", top: 0 });
+			};
+
+			this.backToTopButton.addEventListener("click", handler);
+			this.backToTopButton.addEventListener("touchend", handler, { passive: false });
+		}
+
+		private setupTOC() {
+			if (!this.tocButton || !this.tocSidebar) return;
+
+			this.tocButton.addEventListener("click", () => {
+				const isOpen = this.tocSidebar!.dataset.open === "true";
+				this.tocSidebar!.dataset.open = (!isOpen).toString();
+				this.tocButton!.setAttribute("aria-expanded", (!isOpen).toString());
+			});
+
+			document.addEventListener("click", (e) => {
+				if (
+					this.tocSidebar!.dataset.open === "true" &&
+					!this.tocSidebar!.contains(e.target as Node) &&
+					!this.tocButton!.contains(e.target as Node)
+				) {
+					this.tocSidebar!.dataset.open = "false";
+					this.tocButton!.setAttribute("aria-expanded", "false");
+				}
+			});
+
+			document.addEventListener("keydown", (e) => {
+				if (e.key === "Escape" && this.tocSidebar!.dataset.open === "true") {
+					this.tocSidebar!.dataset.open = "false";
+					this.tocButton!.setAttribute("aria-expanded", "false");
+				}
+			});
+		}
+
+		private setupLike() {
+			if (!this.likeButton) return;
+
+			const slug = this.likeButton.dataset.slug!;
+			const type = this.likeButton.dataset.type!;
+			let userLikes = 0;
+			let isUpdating = false;
+
+			const fillRect = this.likeButton.querySelector<SVGRectElement>(".heart-fill-rect");
+			const popupContainer = this.likeButton.querySelector<HTMLDivElement>(".popup-container");
+			const particlesContainer = this.likeButton.querySelector<HTMLDivElement>(".particles-container");
+
+			const updateFill = (likes: number) => {
+				if (!fillRect) return;
+				const fillHeight = (likes / MAX_LIKES) * 24;
+				const yPosition = 24 - fillHeight;
+				fillRect.setAttribute("height", String(fillHeight));
+				fillRect.setAttribute("y", String(yPosition));
+			};
+
+			const getCookieLikes = (): number | null => {
+				const cookies = document.cookie.split(";");
+				for (const cookie of cookies) {
+					const [name, value] = cookie.trim().split("=");
+					if (name === `${COOKIE_NAME}_${type}_${slug}`) {
+						return Number.parseInt(value || "0") || 0;
+					}
+				}
+				return null;
+			};
+
+			const saveCookieLikes = (count: number) => {
+				const expires = new Date();
+				expires.setFullYear(expires.getFullYear() + 1);
+				document.cookie = `${COOKIE_NAME}_${type}_${slug}=${count}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+			};
+
+			const showPopup = (text = "+1", isMax = false) => {
+				if (!popupContainer) return;
+				const popup = document.createElement("span");
+				popup.className = isMax ? "like-popup max-popup" : "like-popup";
+				popup.textContent = text;
+				popupContainer.appendChild(popup);
+				setTimeout(() => popup.remove(), isMax ? 1200 : 800);
+			};
+
+			const showParticles = () => {
+				if (!particlesContainer) return;
+				const count = 6;
+				for (let i = 0; i < count; i++) {
+					const particle = document.createElement("span");
+					particle.className = "heart-particle";
+					const angle = (i / count) * Math.PI * 2;
+					const distance = 20 + Math.random() * 10;
+					const x = Math.cos(angle) * distance;
+					const y = Math.sin(angle) * distance;
+					particle.style.setProperty("--particle-end", `translate(${x}px, ${y}px)`);
+					particle.style.background = i % 2 === 0 ? "var(--color-red)" : "var(--color-pink)";
+					particlesContainer.appendChild(particle);
+					setTimeout(() => particle.remove(), 600);
+				}
+			};
+
+			const animateLike = () => {
+				this.likeButton!.classList.add("bounce");
+				setTimeout(() => this.likeButton!.classList.remove("bounce"), 400);
+				showPopup();
+				showParticles();
+			};
+
+			const shakeAnimation = () => {
+				this.likeButton!.style.animation = "none";
+				this.likeButton!.offsetHeight;
+				this.likeButton!.style.animation = "shake 0.3s ease";
+				setTimeout(() => { this.likeButton!.style.animation = ""; }, 300);
+			};
+
+			const fetchLikes = async () => {
+				try {
+					const res = await fetch(`${WORKER_URL}/api/analytics/like/${type}/${slug}`);
+					if (!res.ok) return;
+					const data: LikeResponse = await res.json();
+					userLikes = data.user_likes;
+					this.likeButton!.dataset.userLikes = String(userLikes);
+					updateFill(userLikes);
+					saveCookieLikes(userLikes);
+				} catch (error) {
+					console.error("Failed to fetch likes:", error);
+				}
+			};
+
+			const handleClick = async (e: MouseEvent) => {
+				e.preventDefault();
+				e.stopPropagation();
+
+				if (isUpdating) return;
+				if (userLikes >= MAX_LIKES) {
+					shakeAnimation();
+					showPopup("max!", true);
+					return;
+				}
+
+				const newCount = userLikes + 1;
+				isUpdating = true;
+				userLikes = newCount;
+				this.likeButton!.dataset.userLikes = String(newCount);
+				updateFill(newCount);
+				animateLike();
+
+				try {
+					const res = await fetch(`${WORKER_URL}/api/analytics/like/${type}/${slug}`, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({ count: newCount }),
+					});
+
+					if (!res.ok) throw new Error("Failed to update like");
+					const data: LikeResponse = await res.json();
+					userLikes = data.user_likes;
+					this.likeButton!.dataset.userLikes = String(userLikes);
+					updateFill(userLikes);
+					saveCookieLikes(userLikes);
+				} catch (error) {
+					console.error("Failed to update like:", error);
+					await fetchLikes();
+				} finally {
+					isUpdating = false;
+				}
+			};
+
+			const savedLikes = getCookieLikes();
+			if (savedLikes !== null) {
+				userLikes = savedLikes;
+				this.likeButton.dataset.userLikes = String(savedLikes);
+				updateFill(savedLikes);
+			}
+
+			fetchLikes();
+			this.likeButton.addEventListener("click", handleClick);
+		}
+
+		destroy() {
+			if (this.observer) {
+				this.observer.disconnect();
+				this.observer = null;
+			}
+			if (this.fallbackTimer) {
+				clearTimeout(this.fallbackTimer);
+				this.fallbackTimer = null;
+			}
+		}
+	}
+
+	if (!document.getElementById("floating-actions-keyframes")) {
+		const style = document.createElement("style");
+		style.id = "floating-actions-keyframes";
+		style.textContent = `
+			@keyframes shake {
+				0%, 100% { transform: translateX(0); }
+				20% { transform: translateX(-3px); }
+				40% { transform: translateX(3px); }
+				60% { transform: translateX(-2px); }
+				80% { transform: translateX(2px); }
+			}
+		`;
+		document.head.appendChild(style);
+	}
+
+	const controllers = new Map<HTMLDivElement, FloatingActionsController>();
+
+	function initFloatingActions() {
+		document.querySelectorAll<HTMLDivElement>(".floating-actions").forEach((container) => {
+			if (controllers.has(container)) return;
+			controllers.set(container, new FloatingActionsController(container));
+		});
+	}
+
+	function cleanupFloatingActions() {
+		controllers.forEach((controller) => controller.destroy());
+		controllers.clear();
+	}
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", initFloatingActions);
+	} else {
+		initFloatingActions();
+	}
+
+	document.addEventListener("astro:page-load", initFloatingActions);
+	document.addEventListener("astro:before-swap", cleanupFloatingActions);
+</script>

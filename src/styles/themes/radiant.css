@@ -1,0 +1,28 @@
+:root {
+	--rad-rosewater: #dc8a78;
+	--rad-flamingo: #dd7878;
+	--rad-pink: #ea76cb;
+	--rad-mauve: #8839ef;
+	--rad-red: #d20f39;
+	--rad-maroon: #e64553;
+	--rad-peach: #fe640b;
+	--rad-yellow: #df8e1d;
+	--rad-green: #40a02b;
+	--rad-teal: #179299;
+	--rad-sky: #04a5e5;
+	--rad-sapphire: #209fb5;
+	--rad-blue: #1e66f5;
+	--rad-lavender: #7287fd;
+	--rad-text: #4c4f69;
+	--rad-subtext1: #5c5f77;
+	--rad-subtext0: #6c6f85;
+	--rad-overlay2: #7c7f93;
+	--rad-overlay1: #8c8fa1;
+	--rad-overlay0: #9ca0b0;
+	--rad-surface2: #acb0be;
+	--rad-surface1: #bcc0cc;
+	--rad-surface0: #ccd0da;
+	--rad-base: #eff1f5;
+	--rad-mantle: #e6e9ef;
+	--rad-crust: #dce0e8;
+}

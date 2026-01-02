@@ -7,5 +7,6 @@ export function elementHasClass(element: HTMLElement, className: string) {
 }
 
 export function rootInDarkMode() {
-	return document.documentElement.getAttribute("data-theme") === "dark";
+	const theme = document.documentElement.getAttribute("data-theme");
+	return theme !== "radiant";
 }

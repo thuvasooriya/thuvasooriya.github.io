@@ -1,0 +1,654 @@
+---
+import { type CollectionEntry, getCollection } from "astro:content";
+
+interface Props {
+	currentSlug?: string;
+}
+
+const { currentSlug = "" } = Astro.props;
+
+type WikiEntry = CollectionEntry<"wiki">;
+type WikiStatus = "seed" | "growing" | "evergreen";
+
+interface SidebarLink {
+	type: "link";
+	label: string;
+	href: string;
+	order: number;
+	status: WikiStatus;
+}
+
+interface SidebarGroup {
+	type: "group";
+	label: string;
+	href: string | undefined;
+	order: number;
+	status: WikiStatus;
+	entries: SidebarEntry[];
+}
+
+type SidebarEntry = SidebarLink | SidebarGroup;
+
+interface DirNode {
+	[key: string]: DirNode | WikiEntry;
+}
+
+const MAX_DEPTH = 5;
+
+const wikiEntries = await getCollection("wiki", ({ data }) => {
+	if (data.sidebar.hidden) return false;
+	return true;
+});
+
+function buildTree(entries: WikiEntry[]): DirNode {
+	const root: DirNode = {};
+
+	for (const entry of entries) {
+		const parts = entry.id.split("/");
+		let current = root;
+
+		for (let i = 0; i < parts.length; i++) {
+			const part = parts[i];
+			if (!part) continue;
+			const isLast = i === parts.length - 1;
+
+			if (isLast) {
+				const existing = current[part];
+				if (existing && !isWikiEntry(existing)) {
+					(existing as DirNode).__index__ = entry;
+				} else {
+					current[part] = entry;
+				}
+			} else {
+				const existing = current[part];
+				if (!existing) {
+					current[part] = {};
+				} else if (isWikiEntry(existing)) {
+					const dirNode: DirNode = { __index__: existing };
+					current[part] = dirNode;
+				}
+				current = current[part] as DirNode;
+			}
+		}
+	}
+
+	return root;
+}
+
+function isWikiEntry(node: unknown): node is WikiEntry {
+	return typeof node === "object" && node !== null && "id" in node && "data" in node;
+}
+
+function getEntryData(node: DirNode | WikiEntry | undefined): WikiEntry["data"] | null {
+	if (node && isWikiEntry(node)) {
+		return node.data;
+	}
+	return null;
+}
+
+function getOrder(node: DirNode | WikiEntry): number {
+	const data = getEntryData(node);
+	if (data) {
+		return data.sidebar.order ?? 999;
+	}
+	const dirNode = node as DirNode;
+	const indexData = getEntryData(dirNode.__index__);
+	if (indexData) {
+		return indexData.sidebar.order ?? 999;
+	}
+	const childOrders = Object.entries(dirNode)
+		.filter(([key]) => key !== "__index__")
+		.map(([, child]) => getOrder(child as DirNode | WikiEntry));
+	return childOrders.length ? Math.min(...childOrders) : 999;
+}
+
+function sortEntries(entries: [string, DirNode | WikiEntry][]): [string, DirNode | WikiEntry][] {
+	return entries.sort(([keyA, a], [keyB, b]) => {
+		const orderA = getOrder(a);
+		const orderB = getOrder(b);
+		if (orderA !== orderB) return orderA - orderB;
+		return keyA.localeCompare(keyB);
+	});
+}
+
+function treeToSidebar(node: DirNode, basePath: string, depth: number): SidebarEntry[] {
+	if (depth > MAX_DEPTH) return [];
+
+	const entries: [string, DirNode | WikiEntry][] = Object.entries(node).filter(
+		([key]) => key !== "__index__",
+	);
+
+	return sortEntries(entries).map(([key, child]) => {
+		const path = basePath ? `${basePath}/${key}` : key;
+
+		if (isWikiEntry(child)) {
+			return {
+				type: "link" as const,
+				label: child.data.sidebar.label || child.data.title,
+				href: `/wiki/${path}`,
+				order: child.data.sidebar.order ?? 999,
+				status: child.data.status,
+			};
+		}
+
+		const indexEntry = child.__index__;
+		const indexData = getEntryData(indexEntry);
+
+		const group: SidebarGroup = {
+			type: "group",
+			label: indexData ? indexData.sidebar.label || indexData.title : formatDirName(key),
+			href: indexData ? `/wiki/${path}` : undefined,
+			order: indexData ? (indexData.sidebar.order ?? 999) : 999,
+			status: indexData ? indexData.status : "seed",
+			entries: treeToSidebar(child as DirNode, path, depth + 1),
+		};
+
+		return group;
+	});
+}
+
+function formatDirName(name: string): string {
+	return name.replace(/-/g, " ").toLowerCase();
+}
+
+const tree = buildTree(wikiEntries);
+const rootIndex = tree.__index__;
+const sidebar = treeToSidebar(tree, "", 0);
+
+if (rootIndex && isWikiEntry(rootIndex)) {
+	sidebar.unshift({
+		type: "link",
+		label: rootIndex.data.sidebar.label || rootIndex.data.title,
+		href: "/wiki",
+		order: rootIndex.data.sidebar.order ?? -1,
+		status: rootIndex.data.status,
+	});
+}
+
+function isActive(href: string): boolean {
+	const normalized = currentSlug === "index" ? "" : currentSlug;
+	const hrefSlug = href === "/wiki" ? "" : href.replace("/wiki/", "");
+	return normalized === hrefSlug;
+}
+
+function isAncestorOrSelfOfCurrent(entry: SidebarEntry, href: string | undefined): boolean {
+	if (entry.type === "link") return false;
+	const normalizedCurrent = currentSlug === "index" ? "" : currentSlug;
+
+	// check if this group's page is the current page
+	if (href) {
+		const groupSlug = href === "/wiki" ? "" : href.replace("/wiki/", "");
+		if (groupSlug === normalizedCurrent) return true;
+	}
+
+	// check if any descendant is the current page
+	function checkChildren(entries: SidebarEntry[]): boolean {
+		for (const child of entries) {
+			const childHref = child.type === "link" ? child.href : child.href;
+			if (childHref) {
+				const childSlug = childHref === "/wiki" ? "" : childHref.replace("/wiki/", "");
+				if (childSlug === normalizedCurrent) return true;
+			}
+			if (child.type === "group" && checkChildren(child.entries)) return true;
+		}
+		return false;
+	}
+
+	return checkChildren(entry.entries);
+}
+
+function getGroupId(path: string): string {
+	return `wiki-group-${path.replace(/\//g, "-")}`;
+}
+---
+
+<nav class="wiki-sidebar" aria-label="Wiki navigation" id="wiki-sidebar" data-open="false">
+	<ul class="wiki-nav-list">
+		{
+			(function renderEntries(entries: SidebarEntry[], depth: number, parentPath: string): any {
+				return entries.map((entry) => {
+					const isLink = entry.type === "link";
+					const hasHref = isLink || entry.href;
+					const href = isLink ? entry.href : entry.href;
+					const active = hasHref ? isActive(href!) : false;
+					const children = isLink ? [] : entry.entries;
+					const hasChildren = children.length > 0;
+					const status = entry.status;
+					const path = parentPath ? `${parentPath}/${entry.label}` : entry.label;
+					const groupId = hasChildren ? getGroupId(path) : undefined;
+					const shouldExpand = !isLink && isAncestorOrSelfOfCurrent(entry, href);
+
+					return (
+						<li
+							class:list={["wiki-nav-item", { "has-children": hasChildren }]}
+							style={`--depth: ${depth}`}
+						>
+							<div class="wiki-nav-row">
+								{hasChildren && (
+									<button 
+										class="wiki-nav-toggle" 
+										type="button"
+										data-group-id={groupId}
+data-expanded={shouldExpand ? "true" : "false"}
+								aria-expanded={shouldExpand ? "true" : "false"}
+										aria-label={`Toggle ${entry.label} section`}
+									>
+										<svg class="wiki-nav-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+											<polyline points="9 18 15 12 9 6"></polyline>
+										</svg>
+									</button>
+								)}
+								{hasHref ? (
+									<a
+										href={href}
+										class:list={[
+											"wiki-nav-link",
+											`status-${status}`,
+											{ active, "has-toggle": hasChildren },
+										]}
+										aria-current={active ? "page" : undefined}
+									>
+										<span class="wiki-nav-label">{entry.label.toLowerCase()}</span>
+										<span class="wiki-nav-status-indicator"></span>
+									</a>
+								) : (
+									<span class:list={["wiki-nav-link", "disabled", `status-${status}`, { "has-toggle": hasChildren }]}>
+										<span class="wiki-nav-label">{entry.label.toLowerCase()}</span>
+										<span class="wiki-nav-status-indicator"></span>
+									</span>
+								)}
+							</div>
+							{hasChildren && (
+								<div 
+									class="wiki-nav-children" 
+									id={groupId}
+									data-expanded={shouldExpand ? "true" : "false"}
+								>
+									<ul class="wiki-nav-children-inner">
+										{renderEntries(children, depth + 1, path)}
+									</ul>
+								</div>
+							)}
+						</li>
+					);
+				});
+			})(sidebar, 0, "")
+		}
+	</ul>
+</nav>
+
+<!-- wiki sidebar toggle button - mobile only -->
+<button
+	class="wiki-sidebar-toggle fixed left-4 top-1/2 -translate-y-1/2 -translate-x-full opacity-0 transition-all duration-300 data-[show=true]:translate-x-0 data-[show=true]:opacity-100 data-[open=true]:-translate-x-full data-[open=true]:opacity-0"
+	data-show="false"
+	data-open="false"
+	id="wiki-sidebar-toggle"
+	type="button"
+	aria-label="Toggle wiki navigation"
+	style="z-index: 90;"
+>
+	<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+		<path d="M4 6h16M4 12h10M4 18h14" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+	</svg>
+</button>
+
+<style>
+	.wiki-sidebar {
+		width: var(--layout-sidebar-width);
+		flex-shrink: 0;
+		position: sticky;
+		top: 10rem;
+		height: fit-content;
+		max-height: calc(100vh - 12rem);
+		overflow-y: auto;
+		transition: top 0.1s ease-out, max-height 0.1s ease-out;
+	}
+
+	.wiki-nav-list,
+	.wiki-nav-children-inner {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.wiki-nav-children {
+		display: grid;
+		grid-template-rows: 0fr;
+		transition: grid-template-rows 0.2s ease-out;
+	}
+
+	.wiki-nav-children[data-expanded="true"] {
+		grid-template-rows: 1fr;
+	}
+
+	.wiki-nav-children-inner {
+		overflow: hidden;
+		margin-left: 0.75rem;
+		padding-left: 0.75rem;
+		border-left: 1px solid color-mix(in srgb, var(--color-global-text) 15%, transparent);
+	}
+
+	.wiki-nav-item {
+		position: relative;
+	}
+
+	.wiki-nav-row {
+		display: flex;
+		align-items: stretch;
+	}
+
+	.wiki-nav-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.25rem;
+		flex-shrink: 0;
+		padding: 0;
+		background: none;
+		border: none;
+		cursor: pointer;
+		color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
+		transition: color 0.15s ease;
+	}
+
+	.wiki-nav-toggle:hover {
+		color: var(--color-global-text);
+	}
+
+	.wiki-nav-caret {
+		width: 0.875rem;
+		height: 0.875rem;
+		transition: transform 0.2s ease-out;
+	}
+
+	.wiki-nav-toggle[data-expanded="true"] .wiki-nav-caret {
+		transform: rotate(90deg);
+	}
+
+	.wiki-nav-link {
+		display: flex;
+		align-items: stretch;
+		padding-left: 0.5rem;
+		color: var(--color-global-text);
+		text-decoration: none;
+		border-radius: 0.25rem;
+		font-size: 0.8125rem;
+		line-height: 1.4;
+		overflow: hidden;
+		flex: 1;
+		transition:
+			background-color 0.15s ease,
+			color 0.15s ease;
+	}
+
+	.wiki-nav-link.has-toggle {
+		padding-left: 0.25rem;
+	}
+
+	.wiki-nav-label {
+		flex: 1;
+		padding: 0.25rem 0.5rem 0.25rem 0;
+	}
+
+	.wiki-nav-link:not(.disabled):hover {
+		background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		color: var(--color-accent);
+	}
+
+	.wiki-nav-link.active {
+		background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+		color: var(--color-accent);
+		font-weight: 500;
+	}
+
+	.wiki-nav-link.disabled {
+		color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
+		cursor: default;
+	}
+
+	.wiki-nav-status-indicator {
+		width: 0.5rem;
+		align-self: stretch;
+		flex-shrink: 0;
+		opacity: 0;
+		transition: opacity 0.15s ease;
+	}
+
+	.wiki-nav-link:not(.disabled):hover .wiki-nav-status-indicator,
+	.wiki-nav-link.active .wiki-nav-status-indicator {
+		opacity: 1;
+	}
+
+	.wiki-nav-link.status-seed .wiki-nav-status-indicator {
+		background: repeating-linear-gradient(
+			-45deg,
+			var(--color-yellow),
+			var(--color-yellow) 2px,
+			color-mix(in srgb, var(--color-yellow) 40%, transparent) 2px,
+			color-mix(in srgb, var(--color-yellow) 40%, transparent) 4px
+		);
+	}
+
+	.wiki-nav-link.status-growing .wiki-nav-status-indicator {
+		background: var(--color-blue);
+	}
+
+	.wiki-nav-link.status-evergreen .wiki-nav-status-indicator {
+		background: var(--color-green);
+	}
+
+	.wiki-nav-link.status-seed:not(.disabled):hover,
+	.wiki-nav-link.status-seed.active {
+		color: var(--color-yellow);
+	}
+
+	.wiki-nav-link.status-growing:not(.disabled):hover,
+	.wiki-nav-link.status-growing.active {
+		color: var(--color-blue);
+	}
+
+	.wiki-nav-link.status-evergreen:not(.disabled):hover,
+	.wiki-nav-link.status-evergreen.active {
+		color: var(--color-green);
+	}
+
+	.wiki-nav-item.has-children > .wiki-nav-link {
+		font-weight: 500;
+	}
+
+	@media (max-width: 1023px) {
+		.wiki-sidebar {
+			position: fixed;
+			left: 0;
+			top: 0;
+			height: 100vh;
+			max-height: 100vh;
+			width: 16rem;
+			padding: 5rem 1rem 2rem;
+			background: var(--color-global-bg);
+			border-right: 1px solid var(--color-border-default);
+			box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+			z-index: 80;
+			transform: translateX(-100%);
+			transition: transform 0.3s ease;
+		}
+
+		.wiki-sidebar[data-open="true"] {
+			transform: translateX(0);
+		}
+	}
+
+	.wiki-sidebar-toggle {
+		display: none;
+		background: transparent;
+		border: none;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+	}
+
+	.wiki-sidebar-toggle svg {
+		filter: drop-shadow(0 0 8px var(--color-primary)) drop-shadow(0 0 12px var(--color-primary));
+		transition: filter 0.3s ease, transform 0.3s ease;
+	}
+
+	.wiki-sidebar-toggle:hover svg {
+		filter: drop-shadow(0 0 12px var(--color-primary)) drop-shadow(0 0 16px var(--color-primary));
+		transform: translateX(4px);
+	}
+
+	@media (max-width: 1023px) {
+		.wiki-sidebar-toggle {
+			display: flex;
+		}
+	}
+</style>
+
+<script>
+const SCROLL_KEY = "wiki-sidebar-scroll";
+const EXPANDED_KEY = "wiki-sidebar-expanded";
+
+function initSidebar() {
+	const sidebar = document.getElementById("wiki-sidebar") as HTMLElement | null;
+	const toggleBtn = document.getElementById("wiki-sidebar-toggle") as HTMLButtonElement | null;
+	if (!sidebar) return;
+
+	// restore expanded state from localStorage
+	const savedExpanded = localStorage.getItem(EXPANDED_KEY);
+	const expandedSet: Set<string> = savedExpanded ? new Set(JSON.parse(savedExpanded)) : new Set();
+
+	// initialize toggle buttons
+	const toggleBtns = sidebar.querySelectorAll<HTMLButtonElement>(".wiki-nav-toggle");
+	for (const btn of toggleBtns) {
+		const groupId = btn.dataset.groupId;
+		if (!groupId) continue;
+
+		const childList = document.getElementById(groupId);
+		if (!childList) continue;
+
+		// expand if: server says expand (current path) OR localStorage says expand (previously opened)
+		const serverExpanded = btn.dataset.expanded === "true";
+		const shouldExpand = serverExpanded || expandedSet.has(groupId);
+
+		// sync state
+		btn.dataset.expanded = shouldExpand.toString();
+		btn.setAttribute("aria-expanded", shouldExpand.toString());
+		childList.dataset.expanded = shouldExpand.toString();
+
+		// update expandedSet to match current state
+		if (shouldExpand) {
+			expandedSet.add(groupId);
+		}
+
+		btn.addEventListener("click", () => {
+			const expanded = btn.dataset.expanded === "true";
+			const newState = !expanded;
+
+			btn.dataset.expanded = newState.toString();
+			btn.setAttribute("aria-expanded", newState.toString());
+			childList.dataset.expanded = newState.toString();
+
+			// update localStorage
+			if (newState) {
+				expandedSet.add(groupId);
+			} else {
+				expandedSet.delete(groupId);
+			}
+			localStorage.setItem(EXPANDED_KEY, JSON.stringify([...expandedSet]));
+		});
+	}
+
+	// save initial expanded state
+	localStorage.setItem(EXPANDED_KEY, JSON.stringify([...expandedSet]));
+
+	// restore scroll position
+	const saved = sessionStorage.getItem(SCROLL_KEY);
+	if (saved) {
+		sidebar.scrollTop = Number.parseInt(saved, 10);
+	}
+
+	sidebar.addEventListener("scroll", () => {
+		sessionStorage.setItem(SCROLL_KEY, String(sidebar.scrollTop));
+	});
+
+	const activeLink = sidebar.querySelector(".wiki-nav-link.active") as HTMLElement | null;
+	if (activeLink && !saved) {
+		activeLink.scrollIntoView({ block: "center", behavior: "instant" });
+	}
+
+	// dynamic top position based on scroll (desktop only)
+	const updateSidebarPosition = () => {
+		if (window.innerWidth < 1024) return;
+		
+		const navHeight = 80; // 5rem = 80px
+		const baseTop = 80; // 5rem base padding
+		const scrollY = window.scrollY;
+		
+		// as user scrolls past nav, reduce top offset
+		const dynamicTop = Math.max(16, baseTop + navHeight - scrollY);
+		sidebar.style.top = `${dynamicTop}px`;
+		
+		// adjust max-height accordingly
+		const maxHeight = window.innerHeight - dynamicTop - 32;
+		sidebar.style.maxHeight = `${maxHeight}px`;
+	};
+
+	updateSidebarPosition();
+	window.addEventListener("scroll", updateSidebarPosition, { passive: true });
+	window.addEventListener("resize", updateSidebarPosition);
+
+	// mobile toggle functionality
+	if (!toggleBtn) return;
+
+	// show toggle button on mobile
+	const checkVisibility = () => {
+		const isMobile = window.innerWidth < 1024;
+		toggleBtn.dataset.show = isMobile ? "true" : "false";
+		if (!isMobile) {
+			sidebar.dataset.open = "false";
+			toggleBtn.dataset.open = "false";
+			// reset inline styles for desktop
+			updateSidebarPosition();
+		} else {
+			// reset inline styles for mobile
+			sidebar.style.top = "";
+			sidebar.style.maxHeight = "";
+		}
+	};
+
+	checkVisibility();
+	window.addEventListener("resize", checkVisibility);
+
+	// toggle sidebar
+	toggleBtn.addEventListener("click", () => {
+		const isOpen = sidebar.dataset.open === "true";
+		sidebar.dataset.open = (!isOpen).toString();
+		toggleBtn.dataset.open = (!isOpen).toString();
+	});
+
+	// close on outside click
+	document.addEventListener("click", (e) => {
+		if (
+			sidebar.dataset.open === "true" &&
+			!sidebar.contains(e.target as Node) &&
+			!toggleBtn.contains(e.target as Node)
+		) {
+			sidebar.dataset.open = "false";
+			toggleBtn.dataset.open = "false";
+		}
+	});
+
+	// close on escape key
+	document.addEventListener("keydown", (e) => {
+		if (e.key === "Escape" && sidebar.dataset.open === "true") {
+			sidebar.dataset.open = "false";
+			toggleBtn.dataset.open = "false";
+		}
+	});
+}
+
+initSidebar();
+document.addEventListener("astro:after-swap", initSidebar);
+</script>

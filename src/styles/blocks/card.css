@@ -1,150 +1,143 @@
-/* unified card system - apply to all cards across the site */
-
 @theme {
-	/* base card styling */
-	--card-bg: var(--color-global-bg);
-	--card-bg-dark: color-mix(in srgb, var(--color-global-bg) 95%, var(--color-global-text));
-	--card-border: color-mix(in srgb, var(--color-global-text) 15%, transparent);
-	--card-border-dark: color-mix(in srgb, var(--color-global-text) 20%, transparent);
-	--card-shadow: color-mix(in srgb, var(--color-global-text) 5%, transparent);
-	--card-shadow-dark: color-mix(in srgb, var(--color-global-text) 10%, transparent);
-	--card-radius: 0.5rem;
-	--card-padding: 0.5rem;
+  --card-bg: var(--color-global-bg);
+  --card-bg-hover: color-mix(in srgb, var(--color-accent) 5%, var(--color-global-bg));
+  --card-border: color-mix(in srgb, var(--color-global-text) 15%, transparent);
+  --card-border-hover: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  --card-radius: 0.5rem;
+  --card-gap: 1rem;
 
-	/* hover states */
-	--card-hover-bg: color-mix(in srgb, var(--color-accent) 3%, var(--card-bg));
-	--card-hover-bg-dark: color-mix(in srgb, var(--color-accent) 5%, var(--card-bg-dark));
-	--card-hover-border: color-mix(in srgb, var(--color-accent) 30%, transparent);
-	--card-hover-shadow: color-mix(in srgb, var(--color-accent) 10%, transparent);
-	--card-hover-scale: 1.01;
+  --card-title: var(--color-global-text);
+  --card-title-hover: var(--color-accent);
+  --card-text: color-mix(in srgb, var(--color-global-text) 80%, transparent);
+  --card-meta: color-mix(in srgb, var(--color-global-text) 60%, transparent);
+  --card-badge-bg: color-mix(in srgb, var(--color-global-text) 10%, transparent);
+  --card-badge-bg-dark: color-mix(in srgb, var(--color-global-text) 15%, transparent);
+  --card-badge-text: var(--color-global-text);
 
-	/* active/click states */
-	--card-active-scale: 0.99;
-	--card-active-shadow: color-mix(in srgb, var(--color-accent) 5%, transparent);
-
-	/* card content colors */
-	--card-title: var(--color-global-text);
-	--card-title-hover: var(--color-accent);
-	--card-text: color-mix(in srgb, var(--color-global-text) 80%, transparent);
-	--card-meta: color-mix(in srgb, var(--color-global-text) 60%, transparent);
-
-	/* card image/thumbnail */
-	--card-image-bg: color-mix(in srgb, var(--color-accent) 10%, transparent);
-	--card-image-hover-scale: 1.05;
-
-	/* card badge/tag styles */
-	--card-badge-bg: color-mix(in srgb, var(--color-global-text) 10%, transparent);
-	--card-badge-bg-dark: color-mix(in srgb, var(--color-global-text) 15%, transparent);
-	--card-badge-text: var(--color-global-text);
-
-	/* transition settings */
-	--card-transition-duration: 200ms;
-	--card-transition-easing: cubic-bezier(0.2, 0, 0, 1);
+  --tweet-header-bg: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 15%, var(--color-global-bg)) 0%, color-mix(in srgb, var(--color-accent) 5%, var(--color-global-bg)) 100%);
+  --tweet-border: color-mix(in srgb, var(--color-accent) 5%, transparent);
 }
 
-/* base card component */
 .card {
-	background-color: var(--card-bg);
-	border: 1px solid var(--card-border);
-	border-radius: var(--card-radius);
-	box-shadow: 0 1px 3px var(--card-shadow);
-	transition:
-		background-color var(--card-transition-duration) var(--card-transition-easing),
-		border-color var(--card-transition-duration) var(--card-transition-easing),
-		box-shadow var(--card-transition-duration) var(--card-transition-easing),
-		transform var(--card-transition-duration) var(--card-transition-easing);
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  transition: background 150ms ease-out, border-color 150ms ease-out;
 }
 
 .card:hover {
-	background-color: var(--card-hover-bg);
-	border-color: var(--card-hover-border);
-	box-shadow: 0 4px 12px var(--card-hover-shadow);
-	transform: scale(var(--card-hover-scale));
+  background: var(--card-bg-hover);
+  border-color: var(--card-border-hover);
 }
 
 .card:active {
-	transform: scale(var(--card-active-scale));
-	box-shadow: 0 2px 6px var(--card-active-shadow);
+  transform: scale(0.995);
 }
 
-/* dark mode overrides */
-.dark .card {
-	background-color: var(--card-bg-dark);
-	border-color: var(--card-border-dark);
-	box-shadow: 0 1px 3px var(--card-shadow-dark);
+.tweet-header {
+  background: var(--tweet-header-bg);
+  margin: -1px -1px 0;
+  padding: 0.5rem 1rem;
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
 }
 
-.dark .card:hover {
-	background-color: var(--card-hover-bg-dark);
-	border-color: var(--card-hover-border);
-	box-shadow: 0 4px 12px var(--card-hover-shadow);
+.tweet-card.card {
+  border-color: var(--tweet-border);
 }
 
-/* card content elements */
 .card-title {
-	color: var(--card-title);
-	transition: color var(--card-transition-duration) var(--card-transition-easing);
+  color: var(--card-title);
+  transition: color 100ms ease-out;
 }
 
 .card:hover .card-title {
-	color: var(--card-title-hover);
+  color: var(--card-title-hover);
 }
 
 .card-text {
-	color: var(--card-text);
+  color: var(--card-text);
 }
 
 .card-meta {
-	color: var(--card-meta);
+  color: var(--card-meta);
 }
 
-/* card image/thumbnail */
 .card-image {
-	overflow: hidden;
-	background-color: var(--card-image-bg);
+  overflow: hidden;
+  border-radius: var(--card-radius) var(--card-radius) 0 0;
 }
 
 .card-image img {
-	transition: transform var(--card-transition-duration) var(--card-transition-easing);
+  transition: transform 100ms ease-out;
 }
 
 .card:hover .card-image img {
-	transform: scale(var(--card-image-hover-scale));
+  transform: scale(1.02);
 }
 
-/* card badges/tags */
 .card-badge {
-	background-color: var(--card-badge-bg);
-	color: var(--card-badge-text);
-	border-radius: calc(var(--card-radius) / 2);
+  background-color: var(--card-badge-bg);
+  color: var(--card-badge-text);
 }
 
 .dark .card-badge {
-	background-color: var(--card-badge-bg-dark);
+  background-color: var(--card-badge-bg-dark);
 }
 
-/* link wrapper for entire card */
 .card-link {
-	display: block;
-	color: inherit;
-	text-decoration: none;
-	overflow: hidden;
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
 }
 
-/* variants */
-.card-interactive {
-	cursor: pointer;
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
+
+  @media (min-width: 768px) {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: start;
+  }
 }
 
-.card-flat {
-	box-shadow: none;
-	border: 1px solid var(--card-border);
+.card-list-single {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
 }
 
-.card-elevated {
-	box-shadow: 0 4px 6px var(--card-shadow);
+.card-list > *:has(.card:hover) {
+  z-index: 1;
+  position: relative;
 }
 
-.card-elevated:hover {
-	box-shadow: 0 8px 20px var(--card-hover-shadow);
+.card-grid {
+  display: grid;
+  gap: var(--card-gap);
+}
+
+.card-grid > *:has(.card:hover) {
+  z-index: 1;
+  position: relative;
+}
+
+.card-masonry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--card-gap);
+
+  @media (min-width: 768px) {
+    columns: 2;
+    column-gap: var(--card-gap);
+    display: block;
+
+    > * {
+      break-inside: avoid;
+      margin-bottom: var(--card-gap);
+    }
+  }
 }

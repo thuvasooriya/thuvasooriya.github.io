@@ -1,48 +1,92 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 
-/** filter out draft posts based on the environment */
-export async function getAllPosts(): Promise<CollectionEntry<"post">[]> {
-	return await getCollection("post", ({ data }) => {
-		return import.meta.env.PROD ? !data.draft : true;
+type ContentCollection = "post" | "note" | "proj";
+type ContentEntry<T extends ContentCollection> = CollectionEntry<T>;
+
+// filter out drafts in production
+function filterDrafts<T extends { data: { draft?: boolean } }>(entries: T[]): T[] {
+	return entries.filter((entry) => (import.meta.env.PROD ? !entry.data.draft : true));
+}
+
+// sort by publish date (newest first)
+export function sortByDate<T extends { data: { published?: Date | undefined } }>(
+	entries: T[],
+	order: "asc" | "desc" = "desc",
+): T[] {
+	return [...entries].sort((a, b) => {
+		const dateA = a.data.published?.getTime() ?? 0;
+		const dateB = b.data.published?.getTime() ?? 0;
+		return order === "desc" ? dateB - dateA : dateA - dateB;
 	});
 }
 
-/** groups posts by year (based on option siteConfig.sortPostsByUpdatedDate), using the year as the key
- *  Note: This function doesn't filter draft posts, pass it the result of getAllPosts above to do so.
- */
-export function groupPostsByYear(posts: CollectionEntry<"post">[]) {
-	return posts.reduce<Record<string, CollectionEntry<"post">[]>>((acc, post) => {
-		const year = post.data.publishDate.getFullYear();
+// get all posts (filtered by draft status)
+export async function getAllPosts(): Promise<ContentEntry<"post">[]> {
+	const posts = await getCollection("post");
+	return filterDrafts(posts);
+}
+
+// get all notes
+export async function getAllNotes(): Promise<ContentEntry<"note">[]> {
+	return await getCollection("note");
+}
+
+// get all projects
+export async function getAllProjects(): Promise<ContentEntry<"proj">[]> {
+	return await getCollection("proj");
+}
+
+// group entries by year
+export function groupByYear<T extends { data: { published: Date } }>(
+	entries: T[],
+): Record<string, T[]> {
+	return entries.reduce<Record<string, T[]>>((acc, entry) => {
+		const year = entry.data.published.getFullYear().toString();
 		if (!acc[year]) {
 			acc[year] = [];
 		}
-		acc[year]?.push(post);
+		acc[year].push(entry);
 		return acc;
 	}, {});
 }
 
-/** returns all tags created from posts (inc duplicate tags)
- *  Note: This function doesn't filter draft posts, pass it the result of getAllPosts above to do so.
- *  */
-export function getAllTags(posts: CollectionEntry<"post">[]) {
-	return posts.flatMap((post) => [...post.data.tags]);
+// legacy alias
+export function groupPostsByYear(posts: ContentEntry<"post">[]) {
+	return groupByYear(posts);
 }
 
-/** returns all unique tags created from posts
- *  Note: This function doesn't filter draft posts, pass it the result of getAllPosts above to do so.
- *  */
-export function getUniqueTags(posts: CollectionEntry<"post">[]) {
-	return [...new Set(getAllTags(posts))];
+// get all tags from entries (includes duplicates)
+export function getAllTags<T extends { data: { tags?: string[] } }>(entries: T[]): string[] {
+	return entries.flatMap((entry) => entry.data.tags ?? []);
 }
 
-/** returns a count of each unique tag - [[tagName, count], ...]
- *  Note: This function doesn't filter draft posts, pass it the result of getAllPosts above to do so.
- *  */
-export function getUniqueTagsWithCount(posts: CollectionEntry<"post">[]): [string, number][] {
-	return [
-		...getAllTags(posts).reduce(
-			(acc, t) => acc.set(t, (acc.get(t) ?? 0) + 1),
-			new Map<string, number>(),
-		),
-	].sort((a, b) => b[1] - a[1]);
+// get unique tags
+export function getUniqueTags<T extends { data: { tags?: string[] } }>(entries: T[]): string[] {
+	return [...new Set(getAllTags(entries))];
+}
+
+// get unique tags with count, sorted by count descending
+export function getUniqueTagsWithCount<T extends { data: { tags?: string[] } }>(
+	entries: T[],
+): [string, number][] {
+	const tagCounts = getAllTags(entries).reduce(
+		(acc, tag) => acc.set(tag, (acc.get(tag) ?? 0) + 1),
+		new Map<string, number>(),
+	);
+	return [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+// get tag counts as object
+export function getTagCounts<T extends { data: { tags?: string[] } }>(
+	entries: T[],
+): Record<string, number> {
+	return Object.fromEntries(getUniqueTagsWithCount(entries));
+}
+
+// filter entries by tag
+export function filterByTag<T extends { data: { tags?: string[] } }>(
+	entries: T[],
+	tag: string,
+): T[] {
+	return entries.filter((entry) => entry.data.tags?.includes(tag));
 }

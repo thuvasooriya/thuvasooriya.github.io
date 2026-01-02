@@ -20,7 +20,7 @@ const { tweet } = Astro.props;
 const meta = {
 	description:
 		tweet.data.description ||
-		`read about my tweet posted on: ${tweet.data.publishDate.toLocaleDateString()}`,
+		`read about my tweet posted on: ${tweet.data.published.toLocaleDateString()}`,
 	title: tweet.data.title,
 };
 ---

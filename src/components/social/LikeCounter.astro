@@ -1,0 +1,115 @@
+---
+import type { HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"div"> {
+	slug: string;
+	content_type: "post" | "tweet" | "project" | "wiki";
+	format?: "icon" | "text";
+}
+
+const { slug, content_type, format = "text", class: className, ...rest } = Astro.props;
+---
+
+<div class={`like-counter flex items-center gap-1.5 ${className || ""}`} data-slug={slug} data-type={content_type} {...rest}>
+	{
+		format === "icon" ? (
+			<>
+				<svg class="h-4 w-4 text-zinc-500 dark:text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+				</svg>
+				<span class="like-count text-sm font-medium text-zinc-500 dark:text-zinc-400">0</span>
+			</>
+		) : (
+			<span class="text-sm text-zinc-500 dark:text-zinc-400">
+				<span class="like-count font-medium">0</span> likes
+			</span>
+		)
+	}
+</div>
+
+<style>
+	.like-count {
+		font-variant-numeric: tabular-nums;
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.like-count.updating {
+			animation: blink 0.3s ease-in-out;
+		}
+	}
+
+	@keyframes blink {
+		0%, 100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.5;
+		}
+	}
+</style>
+
+<script>
+	interface LikeResponse {
+		user_likes: number;
+		total_likes: number;
+		unique_users: number;
+	}
+
+	const WORKER_URL = import.meta.env.PUBLIC_ANALYTICS_URL || "http://localhost:8787";
+
+	class LikeCounterController {
+		private count_el: HTMLSpanElement;
+		private slug: string;
+		private type: string;
+
+		constructor(wrapper: HTMLElement) {
+			this.count_el = wrapper.querySelector(".like-count")!;
+			this.slug = wrapper.dataset.slug!;
+			this.type = wrapper.dataset.type!;
+
+			this.init();
+		}
+
+		private async init() {
+			await this.fetch_likes();
+		}
+
+		private async fetch_likes() {
+			try {
+				const url = `${WORKER_URL}/api/analytics/like/${this.type}/${this.slug}`;
+				const res = await fetch(url);
+				if (!res.ok) return;
+
+				const data: LikeResponse = await res.json();
+				this.update_count(data.total_likes);
+			} catch (error) {
+				console.error("Failed to fetch likes:", error);
+				this.count_el.textContent = "—";
+			}
+		}
+
+		private update_count(count: number) {
+			this.count_el.classList.add("updating");
+			this.count_el.textContent = String(count);
+			setTimeout(() => {
+				this.count_el.classList.remove("updating");
+			}, 300);
+		}
+	}
+
+	function init_like_counters() {
+		document.querySelectorAll<HTMLElement>(".like-counter").forEach((wrapper) => {
+			if (wrapper.dataset.initialized === "true") return;
+			wrapper.dataset.initialized = "true";
+			new LikeCounterController(wrapper);
+		});
+	}
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", init_like_counters);
+	} else {
+		init_like_counters();
+	}
+
+	document.addEventListener("astro:page-load", init_like_counters);
+</script>
