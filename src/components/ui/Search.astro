@@ -1,22 +1,17 @@
 ---
-// Heavy inspiration taken from Astro Starlight -> https://github.com/withastro/starlight/blob/main/packages/starlight/components/Search.astro
-
+import { Icon } from "astro-icon/components";
+import { getGlobalTagNames } from "@/data/content";
 import "@/styles/blocks/search.css";
+
+const allTags = await getGlobalTagNames();
 ---
 
-<site-search id="search">
-	<dialog
-		aria-label="search"
-		class="search-dialog bg-global-bg h-full max-h-full w-full max-w-full border border-border-default shadow-sm backdrop:backdrop-blur-sm open:flex sm:mx-auto sm:mt-16 sm:mb-auto sm:h-max sm:max-h-[calc(100%-8rem)] sm:min-h-[15rem] sm:w-5/6 sm:max-w-[48rem] sm:rounded-md"
-	>
-		<div class="dialog-frame flex grow flex-col gap-4 p-6 pt-12 sm:pt-6">
-			<button
-				class="ms-auto cursor-pointer rounded-md bg-surface-2 p-2 font-semibold"
-				data-close-modal>close</button
-			>
+<site-search id="search" data-all-tags={JSON.stringify(allTags)}>
+	<dialog aria-label="search" class="search-dialog">
+		<div class="dialog-frame">
 			{
 				import.meta.env.DEV ? (
-					<div class="mx-auto text-center">
+					<div class="dev-notice">
 						<p>
 							search is only available in production builds. <br />
 							try building and previewing the site to test it out locally.
@@ -24,7 +19,68 @@ import "@/styles/blocks/search.css";
 					</div>
 				) : (
 					<div class="search-container">
-						<div id="cactus__search" />
+						<div class="search-header">
+							<div class="search-controls">
+								<div class="filter-bar" hidden>
+									<div class="active-filters"></div>
+									<div class="tag-suggestions"></div>
+								</div>
+								<div class="search-input-container">
+									<Icon name="lucide:search" class="search-icon" />
+									<input
+										type="search"
+										class="search-input"
+										placeholder="search..."
+										autocomplete="off"
+										autocorrect="off"
+										autocapitalize="off"
+										spellcheck="false"
+									/>
+								<button type="button" class="title-only-toggle" aria-pressed="false" title="search titles only" hidden>
+									<Icon name="lucide:heading" />
+								</button>
+									<button type="button" class="search-clear" hidden>
+										<Icon name="lucide:x" />
+									</button>
+								</div>
+								<div class="collection-toggles">
+									<button class="collection-chip" data-collection="post" aria-pressed="false">
+										<Icon name="lucide:file-text" class="collection-icon" />
+										<span>posts</span>
+									</button>
+									<button class="collection-chip" data-collection="project" aria-pressed="false">
+										<Icon name="lucide:folder" class="collection-icon" />
+										<span>projects</span>
+									</button>
+									<button class="collection-chip" data-collection="wiki" aria-pressed="false">
+										<Icon name="lucide:book-open" class="collection-icon" />
+										<span>wiki</span>
+									</button>
+									<button class="collection-chip" data-collection="tweet" aria-pressed="false">
+										<Icon name="lucide:message-circle" class="collection-icon" />
+										<span>tweets</span>
+									</button>
+								</div>
+							</div>
+						</div>
+						<div class="search-results-wrapper">
+							<div class="search-results">
+								<div class="search-empty-state" hidden>
+									<Icon name="lucide:search-x" class="empty-icon" />
+									<p class="empty-title">no results found</p>
+									<p class="empty-subtitle">try different keywords or filters</p>
+								</div>
+							</div>
+						</div>
+						<div class="dialog-footer">
+							<button class="load-more-btn" hidden>
+								<Icon name="lucide:chevrons-down" />
+								<span class="load-more-text">more</span>
+							</button>
+							<button class="close-btn" data-close-modal>
+								<Icon name="lucide:x" />
+							</button>
+						</div>
 					</div>
 				)
 			}
@@ -32,79 +88,628 @@ import "@/styles/blocks/search.css";
 	</dialog>
 </site-search>
 
-<style>
-	/* snappy animation for search dialog */
-	.search-dialog {
-		opacity: 0;
-		transform: scale(0.95) translateY(-10px);
-		transition:
-			opacity 150ms cubic-bezier(0.4, 0, 0.2, 1),
-			transform 150ms cubic-bezier(0.4, 0, 0.2, 1),
-			display 150ms cubic-bezier(0.4, 0, 0.2, 1) allow-discrete,
-			overlay 150ms cubic-bezier(0.4, 0, 0.2, 1) allow-discrete;
-	}
-
-	.search-dialog[open] {
-		opacity: 1;
-		transform: scale(1) translateY(0);
-	}
-
-	@starting-style {
-		.search-dialog[open] {
-			opacity: 0;
-			transform: scale(0.95) translateY(-10px);
-		}
-	}
-
-	.search-dialog::backdrop {
-		background-color: rgb(0 0 0 / 0);
-		transition:
-			background-color 150ms cubic-bezier(0.4, 0, 0.2, 1),
-			overlay 150ms cubic-bezier(0.4, 0, 0.2, 1) allow-discrete,
-			display 150ms cubic-bezier(0.4, 0, 0.2, 1) allow-discrete;
-	}
-
-	.search-dialog[open]::backdrop {
-		background-color: rgb(0 0 0 / 0.5);
-	}
-
-	@starting-style {
-		.search-dialog[open]::backdrop {
-			background-color: rgb(0 0 0 / 0);
-		}
-	}
-</style>
-
 <script>
+	const STORAGE_KEY = "site-search-state";
+	const PAGE_SIZE = 10;
+
+	interface SearchState {
+		collections: string[];
+		tags: string[];
+		titleOnly: boolean;
+		query: string;
+	}
+
+	interface PagefindResult {
+		id: string;
+		data: () => Promise<PagefindResultData>;
+	}
+
+	interface PagefindResultData {
+		url: string;
+		excerpt: string;
+		meta: {
+			title?: string;
+			image?: string;
+		};
+		filters?: Record<string, string[]>;
+		sub_results?: Array<{
+			title: string;
+			url: string;
+			excerpt: string;
+		}>;
+	}
+
+	interface PagefindSearchResponse {
+		results: PagefindResult[];
+	}
+
+	interface Pagefind {
+		init: () => Promise<void>;
+		search: (query: string | null, options?: { filters?: Record<string, unknown> }) => Promise<PagefindSearchResponse>;
+		preload: (query: string, options?: { filters?: Record<string, unknown> }) => void;
+		filters: () => Promise<Record<string, Record<string, number>>>;
+	}
+
+	type CollectionType = "post" | "project" | "wiki" | "tweet";
+
+	const COLLECTION_LABELS: Record<CollectionType, string> = {
+		post: "post",
+		project: "project",
+		wiki: "wiki",
+		tweet: "tweet",
+	};
+
+	function loadState(): SearchState {
+		try {
+			const stored = localStorage.getItem(STORAGE_KEY);
+			if (stored) {
+				const parsed = JSON.parse(stored);
+				return {
+					collections: Array.isArray(parsed.collections) ? parsed.collections : [],
+					tags: Array.isArray(parsed.tags) ? parsed.tags : [],
+					titleOnly: Boolean(parsed.titleOnly),
+					query: typeof parsed.query === "string" ? parsed.query : "",
+				};
+			}
+		} catch {}
+		return { collections: [], tags: [], titleOnly: false, query: "" };
+	}
+
+	function saveState(state: SearchState) {
+		try {
+			localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+		} catch {}
+	}
+
+	function getCollectionFromUrl(url: string): CollectionType | null {
+		if (url.startsWith("/posts/")) return "post";
+		if (url.startsWith("/projects/")) return "project";
+		if (url.startsWith("/wiki/")) return "wiki";
+		if (url.startsWith("/tweets/") && url !== "/tweets/" && !url.match(/^\/tweets\/\d+\/$/)) return "tweet";
+		return null;
+	}
+
+	function highlightMatches(html: string): string {
+		return html.replace(/<mark>/g, '<mark class="search-highlight">').replace(/<\/mark>/g, "</mark>");
+	}
+
+	function highlightQuery(text: string, query: string): string {
+		if (!query.trim()) return text;
+		const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		const regex = new RegExp(`(${escaped})`, "gi");
+		return text.replace(regex, '<mark class="search-highlight">$1</mark>');
+	}
+
 	class SiteSearch extends HTMLElement {
 		#closeBtn: HTMLButtonElement;
+		#loadMoreBtn: HTMLButtonElement;
 		#dialog: HTMLDialogElement;
-		#dialogFrame: HTMLDivElement;
-		#controller: AbortController;
+		#searchInput: HTMLInputElement | null = null;
+		#searchClear: HTMLButtonElement | null = null;
+		#titleOnlyToggle: HTMLButtonElement | null = null;
+		#filterBar: HTMLElement | null = null;
+		#resultsContainer: HTMLElement | null = null;
+		#emptyState: HTMLElement | null = null;
+		#activeFiltersContainer: HTMLElement | null = null;
+		#tagSuggestionsContainer: HTMLElement | null = null;
+	#controller: AbortController;
+	#pagefind: Pagefind | null = null;
+	#pagefindPromise: Promise<void> | null = null;
+	#allTags: string[] = [];
+	#state: SearchState = { collections: [], tags: [], titleOnly: false, query: "" };
+	#currentQuery: string = "";
+	#currentResults: PagefindResult[] = [];
+	#loadedResults: PagefindResultData[] = [];
+	#loadedCount: number = 0;
+	#searchTimeout: number | null = null;
+	#focusedIndex: number = -1;
 
 		constructor() {
 			super();
 			this.#closeBtn = this.querySelector<HTMLButtonElement>("button[data-close-modal]")!;
+			this.#loadMoreBtn = this.querySelector<HTMLButtonElement>(".load-more-btn")!;
 			this.#dialog = this.querySelector("dialog")!;
-			this.#dialogFrame = this.querySelector(".dialog-frame")!;
 			this.#controller = new AbortController();
 
-			this.#closeBtn.addEventListener("click", this.closeModal);
-			this.#dialog.addEventListener("close", () => {
-				window.removeEventListener("click", this.onWindowClick);
-			});
+			try {
+				this.#allTags = JSON.parse(this.dataset.allTags || "[]");
+			} catch {
+				this.#allTags = [];
+			}
 
-			// only add pagefind in production
+			this.#state = loadState();
+
+			this.#closeBtn.addEventListener("click", this.closeModal);
+			this.#loadMoreBtn.addEventListener("click", () => this.#loadMoreResults());
+			this.#dialog.addEventListener("click", this.onDialogClick);
+
 			if (import.meta.env.DEV) return;
-			const onIdle = window.requestIdleCallback || ((cb) => setTimeout(cb, 1));
-			onIdle(async () => {
-				const { PagefindUI } = await import("@pagefind/default-ui");
-				new PagefindUI({
-					baseUrl: import.meta.env.BASE_URL,
-					bundlePath: import.meta.env.BASE_URL.replace(/\/$/, "") + "/pagefind/",
-					element: "#cactus__search",
-					showImages: false,
-					showSubResults: true,
+
+			this.#searchInput = this.querySelector<HTMLInputElement>(".search-input");
+			this.#searchClear = this.querySelector<HTMLButtonElement>(".search-clear");
+			this.#titleOnlyToggle = this.querySelector<HTMLButtonElement>(".title-only-toggle");
+			this.#filterBar = this.querySelector<HTMLElement>(".filter-bar");
+			this.#resultsContainer = this.querySelector<HTMLElement>(".search-results");
+			this.#emptyState = this.querySelector<HTMLElement>(".search-empty-state");
+			this.#activeFiltersContainer = this.querySelector<HTMLElement>(".active-filters");
+			this.#tagSuggestionsContainer = this.querySelector<HTMLElement>(".tag-suggestions");
+
+			this.#initCollectionToggles();
+			this.#initActiveFilters();
+			this.#initSearchInput();
+			this.#initTitleOnlyToggle();
+			this.#renderActiveFilters();
+
+			this.#loadPagefind();
+		}
+
+	async #loadPagefind() {
+		if (this.#pagefind) return;
+		if (this.#pagefindPromise) return this.#pagefindPromise;
+
+		this.#pagefindPromise = (async () => {
+			try {
+				const pagefindPath = `${window.location.origin}/pagefind/pagefind.js`;
+				const pagefindModule = await import(/* @vite-ignore */ pagefindPath);
+				this.#pagefind = pagefindModule as Pagefind;
+				await this.#pagefind.init();
+				await this.#pagefind.filters();
+			} catch (e) {
+				console.error("Failed to load Pagefind:", e);
+				this.#pagefindPromise = null;
+			}
+		})();
+
+		return this.#pagefindPromise;
+	}
+
+	#initSearchInput() {
+		if (!this.#searchInput || !this.#searchClear) return;
+
+		this.#searchInput.addEventListener("input", () => {
+			const query = this.#searchInput!.value;
+			this.#searchClear!.hidden = query.length === 0;
+			this.#updateTitleOnlyVisibility();
+			this.#currentQuery = query;
+			this.#state.query = query;
+			saveState(this.#state);
+
+			if (this.#pagefind && query.length > 0) {
+				this.#pagefind.preload(query, { filters: this.#buildFilters() });
+			}
+
+			this.#debouncedSearch();
+		});
+
+		this.#searchClear.addEventListener("click", () => {
+			this.#searchInput!.value = "";
+			this.#searchClear!.hidden = true;
+			this.#updateTitleOnlyVisibility();
+			this.#currentQuery = "";
+			this.#state.query = "";
+			saveState(this.#state);
+			this.#clearResults();
+			this.#hideTagSuggestions();
+			this.#searchInput!.focus();
+		});
+
+		this.#searchInput.addEventListener("keydown", (e) => {
+			if (e.key === "Escape" && this.#searchInput!.value) {
+				e.preventDefault();
+				e.stopPropagation();
+				this.#searchInput!.value = "";
+				this.#searchClear!.hidden = true;
+				this.#updateTitleOnlyVisibility();
+				this.#currentQuery = "";
+				this.#state.query = "";
+				saveState(this.#state);
+				this.#clearResults();
+				this.#hideTagSuggestions();
+			} else if (e.key === "ArrowDown") {
+				e.preventDefault();
+				this.#moveFocus(1);
+			} else if (e.key === "ArrowUp") {
+				e.preventDefault();
+				this.#moveFocus(-1);
+			} else if (e.key === "Enter" && this.#focusedIndex >= 0) {
+				e.preventDefault();
+				this.#activateFocusedResult();
+			}
+		});
+	}
+
+	#initTitleOnlyToggle() {
+		if (!this.#titleOnlyToggle) return;
+
+		if (this.#state.titleOnly) {
+			this.#titleOnlyToggle.setAttribute("aria-pressed", "true");
+			this.#titleOnlyToggle.hidden = false;
+		}
+
+		this.#titleOnlyToggle.addEventListener("click", () => {
+			const isActive = this.#titleOnlyToggle!.getAttribute("aria-pressed") === "true";
+			this.#state.titleOnly = !isActive;
+			this.#titleOnlyToggle!.setAttribute("aria-pressed", String(!isActive));
+			this.#updateTitleOnlyVisibility();
+			saveState(this.#state);
+			if (this.#currentQuery) this.#performSearch();
+		});
+	}
+
+	#updateTitleOnlyVisibility() {
+		if (!this.#titleOnlyToggle) return;
+		const hasQuery = this.#searchInput?.value.length ?? 0 > 0;
+		const isActive = this.#titleOnlyToggle.getAttribute("aria-pressed") === "true";
+		this.#titleOnlyToggle.hidden = !hasQuery && !isActive;
+	}
+
+		#moveFocus(direction: number) {
+			const results = this.#resultsContainer?.querySelectorAll<HTMLAnchorElement>(".search-result");
+			if (!results || results.length === 0) return;
+
+			const prev = results[this.#focusedIndex];
+			if (prev) prev.classList.remove("is-focused");
+
+			this.#focusedIndex += direction;
+			if (this.#focusedIndex < 0) this.#focusedIndex = results.length - 1;
+			if (this.#focusedIndex >= results.length) this.#focusedIndex = 0;
+
+			const current = results[this.#focusedIndex];
+			if (current) {
+				current.classList.add("is-focused");
+				current.scrollIntoView({ block: "nearest", behavior: "smooth" });
+			}
+		}
+
+		#activateFocusedResult() {
+			const results = this.#resultsContainer?.querySelectorAll<HTMLAnchorElement>(".search-result");
+			if (!results || this.#focusedIndex < 0 || this.#focusedIndex >= results.length) return;
+			const result = results[this.#focusedIndex];
+			if (result) result.click();
+		}
+
+		#debouncedSearch() {
+			if (this.#searchTimeout) clearTimeout(this.#searchTimeout);
+			this.#searchTimeout = window.setTimeout(() => {
+				this.#performSearch();
+				this.#updateTagSuggestions();
+			}, 300);
+		}
+
+	async #performSearch() {
+		const hasQuery = this.#currentQuery.trim().length > 0;
+		const hasFilters = this.#state.tags.length > 0 || this.#state.collections.length > 0;
+
+		if (!this.#pagefind || (!hasQuery && !hasFilters)) {
+			this.#clearResults();
+			return;
+		}
+
+		this.#renderLoadingState();
+
+		try {
+			const searchQuery = hasQuery ? this.#currentQuery : null;
+			const filters = this.#buildFilters();
+			const response = await this.#pagefind.search(searchQuery, { filters });
+
+			this.#currentResults = response.results;
+			this.#loadedResults = [];
+			this.#loadedCount = 0;
+			this.#focusedIndex = -1;
+			await this.#loadMoreResults();
+		} catch (e) {
+			console.error("Search error:", e);
+			this.#renderError();
+		}
+	}
+
+		async #loadMoreResults() {
+			if (!this.#resultsContainer) return;
+
+			if (this.#loadedCount >= this.#currentResults.length) {
+				this.#loadMoreBtn.hidden = true;
+				if (this.#loadedCount === 0) {
+					this.#renderResults(false);
+				}
+				return;
+			}
+
+			const toLoad = this.#currentResults.slice(this.#loadedCount, this.#loadedCount + PAGE_SIZE);
+			const loaded = await Promise.all(toLoad.map((r) => r.data()));
+
+			let filtered = loaded.filter((r) => getCollectionFromUrl(r.url) !== null);
+
+			if (this.#state.titleOnly && this.#currentQuery) {
+				const query = this.#currentQuery.toLowerCase();
+				filtered = filtered.filter((r) => {
+					const title = (r.meta.title || "").toLowerCase();
+					return title.includes(query);
+				});
+			}
+
+			this.#loadedResults.push(...filtered);
+			this.#loadedCount += loaded.length;
+			const hasMore = this.#loadedCount < this.#currentResults.length;
+			this.#renderResults(hasMore);
+		}
+
+		#clearResults() {
+			if (!this.#resultsContainer) return;
+			const groups = this.#resultsContainer.querySelectorAll(".result-group");
+			groups.forEach((g) => g.remove());
+			if (this.#emptyState) this.#emptyState.hidden = true;
+			this.#currentResults = [];
+			this.#loadedResults = [];
+			this.#loadedCount = 0;
+			this.#focusedIndex = -1;
+			this.#loadMoreBtn.hidden = true;
+		}
+
+		#renderLoadingState() {
+			if (!this.#resultsContainer) return;
+			const existing = this.#resultsContainer.querySelector(".search-status");
+			if (!existing) {
+				const status = document.createElement("div");
+				status.className = "search-status";
+				status.textContent = "searching...";
+				this.#resultsContainer.insertBefore(status, this.#resultsContainer.firstChild);
+			}
+			if (this.#emptyState) this.#emptyState.hidden = true;
+			this.#loadMoreBtn.hidden = true;
+		}
+
+		#renderError() {
+			if (!this.#resultsContainer) return;
+			this.#clearResults();
+			const status = document.createElement("div");
+			status.className = "search-status search-error";
+			status.textContent = "something went wrong";
+			this.#resultsContainer.insertBefore(status, this.#resultsContainer.firstChild);
+			this.#loadMoreBtn.hidden = true;
+		}
+
+		#renderResults(hasMore: boolean) {
+			if (!this.#resultsContainer) return;
+
+			const statusEl = this.#resultsContainer.querySelector(".search-status");
+			if (statusEl) statusEl.remove();
+
+			const existingGroups = this.#resultsContainer.querySelectorAll(".result-group");
+			existingGroups.forEach((g) => g.remove());
+
+			if (this.#loadedResults.length === 0) {
+				if (this.#emptyState) {
+					this.#emptyState.hidden = false;
+					const subtitle = this.#emptyState.querySelector(".empty-subtitle");
+					if (subtitle) {
+						if (this.#currentQuery.trim()) {
+							subtitle.textContent = `no results for "${this.#currentQuery}"`;
+						} else if (this.#state.tags.length > 0) {
+							const tagList = this.#state.tags.map((t) => `#${t}`).join(", ");
+							subtitle.textContent = `no content tagged ${tagList}`;
+						} else if (this.#state.collections.length > 0) {
+							subtitle.textContent = "no content in selected collections";
+						} else {
+							subtitle.textContent = "try different keywords or filters";
+						}
+					}
+				}
+				this.#loadMoreBtn.hidden = true;
+				return;
+			}
+
+			if (this.#emptyState) this.#emptyState.hidden = true;
+
+			const grouped = new Map<CollectionType, PagefindResultData[]>();
+			for (const result of this.#loadedResults) {
+				const collection = getCollectionFromUrl(result.url);
+				if (collection) {
+					if (!grouped.has(collection)) grouped.set(collection, []);
+					grouped.get(collection)!.push(result);
+				}
+			}
+
+			const order: CollectionType[] = ["post", "project", "wiki", "tweet"];
+			const fragment = document.createDocumentFragment();
+
+			for (const collection of order) {
+				const items = grouped.get(collection);
+				if (!items || items.length === 0) continue;
+
+				const group = document.createElement("div");
+				group.className = "result-group";
+				group.dataset.collection = collection;
+
+				const header = document.createElement("div");
+				header.className = "result-group-header";
+				header.innerHTML = `<span class="result-group-label">${COLLECTION_LABELS[collection]}</span><span class="result-group-count">${items.length}</span>`;
+				group.appendChild(header);
+
+				const list = document.createElement("div");
+				list.className = "result-group-list";
+
+				for (const result of items) {
+					const item = document.createElement("a");
+					item.href = result.url;
+					item.className = "search-result";
+
+					const title = document.createElement("div");
+					title.className = "search-result-title";
+					const titleText = result.meta.title || result.url;
+					if (this.#state.titleOnly && this.#currentQuery) {
+						title.innerHTML = highlightQuery(titleText, this.#currentQuery);
+					} else {
+						title.textContent = titleText;
+					}
+					item.appendChild(title);
+
+					if (result.excerpt && !this.#state.titleOnly) {
+						const excerpt = document.createElement("div");
+						excerpt.className = "search-result-excerpt";
+						excerpt.innerHTML = highlightMatches(result.excerpt);
+						item.appendChild(excerpt);
+					}
+
+					list.appendChild(item);
+				}
+
+				group.appendChild(list);
+				fragment.appendChild(group);
+			}
+
+			this.#resultsContainer.appendChild(fragment);
+
+			this.#loadMoreBtn.hidden = !hasMore;
+			if (hasMore) {
+				const remaining = this.#currentResults.length - this.#loadedCount;
+				const text = this.#loadMoreBtn.querySelector(".load-more-text");
+				if (text) text.textContent = `${remaining} more`;
+			}
+		}
+
+		#initCollectionToggles() {
+			const chips = this.querySelectorAll<HTMLButtonElement>(".collection-chip");
+			chips.forEach((chip) => {
+				const collection = chip.dataset.collection;
+				if (collection && this.#state.collections.includes(collection)) {
+					chip.setAttribute("aria-pressed", "true");
+				}
+
+				chip.addEventListener("click", () => {
+					const coll = chip.dataset.collection;
+					if (!coll) return;
+
+					const isActive = chip.getAttribute("aria-pressed") === "true";
+					if (isActive) {
+						chip.setAttribute("aria-pressed", "false");
+						this.#state.collections = this.#state.collections.filter((c) => c !== coll);
+					} else {
+						chip.setAttribute("aria-pressed", "true");
+						this.#state.collections.push(coll);
+					}
+
+					saveState(this.#state);
+					this.#renderActiveFilters();
+					this.#performSearch();
+				});
+			});
+		}
+
+		#initActiveFilters() {
+			if (!this.#activeFiltersContainer) return;
+
+			this.#activeFiltersContainer.addEventListener("click", (e) => {
+				const target = e.target as HTMLElement;
+				const chip = target.closest(".filter-chip") as HTMLElement;
+				if (!chip) return;
+
+				const type = chip.dataset.type;
+				const value = chip.dataset.value;
+				if (!type || !value) return;
+
+				if (type === "collection") {
+					this.#state.collections = this.#state.collections.filter((c) => c !== value);
+					const toggle = this.querySelector<HTMLButtonElement>(`.collection-chip[data-collection="${value}"]`);
+					toggle?.setAttribute("aria-pressed", "false");
+				} else if (type === "tag") {
+					this.#state.tags = this.#state.tags.filter((t) => t !== value);
+				}
+
+				saveState(this.#state);
+				this.#renderActiveFilters();
+				this.#performSearch();
+			});
+		}
+
+		#renderActiveFilters() {
+			if (!this.#activeFiltersContainer || !this.#filterBar) return;
+
+			const hasFilters = this.#state.collections.length > 0 || this.#state.tags.length > 0;
+			const hasTagSuggestions = this.#tagSuggestionsContainer && this.#tagSuggestionsContainer.children.length > 0;
+
+			if (!hasFilters && !hasTagSuggestions) {
+				this.#filterBar.hidden = true;
+				this.#activeFiltersContainer.innerHTML = "";
+				return;
+			}
+
+			this.#filterBar.hidden = false;
+
+			if (!hasFilters) {
+				this.#activeFiltersContainer.innerHTML = "";
+				return;
+			}
+
+			const chips: string[] = [];
+			for (const coll of this.#state.collections) {
+				chips.push(`<button class="filter-chip" data-type="collection" data-value="${coll}"><span>${coll}</span><svg class="filter-chip-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`);
+			}
+			for (const tag of this.#state.tags) {
+				chips.push(`<button class="filter-chip filter-chip-tag" data-type="tag" data-value="${tag}"><span>#${tag}</span><svg class="filter-chip-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>`);
+			}
+			this.#activeFiltersContainer.innerHTML = chips.join("");
+		}
+
+		#buildFilters(): Record<string, unknown> {
+			const filters: Record<string, unknown> = {};
+			if (this.#state.collections.length > 0) {
+				filters.content_type = { any: this.#state.collections };
+			}
+			if (this.#state.tags.length > 0) {
+				filters.tag = { all: this.#state.tags };
+			}
+			return filters;
+		}
+
+		#hideTagSuggestions() {
+			if (!this.#tagSuggestionsContainer || !this.#filterBar) return;
+			this.#tagSuggestionsContainer.innerHTML = "";
+			this.#renderActiveFilters();
+		}
+
+		#updateTagSuggestions() {
+			if (!this.#tagSuggestionsContainer || !this.#filterBar) return;
+
+			if (!this.#currentQuery || this.#currentQuery.length < 2) {
+				this.#hideTagSuggestions();
+				return;
+			}
+
+			const query = this.#currentQuery.toLowerCase();
+			const matchingTags = this.#allTags
+				.filter((tag) => tag.toLowerCase().includes(query))
+				.filter((tag) => !this.#state.tags.includes(tag))
+				.slice(0, 5);
+
+			if (matchingTags.length === 0) {
+				this.#tagSuggestionsContainer.innerHTML = "";
+				this.#renderActiveFilters();
+				return;
+			}
+
+			this.#filterBar.hidden = false;
+
+			this.#tagSuggestionsContainer.innerHTML = matchingTags
+				.map((tag) => `<button class="tag-suggestion" data-tag="${tag}">+ #${tag}</button>`)
+				.join("");
+
+			this.#tagSuggestionsContainer.querySelectorAll<HTMLButtonElement>(".tag-suggestion").forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const tag = btn.dataset.tag;
+					if (tag && !this.#state.tags.includes(tag)) {
+						this.#state.tags.push(tag);
+						this.#state.query = "";
+						saveState(this.#state);
+						if (this.#searchInput) {
+							this.#searchInput.value = "";
+							this.#searchClear!.hidden = true;
+						}
+						this.#currentQuery = "";
+						this.#clearResults();
+						this.#renderActiveFilters();
+						this.#hideTagSuggestions();
+						this.#performSearch();
+					}
 				});
 			});
 		}
@@ -117,24 +722,48 @@ import "@/styles/blocks/search.css";
 			this.#controller.abort();
 		}
 
-		openModal = (event?: MouseEvent) => {
-			this.#dialog.showModal();
-			this.querySelector("input")?.focus();
-			event?.stopPropagation();
-			window.addEventListener("click", this.onWindowClick, { signal: this.#controller.signal });
-		};
+openModal = (event?: MouseEvent) => {
+	this.#dialog.showModal();
+
+	const hasQuery = this.#state.query.length > 0;
+	const hasFilters = this.#state.tags.length > 0 || this.#state.collections.length > 0;
+
+	if (this.#searchInput && hasQuery) {
+		this.#searchInput.value = this.#state.query;
+		this.#currentQuery = this.#state.query;
+		this.#searchClear!.hidden = false;
+		this.#updateTitleOnlyVisibility();
+	}
+
+	if (hasQuery || hasFilters) {
+		this.#restoreSearch();
+	}
+
+	setTimeout(() => {
+		this.#searchInput?.focus();
+	}, 50);
+	event?.stopPropagation();
+};
+
+	async #restoreSearch() {
+		if (!this.#pagefind) {
+			await this.#loadPagefind();
+		}
+		if (this.#pagefind) {
+			this.#performSearch();
+		}
+	}
 
 		closeModal = () => {
 			this.#dialog.close();
 		};
 
-		onWindowClick = (event: MouseEvent) => {
-			const isLink = "href" in (event.target || {});
-			if (
-				isLink ||
-				(document.body.contains(event.target as Node) &&
-					!this.#dialogFrame.contains(event.target as Node))
-			) {
+		onDialogClick = (event: MouseEvent) => {
+			if (event.target === this.#dialog) {
+				this.closeModal();
+			}
+			const isLink = (event.target as HTMLElement).closest("a[href]");
+			if (isLink) {
 				this.closeModal();
 			}
 		};

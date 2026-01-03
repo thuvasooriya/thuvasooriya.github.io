@@ -17,9 +17,9 @@ interface Props {
 const { slug, status, updated, tags } = Astro.props;
 
 const statusConfig = {
-	seed: { label: "seed", icon: "mdi:seed" },
-	growing: { label: "grow", icon: "mdi:sprout" },
-	evergreen: { label: "green", icon: "mdi:leaf" },
+	seed: { label: "seed", icon: "lucide:circle-dot" },
+	growing: { label: "grow", icon: "lucide:sprout" },
+	evergreen: { label: "green", icon: "lucide:leaf" },
 };
 
 const { label, icon } = statusConfig[status];

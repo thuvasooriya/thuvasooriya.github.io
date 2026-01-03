@@ -1,4 +1,6 @@
 ---
+import { Icon } from "astro-icon/components";
+
 interface Props {
 	class?: string;
 }
@@ -13,17 +15,7 @@ const { class: className } = Astro.props;
 	data-action="back-to-top"
 >
 	<span class="action-tooltip">back to top</span>
-	<svg
-		aria-hidden="true"
-		class="action-icon"
-		fill="none"
-		stroke="currentColor"
-		stroke-width="2.5"
-		viewBox="0 0 24 24"
-		xmlns="http://www.w3.org/2000/svg"
-	>
-		<path d="M4.5 15.75l7.5-7.5 7.5 7.5" stroke-linecap="round" stroke-linejoin="round" />
-	</svg>
+	<Icon name="lucide:chevron-up" class="action-icon" />
 </button>
 
 <style>

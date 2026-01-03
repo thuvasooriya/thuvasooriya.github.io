@@ -1,6 +1,7 @@
 ---
 import { type CollectionEntry, render } from "astro:content";
 import type { HTMLTag, Polymorphic } from "astro/types";
+import { Icon } from "astro-icon/components";
 import LikeButton from "@/components/social/LikeButton.astro";
 import LikeCounter from "@/components/social/LikeCounter.astro";
 import ViewCounter from "@/components/social/ViewCounter.astro";
@@ -16,7 +17,7 @@ const { Content } = await render(tweet);
 const display_name = tweet.data.title;
 ---
 
-<Card as={Tag} class={`tweet-card not-prose block ${className || ""}`} data-pagefind-body>
+<Card as={Tag} class={`tweet-card not-prose block ${className || ""}`}>
 	<a class="tweet-link-overlay" href={`/tweets/${tweet.id}/`} aria-label={display_name}>
 		<span class="sr-only">Read tweet: {display_name}</span>
 	</a>
@@ -31,12 +32,8 @@ const display_name = tweet.data.title;
 				data-slug={tweet.id}
 				aria-label="Copy link to clipboard"
 			>
-				<svg class="share-icon h-4 w-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-				</svg>
-				<svg class="check-icon h-4 w-4 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-				</svg>
+				<Icon name="lucide:share-2" class="share-icon h-4 w-4 transition-transform" />
+				<Icon name="lucide:check" class="check-icon h-4 w-4 hidden" />
 			</button>
 		</div>
 	</div>

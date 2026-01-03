@@ -35,6 +35,10 @@
 		}
 	}
 
+	body:has(dialog[open]) {
+		overflow: hidden;
+	}
+
 	.text-muted {
 		color: var(--color-text-muted);
 	}

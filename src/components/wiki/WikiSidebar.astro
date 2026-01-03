@@ -1,5 +1,6 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
+import { Icon } from "astro-icon/components";
 
 interface Props {
 	currentSlug?: string;
@@ -203,6 +204,25 @@ function getGroupId(path: string): string {
 ---
 
 <nav class="wiki-sidebar" aria-label="Wiki navigation" id="wiki-sidebar" data-open="false">
+	<div class="wiki-sidebar-filter">
+		<input
+			type="text"
+			id="wiki-filter-input"
+			class="wiki-filter-input"
+			placeholder="filter..."
+			autocomplete="off"
+			spellcheck="false"
+		/>
+		<button
+			type="button"
+			id="wiki-filter-clear"
+			class="wiki-filter-clear"
+			aria-label="Clear filter"
+			hidden
+		>
+			<Icon name="lucide:x" class="h-3 w-3" />
+		</button>
+	</div>
 	<ul class="wiki-nav-list">
 		{
 			(function renderEntries(entries: SidebarEntry[], depth: number, parentPath: string): any {
@@ -233,9 +253,7 @@ data-expanded={shouldExpand ? "true" : "false"}
 								aria-expanded={shouldExpand ? "true" : "false"}
 										aria-label={`Toggle ${entry.label} section`}
 									>
-										<svg class="wiki-nav-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-											<polyline points="9 18 15 12 9 6"></polyline>
-										</svg>
+										<Icon name="lucide:chevron-right" class="wiki-nav-caret" />
 									</button>
 								)}
 								{hasHref ? (
@@ -277,22 +295,74 @@ data-expanded={shouldExpand ? "true" : "false"}
 	</ul>
 </nav>
 
-<!-- wiki sidebar toggle button - mobile only -->
-<button
-	class="wiki-sidebar-toggle fixed left-4 top-1/2 -translate-y-1/2 -translate-x-full opacity-0 transition-all duration-300 data-[show=true]:translate-x-0 data-[show=true]:opacity-100 data-[open=true]:-translate-x-full data-[open=true]:opacity-0"
-	data-show="false"
-	data-open="false"
-	id="wiki-sidebar-toggle"
-	type="button"
-	aria-label="Toggle wiki navigation"
-	style="z-index: 90;"
->
-	<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-		<path d="M4 6h16M4 12h10M4 18h14" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-	</svg>
-</button>
-
 <style>
+	.wiki-sidebar-filter {
+		position: sticky;
+		top: 0;
+		z-index: 1;
+		display: flex;
+		align-items: center;
+		gap: 0.25rem;
+		margin-bottom: 0.75rem;
+		padding-top: 0.25rem;
+		padding-bottom: 0.25rem;
+		background: var(--color-global-bg);
+	}
+
+	.wiki-filter-input {
+		flex: 1;
+		padding: 0.375rem 0.5rem;
+		padding-right: 1.75rem;
+		font-size: 0.8125rem;
+		font-family: inherit;
+		background: color-mix(in srgb, var(--color-global-text) 5%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 15%, transparent);
+		border-radius: 0.25rem;
+		color: var(--color-global-text);
+		outline: none;
+		transition: border-color 0.15s ease, background-color 0.15s ease;
+	}
+
+	.wiki-filter-input::placeholder {
+		color: color-mix(in srgb, var(--color-global-text) 40%, transparent);
+	}
+
+	.wiki-filter-input:focus {
+		border-color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+	}
+
+	.wiki-filter-clear {
+		position: absolute;
+		right: 0.5rem;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		padding: 0;
+		background: none;
+		border: none;
+		cursor: pointer;
+		color: color-mix(in srgb, var(--color-global-text) 50%, transparent);
+		transition: color 0.15s ease;
+	}
+
+	.wiki-filter-clear:hover {
+		color: var(--color-global-text);
+	}
+
+	.wiki-filter-clear svg {
+		width: 0.75rem;
+		height: 0.75rem;
+	}
+
+	.wiki-nav-item[data-filter-hidden="true"] {
+		display: none;
+	}
+
 	.wiki-sidebar {
 		width: var(--layout-sidebar-width);
 		flex-shrink: 0;
@@ -301,6 +371,7 @@ data-expanded={shouldExpand ? "true" : "false"}
 		height: fit-content;
 		max-height: calc(100vh - 12rem);
 		overflow-y: auto;
+		overscroll-behavior: contain;
 		transition: top 0.1s ease-out, max-height 0.1s ease-out;
 	}
 
@@ -463,45 +534,39 @@ data-expanded={shouldExpand ? "true" : "false"}
 			position: fixed;
 			left: 0;
 			top: 0;
-			height: 100vh;
-			max-height: 100vh;
+			bottom: 3.5rem;
+			height: auto;
+			max-height: none;
 			width: 16rem;
-			padding: 5rem 1rem 2rem;
+			padding: 1rem;
 			background: var(--color-global-bg);
 			border-right: 1px solid var(--color-border-default);
 			box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
 			z-index: 80;
 			transform: translateX(-100%);
 			transition: transform 0.3s ease;
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-end;
+			overscroll-behavior: contain;
 		}
 
 		.wiki-sidebar[data-open="true"] {
 			transform: translateX(0);
 		}
-	}
 
-	.wiki-sidebar-toggle {
-		display: none;
-		background: transparent;
-		border: none;
-		align-items: center;
-		justify-content: center;
-		cursor: pointer;
-	}
+		.wiki-sidebar-filter {
+			order: 1;
+			position: relative;
+			flex-shrink: 0;
+			margin-bottom: 0;
+			margin-top: 0.75rem;
+		}
 
-	.wiki-sidebar-toggle svg {
-		filter: drop-shadow(0 0 8px var(--color-primary)) drop-shadow(0 0 12px var(--color-primary));
-		transition: filter 0.3s ease, transform 0.3s ease;
-	}
-
-	.wiki-sidebar-toggle:hover svg {
-		filter: drop-shadow(0 0 12px var(--color-primary)) drop-shadow(0 0 16px var(--color-primary));
-		transform: translateX(4px);
-	}
-
-	@media (max-width: 1023px) {
-		.wiki-sidebar-toggle {
-			display: flex;
+		.wiki-nav-list {
+			flex: 0 1 auto;
+			overflow-y: auto;
+			overscroll-behavior: contain;
 		}
 	}
 </style>
@@ -509,10 +574,10 @@ data-expanded={shouldExpand ? "true" : "false"}
 <script>
 const SCROLL_KEY = "wiki-sidebar-scroll";
 const EXPANDED_KEY = "wiki-sidebar-expanded";
+const FILTER_KEY = "wiki-sidebar-filter";
 
 function initSidebar() {
 	const sidebar = document.getElementById("wiki-sidebar") as HTMLElement | null;
-	const toggleBtn = document.getElementById("wiki-sidebar-toggle") as HTMLButtonElement | null;
 	if (!sidebar) return;
 
 	// restore expanded state from localStorage
@@ -578,6 +643,92 @@ function initSidebar() {
 		activeLink.scrollIntoView({ block: "center", behavior: "instant" });
 	}
 
+	// filter functionality
+	const filterInput = document.getElementById("wiki-filter-input") as HTMLInputElement | null;
+	const filterClear = document.getElementById("wiki-filter-clear") as HTMLButtonElement | null;
+
+	if (filterInput && filterClear) {
+		const allItems = sidebar.querySelectorAll<HTMLLIElement>(".wiki-nav-item");
+
+		const applyFilter = (query: string, persist = true) => {
+			const normalizedQuery = query.toLowerCase().trim();
+			filterClear.hidden = !normalizedQuery;
+
+			if (persist) {
+				if (normalizedQuery) {
+					sessionStorage.setItem(FILTER_KEY, query);
+				} else {
+					sessionStorage.removeItem(FILTER_KEY);
+				}
+			}
+
+			if (!normalizedQuery) {
+				for (const item of allItems) {
+					item.dataset.filterHidden = "false";
+				}
+				return;
+			}
+
+			// first pass: mark items as matching or not
+			const matchingItems = new Set<HTMLLIElement>();
+
+			for (const item of allItems) {
+				const label = item.querySelector(".wiki-nav-label")?.textContent?.toLowerCase() || "";
+				if (label.includes(normalizedQuery)) {
+					matchingItems.add(item);
+					// also mark all ancestors as matching (to preserve tree structure)
+					let parent = item.parentElement?.closest<HTMLLIElement>(".wiki-nav-item");
+					while (parent) {
+						matchingItems.add(parent);
+						parent = parent.parentElement?.closest<HTMLLIElement>(".wiki-nav-item");
+					}
+				}
+			}
+
+			// second pass: hide non-matching, show matching
+			for (const item of allItems) {
+				const shouldShow = matchingItems.has(item);
+				item.dataset.filterHidden = (!shouldShow).toString();
+
+				// auto-expand groups with matching children
+				if (shouldShow && item.classList.contains("has-children")) {
+					const toggle = item.querySelector<HTMLButtonElement>(".wiki-nav-toggle");
+					const groupId = toggle?.dataset.groupId;
+					const childList = groupId ? document.getElementById(groupId) : null;
+					if (toggle && childList) {
+						toggle.dataset.expanded = "true";
+						toggle.setAttribute("aria-expanded", "true");
+						childList.dataset.expanded = "true";
+					}
+				}
+			}
+		};
+
+		filterInput.addEventListener("input", () => {
+			applyFilter(filterInput.value);
+		});
+
+		filterClear.addEventListener("click", () => {
+			filterInput.value = "";
+			applyFilter("");
+			filterInput.focus();
+		});
+
+		filterInput.addEventListener("keydown", (e) => {
+			if (e.key === "Escape" && filterInput.value) {
+				e.stopPropagation();
+				filterInput.value = "";
+				applyFilter("");
+			}
+		});
+
+		const savedFilter = sessionStorage.getItem(FILTER_KEY);
+		if (savedFilter) {
+			filterInput.value = savedFilter;
+			applyFilter(savedFilter, false);
+		}
+	}
+
 	// dynamic top position based on scroll (desktop only)
 	const updateSidebarPosition = () => {
 		if (window.innerWidth < 1024) return;
@@ -599,20 +750,13 @@ function initSidebar() {
 	window.addEventListener("scroll", updateSidebarPosition, { passive: true });
 	window.addEventListener("resize", updateSidebarPosition);
 
-	// mobile toggle functionality
-	if (!toggleBtn) return;
-
-	// show toggle button on mobile
+	// mobile: reset styles and handle resize
 	const checkVisibility = () => {
 		const isMobile = window.innerWidth < 1024;
-		toggleBtn.dataset.show = isMobile ? "true" : "false";
 		if (!isMobile) {
 			sidebar.dataset.open = "false";
-			toggleBtn.dataset.open = "false";
-			// reset inline styles for desktop
 			updateSidebarPosition();
 		} else {
-			// reset inline styles for mobile
 			sidebar.style.top = "";
 			sidebar.style.maxHeight = "";
 		}
@@ -621,30 +765,23 @@ function initSidebar() {
 	checkVisibility();
 	window.addEventListener("resize", checkVisibility);
 
-	// toggle sidebar
-	toggleBtn.addEventListener("click", () => {
-		const isOpen = sidebar.dataset.open === "true";
-		sidebar.dataset.open = (!isOpen).toString();
-		toggleBtn.dataset.open = (!isOpen).toString();
-	});
-
-	// close on outside click
+	// close on outside click (mobile)
 	document.addEventListener("click", (e) => {
+		const target = e.target as Node;
+		// don't close if click is on the sidebar toggle button in mobile nav
+		if ((target as Element).closest?.(".mobile-sidebar-trigger")) return;
 		if (
 			sidebar.dataset.open === "true" &&
-			!sidebar.contains(e.target as Node) &&
-			!toggleBtn.contains(e.target as Node)
+			!sidebar.contains(target)
 		) {
 			sidebar.dataset.open = "false";
-			toggleBtn.dataset.open = "false";
 		}
 	});
 
-	// close on escape key
+	// close on escape key (mobile)
 	document.addEventListener("keydown", (e) => {
 		if (e.key === "Escape" && sidebar.dataset.open === "true") {
 			sidebar.dataset.open = "false";
-			toggleBtn.dataset.open = "false";
 		}
 	});
 }

@@ -1,13 +1,40 @@
 ---
+import { Icon } from "astro-icon/components";
 import Logo from "@/components/ui/Logo.astro";
 import { menuLinks, themeConfig } from "@/site.config";
+
+interface Props {
+	sidebarType?: "wiki" | "project";
+}
+
+const { sidebarType } = Astro.props;
+const hasSidebar = !!sidebarType;
 ---
 
 <mobile-nav
 	class="fixed inset-x-0 bottom-0 z-50 sm:hidden"
 	data-visible="true"
+	data-sidebar-type={sidebarType}
 >
-	<div class="mobile-nav-bar flex h-14 items-center justify-around px-2">
+	<div class:list={["mobile-nav-bar flex h-14 items-center px-2", hasSidebar ? "justify-between" : "justify-around"]}>
+		{hasSidebar && (
+			<button
+				aria-label={`Toggle ${sidebarType} sidebar`}
+				class="mobile-nav-btn mobile-sidebar-trigger flex h-11 w-11 items-center justify-center rounded-full"
+				type="button"
+			>
+				<Icon name="lucide:panel-left" class="h-5 w-5" />
+			</button>
+		)}
+
+		<button
+			aria-label="Search"
+			class="mobile-nav-btn mobile-search-trigger flex h-11 w-11 items-center justify-center rounded-full"
+			type="button"
+		>
+			<Icon name="lucide:search" class="h-5 w-5" />
+		</button>
+
 		<a
 			aria-label="Home"
 			class="mobile-home-link flex h-11 w-11 items-center justify-center"
@@ -17,42 +44,11 @@ import { menuLinks, themeConfig } from "@/site.config";
 		</a>
 
 		<button
-			aria-label="Search"
-			class="mobile-nav-btn mobile-search-trigger flex h-11 w-11 items-center justify-center rounded-full"
-			type="button"
-		>
-			<svg
-				aria-hidden="true"
-				class="h-5 w-5"
-				fill="none"
-				stroke="currentColor"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-				stroke-width="1.5"
-				viewBox="0 0 24 24"
-			>
-				<path d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
-			</svg>
-		</button>
-
-		<button
 			aria-label="Theme settings"
 			class="mobile-nav-btn mobile-theme-trigger flex h-11 w-11 items-center justify-center rounded-full"
 			type="button"
 		>
-			<svg
-				aria-hidden="true"
-				class="h-5 w-5"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.5"
-				viewBox="0 0 24 24"
-			>
-				<path
-					d="M9.53 16.122a3 3 0 0 0-5.78 1.128 2.25 2.25 0 0 1-2.4 2.245 4.5 4.5 0 0 0 8.4-2.245c0-.399-.078-.78-.22-1.128Zm0 0a15.998 15.998 0 0 0 3.388-1.62m-5.043-.025a15.994 15.994 0 0 1 1.622-3.395m3.42 3.42a15.995 15.995 0 0 0 4.764-4.648l3.876-5.814a1.151 1.151 0 0 0-1.597-1.597L14.146 6.32a15.996 15.996 0 0 0-4.649 4.763m3.42 3.42a6.776 6.776 0 0 0-3.42-3.42"
-					stroke-linecap="round"
-					stroke-linejoin="round"></path>
-			</svg>
+			<Icon name="lucide:swatch-book" class="h-5 w-5" />
 		</button>
 
 		<button
@@ -61,26 +57,8 @@ import { menuLinks, themeConfig } from "@/site.config";
 			class="mobile-nav-btn mobile-menu-trigger flex h-11 w-11 items-center justify-center rounded-full"
 			type="button"
 		>
-			<svg
-				aria-hidden="true"
-				class="menu-icon h-5 w-5"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.5"
-				viewBox="0 0 24 24"
-			>
-				<path d="M3.75 9h16.5m-16.5 6.75h16.5" stroke-linecap="round" stroke-linejoin="round"></path>
-			</svg>
-			<svg
-				aria-hidden="true"
-				class="close-icon hidden h-5 w-5"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.5"
-				viewBox="0 0 24 24"
-			>
-				<path d="M6 18L18 6M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"></path>
-			</svg>
+			<Icon name="lucide:menu" class="menu-icon h-5 w-5" />
+			<Icon name="lucide:x" class="close-icon hidden h-5 w-5" />
 		</button>
 	</div>
 
@@ -146,14 +124,14 @@ import { menuLinks, themeConfig } from "@/site.config";
 					{
 						themeConfig.themes.map((theme) => (
 							<button
-								class="theme-btn bg-surface-1 hover:bg-surface-2 flex items-center gap-2 rounded-md px-3 py-2 text-start text-sm lowercase transition-colors"
+								class="theme-btn bg-surface-1 hover:bg-surface-2 flex items-center gap-2 rounded-md px-3 py-2 text-start text-sm lowercase transition-colors overflow-hidden"
 								data-theme={theme.name}
 								type="button"
 							>
 								<span
-									class={`h-2 w-2 rounded-full ${theme.isDark ? "bg-surface-3 border-border-muted border" : "bg-yellow"}`}
+									class={`h-2 w-2 shrink-0 rounded-full ${theme.isDark ? "bg-surface-3 border-border-muted border" : "bg-yellow"}`}
 								/>
-								{theme.label}
+								<span class="truncate">{theme.label}</span>
 							</button>
 						))
 					}
@@ -299,9 +277,24 @@ import { menuLinks, themeConfig } from "@/site.config";
 
 		const openSearch = () => {
 			closeAll();
-			const dialog = document.querySelector<HTMLDialogElement>("site-search dialog");
-			dialog?.showModal();
+			const siteSearch = document.querySelector<HTMLElement & { openModal: () => void }>("site-search");
+			siteSearch?.openModal();
 		};
+
+			const sidebarTrigger = this.querySelector<HTMLButtonElement>(".mobile-sidebar-trigger");
+			const sidebarType = this.dataset.sidebarType;
+
+			if (sidebarTrigger && sidebarType) {
+				sidebarTrigger.addEventListener("click", () => {
+					closeAll();
+					const sidebarId = sidebarType === "wiki" ? "wiki-sidebar" : "project-sidebar";
+					const sidebar = document.getElementById(sidebarId);
+					if (sidebar) {
+						const isOpen = sidebar.dataset.open === "true";
+						sidebar.dataset.open = (!isOpen).toString();
+					}
+				}, { signal });
+			}
 
 			menuTrigger.addEventListener("click", toggleMenu, { signal });
 			themeTrigger.addEventListener("click", toggleTheme, { signal });

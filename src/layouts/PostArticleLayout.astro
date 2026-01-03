@@ -24,6 +24,7 @@ const readingTime: string = remarkPluginFrontmatter.readingTime;
 	}}
 	headings={headings}
 	heroId="blog-hero"
+	contentType="post"
 	likeButton={{ slug: post.id, contentType: "post" }}
 >
 	<PostHeader slot="hero" content={post} readingTime={readingTime} postId={post.id} />

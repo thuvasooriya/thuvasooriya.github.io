@@ -24,10 +24,11 @@ const currentSlug = entry.id === "index" ? "index" : entry.id;
 	}}
 	pageType="wiki"
 	hideFooter
+	sidebarType="wiki"
 >
 	<div class="wiki-layout">
 		<WikiSidebar currentSlug={currentSlug} />
-		<article class="wiki-content">
+		<article class="wiki-content" data-pagefind-body data-pagefind-filter="content_type:wiki">
 			<header class="wiki-header" data-animate data-animate-immediate>
 				<h1>{entry.data.title}</h1>
 				{entry.data.description && <p class="wiki-description">{entry.data.description}</p>}

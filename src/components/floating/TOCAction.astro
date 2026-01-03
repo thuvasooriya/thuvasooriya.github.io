@@ -1,4 +1,6 @@
 ---
+import { Icon } from "astro-icon/components";
+
 interface Props {
 	class?: string;
 }
@@ -13,21 +15,7 @@ const { class: className } = Astro.props;
 	data-action="toggle-toc"
 >
 	<span class="action-tooltip">contents</span>
-	<svg
-		aria-hidden="true"
-		class="action-icon"
-		fill="none"
-		viewBox="0 0 24 24"
-		xmlns="http://www.w3.org/2000/svg"
-	>
-		<path
-			d="M4 6h16M4 12h8M4 18h16"
-			stroke="currentColor"
-			stroke-linecap="round"
-			stroke-linejoin="round"
-			stroke-width="2"
-		/>
-	</svg>
+	<Icon name="lucide:table-of-contents" class="action-icon" />
 </button>
 
 <style>

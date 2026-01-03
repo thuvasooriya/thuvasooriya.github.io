@@ -26,10 +26,10 @@ const meta = {
 ---
 
 {hasLogs ? (
-	<BaseLayout meta={meta} pageType="wide">
+	<BaseLayout meta={meta} pageType="wide" sidebarType="project">
 		<div class="project-layout">
 			<ProjectSidebar logs={relatedLogs} projectFolder={projectFolder!} currentSlug={entry.id} />
-			<article class="project-content grow break-words" data-pagefind-body>
+			<article class="project-content grow break-words" data-pagefind-body data-pagefind-filter="content_type:project">
 				<div id="project-hero" class="mb-4" data-animate data-animate-immediate>
 					<ProjectHeader entry={entry} isLog={false} />
 				</div>
@@ -53,6 +53,7 @@ const meta = {
 		meta={meta}
 		headings={headings}
 		heroId="project-hero"
+		contentType="project"
 		likeButton={{ slug: entry.id, contentType: "project" }}
 	>
 		<Fragment slot="hero">

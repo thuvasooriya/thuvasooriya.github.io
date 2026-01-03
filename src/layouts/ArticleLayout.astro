@@ -12,6 +12,7 @@ interface Props {
 	showToc?: boolean;
 	showBackToTop?: boolean;
 	pagefindBody?: boolean;
+	contentType?: "post" | "project" | "wiki";
 	likeButton?: { slug: string; contentType: "post" | "project" | "tweet" | "wiki" };
 	pageType?: "article" | "wide";
 }
@@ -23,13 +24,14 @@ const {
 	showToc = true,
 	showBackToTop = true,
 	pagefindBody = true,
+	contentType,
 	likeButton,
 	pageType = "article",
 } = Astro.props;
 ---
 
 <BaseLayout meta={meta} pageType={pageType}>
-	<article class="grow break-words" data-pagefind-body={pagefindBody}>
+	<article class="grow break-words" data-pagefind-body={pagefindBody} data-pagefind-filter={contentType ? `content_type:${contentType}` : undefined}>
 		<slot name="before-hero" />
 		<div id={heroId} class="mb-4" data-animate data-animate-immediate>
 			<slot name="hero" />

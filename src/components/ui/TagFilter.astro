@@ -1,4 +1,6 @@
 ---
+import { Icon } from "astro-icon/components";
+
 export interface Props {
 	all_tags: string[];
 	tag_counts?: Record<string, number>;
@@ -36,14 +38,10 @@ const filtered_tags = all_tags
 		{/* expand button - shown when tags overflow */}
 		<div class="tag-filter-actions">
 			<button class="tag-filter-expand-btn hidden" data-expand-btn type="button" title="">
-				<svg class="tag-filter-chevron" data-chevron fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-				</svg>
+				<Icon name="lucide:chevron-down" class="tag-filter-chevron" data-chevron />
 			</button>
 			<button class="tag-filter-clear-icon-btn hidden" data-clear-filters-icon type="button" title="clear filters">
-				<svg class="tag-filter-clear-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-				</svg>
+				<Icon name="lucide:x" class="tag-filter-clear-icon" />
 			</button>
 		</div>
 	</div>

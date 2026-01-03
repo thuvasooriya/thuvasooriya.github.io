@@ -1,0 +1,105 @@
+---
+import type { GetStaticPaths } from "astro";
+import ContentCard from "@/components/shared/ContentCard.astro";
+import FormattedDate from "@/components/shared/FormattedDate.astro";
+import AnimateIn from "@/components/ui/AnimateIn.astro";
+import { getContentByTag, getGlobalTagNames } from "@/data/content";
+import PageLayout from "@/layouts/Base.astro";
+import { collectionDateSort } from "@/utils";
+
+export const getStaticPaths: GetStaticPaths = async () => {
+	const tags = await getGlobalTagNames();
+	return tags.map((tag) => ({ params: { tag } }));
+};
+
+const { tag } = Astro.params;
+const content = await getContentByTag(String(tag));
+
+const posts = content.posts.sort(collectionDateSort);
+const projects = content.projects.sort((a, b) => {
+	const dateA = a.data.started?.getTime() ?? 0;
+	const dateB = b.data.started?.getTime() ?? 0;
+	return dateB - dateA;
+});
+const wiki = content.wiki.sort((a, b) => {
+	const dateA = a.data.updated?.getTime() ?? 0;
+	const dateB = b.data.updated?.getTime() ?? 0;
+	return dateB - dateA;
+});
+
+const totalCount = posts.length + projects.length + wiki.length;
+
+const meta = {
+	description: `all content tagged with ${tag}`,
+	title: `#${tag}`,
+};
+---
+
+<PageLayout meta={meta} pageType="listing">
+	<div class="mb-8 flex items-center" data-animate>
+		<h1 class="sr-only">content with the tag {tag}</h1>
+		<a class="title text-accent" href="/tags/">tags</a>
+		<span aria-hidden="true" class="ms-2 me-3 text-xl">→</span>
+		<span aria-hidden="true" class="text-xl font-semibold">#{tag}</span>
+		<span class="ms-3 text-sm text-text-muted">({totalCount} items)</span>
+	</div>
+
+	{posts.length > 0 && (
+		<section class="mb-10" data-animate data-delay="1">
+			<h2 class="mb-4 text-lg font-semibold text-text-muted">
+				posts <span class="text-sm font-normal">({posts.length})</span>
+			</h2>
+			<ul class="card-list">
+				{posts.map((post) => (
+					<li>
+						<ContentCard entry={post} />
+					</li>
+				))}
+			</ul>
+		</section>
+	)}
+
+	{projects.length > 0 && (
+		<section class="mb-10" data-animate data-delay="2">
+			<h2 class="mb-4 text-lg font-semibold text-text-muted">
+				projects <span class="text-sm font-normal">({projects.length})</span>
+			</h2>
+			<ul class="card-list">
+				{projects.map((project) => (
+					<li>
+						<ContentCard entry={project} />
+					</li>
+				))}
+			</ul>
+		</section>
+	)}
+
+	{wiki.length > 0 && (
+		<section class="mb-10" data-animate data-delay="3">
+			<h2 class="mb-4 text-lg font-semibold text-text-muted">
+				wiki <span class="text-sm font-normal">({wiki.length})</span>
+			</h2>
+			<ul class="space-y-3">
+				{wiki.map((entry) => (
+					<li class="flex items-baseline gap-3">
+						<a
+							class="cactus-link font-medium"
+							href={`/wiki/${entry.id}/`}
+							data-astro-prefetch
+						>
+							{entry.data.title}
+						</a>
+						{entry.data.updated && (
+							<FormattedDate
+								class="text-xs text-text-muted"
+								date={entry.data.updated}
+							/>
+						)}
+					</li>
+				))}
+			</ul>
+		</section>
+	)}
+</PageLayout>
+
+<AnimateIn />

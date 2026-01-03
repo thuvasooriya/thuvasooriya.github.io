@@ -24,5 +24,8 @@ const meta = {
 ---
 
 <PageLayout meta={meta} pageType="article">
-	<Tweet as="h1" tweet={tweet} />
+	<article data-pagefind-body data-pagefind-filter="content_type:tweet">
+		<span data-pagefind-meta="title" class="sr-only">{tweet.data.title}</span>
+		<Tweet as="div" tweet={tweet} />
+	</article>
 </PageLayout>

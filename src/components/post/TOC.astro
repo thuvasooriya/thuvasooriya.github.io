@@ -1,5 +1,6 @@
 ---
 import type { MarkdownHeading } from "astro";
+import { Icon } from "astro-icon/components";
 import { generateToc, type TocItem } from "@/utils";
 import TOCHeading from "./TOCHeading.astro";
 
@@ -36,9 +37,7 @@ const toc = generateToc(headings);
 	aria-label="Toggle table of contents"
 	style="z-index: 90;"
 >
-	<svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-		<path d="M4 6h16M4 12h8M4 18h16" stroke="var(--color-primary)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
-	</svg>
+	<Icon name="lucide:list" class="h-6 w-6 toc-icon" style="color: var(--color-primary);" />
 </button>
 
 <script is:inline>
@@ -173,12 +172,12 @@ const toc = generateToc(headings);
 		justify-content: center;
 	}
 
-	.toc-toggle-btn svg {
+	.toc-toggle-btn .toc-icon {
 		filter: drop-shadow(0 0 8px var(--color-primary)) drop-shadow(0 0 12px var(--color-primary));
 		transition: filter 0.3s ease, transform 0.3s ease;
 	}
 
-	.toc-toggle-btn:hover svg {
+	.toc-toggle-btn:hover .toc-icon {
 		filter: drop-shadow(0 0 12px var(--color-primary)) drop-shadow(0 0 16px var(--color-primary));
 		transform: translateX(-4px);
 	}

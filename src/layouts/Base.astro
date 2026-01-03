@@ -17,12 +17,14 @@ interface Props {
 	meta: SiteMeta;
 	pageType?: "article" | "listing" | "home" | "wide" | "wiki";
 	hideFooter?: boolean;
+	sidebarType?: "wiki" | "project";
 }
 
 const {
 	meta: { articleDate, description = siteConfig.description, ogImage, title },
 	pageType = "article",
 	hideFooter = false,
+	sidebarType,
 } = Astro.props;
 
 const layoutClass =
@@ -88,7 +90,7 @@ const layoutClass =
 		</main>
 		{!hideFooter && <Footer />}
 		<Search />
-		<MobileNav />
+		{sidebarType ? <MobileNav sidebarType={sidebarType} /> : <MobileNav />}
 		<script>
 			function wrapImagesWithFigure() {
 				const prose = document.querySelectorAll('.prose');
