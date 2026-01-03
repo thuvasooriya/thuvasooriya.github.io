@@ -1,29 +1,19 @@
 ---
-import { Icon } from "astro-icon/components";
-
 interface Props {
 	tags: string[];
 	class?: string;
 	size?: "sm" | "md";
-	showIcon?: boolean;
 }
 
-const { tags, class: className, size = "md", showIcon = true } = Astro.props;
-
-const iconSize = size === "sm" ? "h-4 w-4" : "h-6 w-6";
+const { tags, class: className, size = "md" } = Astro.props;
 ---
 
 {tags.length > 0 && (
 	<div class:list={["tag-list", `tag-list-${size}`, className]}>
-		{showIcon && (
-			<Icon name="lucide:tags" class:list={["tag-list-icon", iconSize]} />
-		)}
-		{tags.map((tag, i) => (
-			<span class="contents">
-				<a class="cactus-link inline-block before:content-['#']" href={`/tags/${tag}/`}>
-					<span class="sr-only">View more content with the tag </span><span data-pagefind-filter="tag">{tag}</span>
-				</a>{i < tags.length - 1 && ", "}
-			</span>
+		{tags.map((tag) => (
+			<a class="cactus-link inline-block before:content-['#']" href={`/tags/${tag}/`}>
+				<span class="sr-only">View more content with the tag </span><span data-pagefind-filter="tag">{tag}</span>
+			</a>
 		))}
 	</div>
 )}
@@ -33,16 +23,12 @@ const iconSize = size === "sm" ? "h-4 w-4" : "h-6 w-6";
 		display: none;
 		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.5rem;
 	}
 
 	@media (min-width: 640px) {
 		.tag-list {
 			display: flex;
 		}
-	}
-
-	.tag-list-icon {
-		flex-shrink: 0;
 	}
 </style>

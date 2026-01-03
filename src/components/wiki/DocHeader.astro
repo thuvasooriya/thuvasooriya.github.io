@@ -31,24 +31,28 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 
 <div class="wiki-doc-header">
 	<div class="wiki-doc-meta">
-		<span class:list={["status-badge", `status-${status}`]}>
-			<span class="status-indicator">
-				<Icon name={icon} class="status-icon" />
-			</span>
-			<span class="status-label">{label}</span>
-		</span>
-		{updated && (
-			<>
-				<span aria-hidden="true" class="text-primary">•</span>
-				<span class="meta-item">
-					updated: <FormattedDate date={updated} dateTimeOptions={dateTimeOptions} />
+		<span class="meta-group">
+			<span class:list={["status-badge", `status-${status}`]}>
+				<span class="status-indicator">
+					<Icon name={icon} class="status-icon" />
 				</span>
-			</>
-		)}
-		<span aria-hidden="true" class="text-primary">•</span>
-		<ViewCounter slug={slug} content_type="wiki" format="text" />
-		<span aria-hidden="true" class="text-primary">•</span>
-		<LikeCounter slug={slug} content_type="wiki" format="text" />
+				<span class="status-label">{label}</span>
+			</span>
+			{updated && (
+				<>
+					<span aria-hidden="true" class="meta-sep text-primary">•</span>
+					<span class="meta-item">
+						updated: <FormattedDate date={updated} dateTimeOptions={dateTimeOptions} />
+					</span>
+				</>
+			)}
+		</span>
+		<span aria-hidden="true" class="group-sep text-primary">•</span>
+		<span class="meta-group">
+			<ViewCounter slug={slug} content_type="wiki" format="text" />
+			<span aria-hidden="true" class="text-primary">•</span>
+			<LikeCounter slug={slug} content_type="wiki" format="text" />
+		</span>
 	</div>
 	{tags && tags.length > 0 && (
 		<TagList tags={tags} size="sm" />
@@ -74,6 +78,23 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 		align-items: center;
 		column-gap: 0.75rem;
 		row-gap: 0.25rem;
+	}
+
+	.meta-group {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	@media (max-width: 480px) {
+		.wiki-doc-meta {
+			flex-direction: column;
+			align-items: center;
+		}
+		.meta-sep,
+		.group-sep {
+			display: none;
+		}
 	}
 
 	.meta-item {

@@ -25,7 +25,6 @@ const {
 	rounded = "rounded-sm",
 } = Astro.props;
 
-// Greetings in different languages
 const greetings = [
 	{ language: "english", text: "hello!" },
 	{ language: "japanese", text: "こんにちは!" },
@@ -40,87 +39,149 @@ const greetings = [
 	{ language: "arabic", text: "مرحباً!" },
 ];
 
-// Generate unique IDs for this component instance
-const id = `greeting-${Math.random().toString(36).substring(2, 9)}`;
+const longestGreeting = greetings.reduce((a, b) => (a.text.length > b.text.length ? a : b)).text;
 ---
 
-<div class={`inline-flex flex-col items-start ${className}`}>
-	<!-- Background box with padding -->
+<language-greeting
+	class={`inline-flex flex-col items-start ${className}`}
+	data-greetings={JSON.stringify(greetings)}
+	data-typing-speed={typingSpeed}
+	data-pause-duration={pauseDuration}
+	data-show-language={showLanguage}
+>
 	<div class={`inline-block ${bgColor} ${paddingX} ${paddingY} ${rounded}`}>
-		<!-- Container uses grid stacking for natural width sizing -->
-		<div id={`container-${id}`} class="greeting-container">
-			<!-- Hidden sizing element - sets container width to longest greeting -->
-			<span class="greeting-sizer" aria-hidden="true">{greetings.reduce((a, b) => a.text.length > b.text.length ? a : b).text}</span>
-			<!-- Visible text element with cursor inside -->
-			<span id={`text-${id}`} class={`greeting-text ${textColor}`}><span id={`cursor-${id}`} class={`greeting-cursor ${cursorColor}`}></span></span>
+		<div class="greeting-container">
+			<span class="greeting-sizer" aria-hidden="true">{longestGreeting}</span>
+			<span class={`greeting-text ${textColor}`} data-text><span class={`greeting-cursor ${cursorColor}`} data-cursor></span></span>
 		</div>
 	</div>
+	{showLanguage && <div class="greeting-lang mt-1.5 min-h-[1em] text-center text-xs opacity-70" data-lang />}
+</language-greeting>
 
-	{/* Optional language display */}
-	{
-		showLanguage && (
-			<div id={`lang-${id}`} class="mt-1.5 min-h-[1em] text-center text-xs opacity-70" />
-		)
-	}
-</div>
+<script>
+	class LanguageGreeting extends HTMLElement {
+		#textEl: HTMLElement | null = null;
+		#cursorEl: HTMLElement | null = null;
+		#langEl: HTMLElement | null = null;
+		#greetings: Array<{ language: string; text: string }> = [];
+		#typingSpeed = 100;
+		#pauseDuration = 1000;
+		#showLanguage = false;
+		#currentIndex = 0;
+		#currentText = "";
+		#timeoutId: number | null = null;
+		#isRunning = false;
 
-<script is:inline define:vars={{ id, greetings, typingSpeed, pauseDuration, showLanguage }}>
-	(function initGreeting() {
-		const textEl = document.getElementById(`text-${id}`);
-		const cursorEl = document.getElementById(`cursor-${id}`);
-		const langEl = showLanguage ? document.getElementById(`lang-${id}`) : null;
-
-		if (!textEl || !cursorEl) return;
-		if (textEl.dataset.initialized === "true") return;
-		textEl.dataset.initialized = "true";
-
-		let currentIndex = 0;
-		let currentText = "";
-
-		function setBlinking(shouldBlink) {
-			cursorEl.dataset.blinking = shouldBlink ? "true" : "false";
+		connectedCallback() {
+			this.#init();
 		}
 
-		function updateText(text) {
-			currentText = text;
-			cursorEl.previousSibling?.remove();
+		disconnectedCallback() {
+			this.#cleanup();
+		}
+
+		#init() {
+			this.#textEl = this.querySelector("[data-text]");
+			this.#cursorEl = this.querySelector("[data-cursor]");
+			this.#langEl = this.querySelector("[data-lang]");
+
+			try {
+				this.#greetings = JSON.parse(this.dataset.greetings || "[]");
+			} catch {
+				this.#greetings = [];
+			}
+
+			this.#typingSpeed = Number(this.dataset.typingSpeed) || 100;
+			this.#pauseDuration = Number(this.dataset.pauseDuration) || 1000;
+			this.#showLanguage = this.dataset.showLanguage === "true";
+
+			if (!this.#textEl || !this.#cursorEl || this.#greetings.length === 0) return;
+
+			this.#reset();
+			this.#showNextGreeting();
+		}
+
+		reinit() {
+			this.#cleanup();
+			this.#init();
+		}
+
+		#cleanup() {
+			if (this.#timeoutId) {
+				clearTimeout(this.#timeoutId);
+				this.#timeoutId = null;
+			}
+			this.#isRunning = false;
+		}
+
+		#reset() {
+			this.#cleanup();
+			this.#currentIndex = 0;
+			this.#currentText = "";
+			this.#isRunning = true;
+			while (this.#cursorEl?.previousSibling) {
+				this.#cursorEl.previousSibling.remove();
+			}
+		}
+
+		#setBlinking(shouldBlink: boolean) {
+			if (this.#cursorEl) {
+				this.#cursorEl.dataset.blinking = shouldBlink ? "true" : "false";
+			}
+		}
+
+		#updateText(text: string) {
+			if (!this.#textEl || !this.#cursorEl) return;
+			this.#currentText = text;
+			this.#cursorEl.previousSibling?.remove();
 			if (text) {
-				textEl.insertBefore(document.createTextNode(text), cursorEl);
+				this.#textEl.insertBefore(document.createTextNode(text), this.#cursorEl);
 			}
 		}
 
-		function typeText(text, index = 0) {
-			setBlinking(false);
+		#typeText(text: string, index = 0) {
+			if (!this.#isRunning) return;
+			this.#setBlinking(false);
 			if (index < text.length) {
-				updateText(text.substring(0, index + 1));
-				setTimeout(() => typeText(text, index + 1), typingSpeed);
+				this.#updateText(text.substring(0, index + 1));
+				this.#timeoutId = window.setTimeout(() => this.#typeText(text, index + 1), this.#typingSpeed);
 			} else {
-				setBlinking(true);
-				setTimeout(eraseText, pauseDuration);
+				this.#setBlinking(true);
+				this.#timeoutId = window.setTimeout(() => this.#eraseText(), this.#pauseDuration);
 			}
 		}
 
-		function eraseText() {
-			setBlinking(false);
-			if (currentText.length > 0) {
-				updateText(currentText.substring(0, currentText.length - 1));
-				setTimeout(eraseText, typingSpeed / 2);
+		#eraseText() {
+			if (!this.#isRunning) return;
+			this.#setBlinking(false);
+			if (this.#currentText.length > 0) {
+				this.#updateText(this.#currentText.substring(0, this.#currentText.length - 1));
+				this.#timeoutId = window.setTimeout(() => this.#eraseText(), this.#typingSpeed / 2);
 			} else {
-				currentIndex = (currentIndex + 1) % greetings.length;
-				setTimeout(showNextGreeting, 500);
+				this.#currentIndex = (this.#currentIndex + 1) % this.#greetings.length;
+				this.#timeoutId = window.setTimeout(() => this.#showNextGreeting(), 500);
 			}
 		}
 
-		function showNextGreeting() {
-			updateText("");
-			if (langEl) {
-				langEl.textContent = greetings[currentIndex].language;
+		#showNextGreeting() {
+			if (!this.#isRunning) return;
+			const greeting = this.#greetings[this.#currentIndex];
+			if (!greeting) return;
+			this.#updateText("");
+			if (this.#showLanguage && this.#langEl) {
+				this.#langEl.textContent = greeting.language;
 			}
-			typeText(greetings[currentIndex].text);
+			this.#typeText(greeting.text);
 		}
+	}
 
-		showNextGreeting();
-	})();
+	customElements.define("language-greeting", LanguageGreeting);
+
+	document.addEventListener("astro:page-load", () => {
+		document.querySelectorAll<LanguageGreeting>("language-greeting").forEach((el) => {
+			el.reinit();
+		});
+	});
 </script>
 
 <style>

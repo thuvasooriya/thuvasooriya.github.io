@@ -53,3 +53,9 @@
 		max-width: 100%;
 	}
 }
+
+@media (max-width: 480px) {
+	.wiki-header {
+		text-align: center;
+	}
+}

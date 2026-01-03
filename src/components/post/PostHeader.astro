@@ -41,18 +41,18 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 	{data.title}
 </h1>
 
-<div class="text-variant-6 my-4 italic">
+<div class="description text-variant-6 my-4 italic">
 	{data.description}
 </div>
 <div class="text-variant-4 flex flex-col gap-1.5 lowercase">
-	<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+	<div class="date-row">
 		<p>
 			published: <FormattedDate date={data.published} dateTimeOptions={dateTimeOptions} />
 		</p>
 		{
 			data.updated && (
 				<>
-					<span aria-hidden="true" class="text-primary">•</span>
+					<span aria-hidden="true" class="date-sep text-primary">•</span>
 					<span class="bg-quote/5 text-quote flex items-center gap-1.5 rounded-lg px-2 py-1">
 						updated:
 						<FormattedDate class="ms-1" date={data.updated} dateTimeOptions={dateTimeOptions} />
@@ -73,3 +73,27 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 	<TagList tags={data.tags} class="mt-2" />
 )}
 
+<style>
+	.date-row,
+	.masthead-stats {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		column-gap: 0.75rem;
+		row-gap: 0.25rem;
+	}
+
+	@media (max-width: 480px) {
+		.title,
+		.description {
+			text-align: center;
+		}
+		.date-row,
+		.masthead-stats {
+			justify-content: center;
+		}
+		.date-sep {
+			display: none;
+		}
+	}
+</style>

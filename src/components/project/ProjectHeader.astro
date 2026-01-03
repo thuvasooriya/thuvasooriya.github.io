@@ -5,7 +5,6 @@ import FormattedDate from "@/components/shared/FormattedDate.astro";
 import TagList from "@/components/shared/TagList.astro";
 import LikeCounter from "@/components/social/LikeCounter.astro";
 import ViewCounter from "@/components/social/ViewCounter.astro";
-import IconLink from "@/components/ui/IconLink.astro";
 
 interface Props {
 	entry: CollectionEntry<"project">;
@@ -18,6 +17,18 @@ const { entry, isLog = false, projectFolder } = Astro.props;
 const dateTimeOptions: Intl.DateTimeFormatOptions = {
 	month: "short",
 };
+
+const statusConfig: Record<string, { label: string; icon: string }> = {
+	init: { label: "init", icon: "lucide:circle" },
+	plan: { label: "plan", icon: "lucide:book-open" },
+	exec: { label: "exec", icon: "lucide:play" },
+	hold: { label: "hold", icon: "lucide:pause" },
+	done: { label: "done", icon: "lucide:check" },
+};
+
+const status = entry.data.status;
+const currentStatus = status ? statusConfig[status] : null;
+const additionalLinks = entry.data.links ?? [];
 ---
 
 {isLog && projectFolder && (
@@ -32,80 +43,296 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 	</div>
 )}
 
-<div class="mb-3 flex flex-wrap items-start justify-between gap-3">
-	<h1 class="title text-accent">{entry.data.title}</h1>
-	{!isLog && entry.data.status && (
-		<span class:list={[
-			"rounded-full px-3 py-1 text-sm font-medium",
-			`status-${entry.data.status}`
-		]}>
-			{entry.data.status}
-		</span>
-	)}
-</div>
+{isLog ? (
+	<h1 class="title text-accent mb-3">{entry.data.title}</h1>
+) : (
+	<div class="project-header-pill" data-status={status}>
+		<div class="pill-top">
+			<h1 class="pill-title">{entry.data.title}</h1>
+			<div class="pill-actions">
+				{entry.data.demo && (
+					<a
+						class="action-link"
+						href={entry.data.demo}
+						rel="noopener noreferrer"
+						target="_blank"
+						title="View demo"
+					>
+						<Icon name="lucide:external-link" class="action-icon" />
+					</a>
+				)}
+				{entry.data.github && (
+					<a
+						class="action-link"
+						href={entry.data.github}
+						rel="noopener noreferrer"
+						target="_blank"
+						title="View on GitHub"
+					>
+						<Icon name="ri:github-fill" class="action-icon" />
+					</a>
+				)}
+			</div>
+		</div>
+		<div class="pill-bottom">
+			{entry.data.code && (
+				<span class="project-code">{entry.data.code}</span>
+			)}
+			{entry.data.code && currentStatus && (
+				<span aria-hidden="true" class="dot-sep">·</span>
+			)}
+			{currentStatus && (
+				<span class="status-badge">
+					<Icon name={currentStatus.icon} class="status-icon" />
+					<span class="status-label">{currentStatus.label}</span>
+				</span>
+			)}
+		</div>
+	</div>
+)}
 
 {entry.data.description && (
-	<div class="text-variant-6 my-4 italic">
+	<div class="description text-variant-6 my-4 italic">
 		{entry.data.description}
 	</div>
 )}
 
-<div class="text-variant-4 flex flex-col gap-1.5 lowercase">
+<div class="project-meta">
 	{isLog && entry.data.updated && (
-		<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
-			<p>
+		<div class="meta-row">
+			<span class="meta-item">
 				published: <FormattedDate date={entry.data.updated} dateTimeOptions={dateTimeOptions} />
-			</p>
+			</span>
 		</div>
 	)}
 
 	{!isLog && (
-		<div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+		<div class="date-row">
 			{entry.data.started && (
-				<p>
+				<span class="meta-item">
 					started: <FormattedDate date={entry.data.started} dateTimeOptions={dateTimeOptions} />
-				</p>
+				</span>
+			)}
+			{entry.data.started && entry.data.updated && (
+				<span aria-hidden="true" class="date-sep text-primary">•</span>
 			)}
 			{entry.data.updated && (
-				<>
-					<span aria-hidden="true" class="text-primary">-</span>
-					<span class="bg-quote/5 text-quote flex items-center gap-1.5 rounded-lg px-2 py-1">
-						updated: <FormattedDate class="ms-1" date={entry.data.updated} dateTimeOptions={dateTimeOptions} />
-					</span>
-				</>
+				<span class="bg-quote/5 text-quote flex items-center gap-1.5 rounded-lg px-2 py-1">
+					updated: <FormattedDate class="ms-1" date={entry.data.updated} dateTimeOptions={dateTimeOptions} />
+				</span>
 			)}
 		</div>
 	)}
 
-	<div class="flex flex-wrap items-center gap-x-3 gap-y-1 font-semibold">
+	<div class="meta-row font-semibold">
 		<ViewCounter slug={entry.id} content_type="project" format="text" />
-		<span aria-hidden="true" class="text-primary">-</span>
+		<span aria-hidden="true" class="text-primary">•</span>
 		<LikeCounter slug={entry.id} content_type="project" format="text" />
-		{!isLog && (
-			<>
-				{entry.data.demo && (
-					<>
-						<span aria-hidden="true" class="text-primary">-</span>
-						<IconLink href={entry.data.demo} label="demo" icon="demo" />
-					</>
-				)}
-				{entry.data.github && (
-					<>
-						<span aria-hidden="true" class="text-primary">-</span>
-						<IconLink href={entry.data.github} label="github" icon="github" />
-					</>
-				)}
-				{entry.data.links?.map((link) => (
-					<>
-						<span aria-hidden="true" class="text-primary">-</span>
-						<IconLink href={link.url} label={link.label} icon="link" />
-					</>
-				))}
-			</>
-		)}
 	</div>
+
+	{!isLog && additionalLinks.length > 0 && (
+		<div class="meta-row">
+			{additionalLinks.map((link, i) => (
+				<>
+					{i > 0 && <span aria-hidden="true" class="text-primary">•</span>}
+					<a
+						class="link-item"
+						href={link.url}
+						rel="noopener noreferrer"
+						target="_blank"
+					>
+						<Icon name="lucide:link" class="link-icon" />
+						<span>{link.label}</span>
+					</a>
+				</>
+			))}
+		</div>
+	)}
 </div>
 
 {entry.data.tags && entry.data.tags.length > 0 && (
 	<TagList tags={entry.data.tags} class="mt-2" />
 )}
+
+<style>
+	.project-header-pill {
+		--pill-accent: var(--color-accent);
+		display: flex;
+		flex-direction: column;
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--pill-accent) 15%, var(--color-global-bg)) 0%,
+			color-mix(in srgb, var(--pill-accent) 5%, var(--color-global-bg)) 100%
+		);
+		border: 1px solid color-mix(in srgb, var(--pill-accent) 20%, transparent);
+		border-radius: 0.5rem;
+		overflow: hidden;
+		margin-bottom: 1rem;
+	}
+
+	.pill-top {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		padding: 0.75rem 1rem;
+	}
+
+	.pill-title {
+		font-size: 1.5rem;
+		font-weight: 700;
+		line-height: 1.2;
+		color: var(--pill-accent);
+		margin: 0;
+	}
+
+	@media (min-width: 640px) {
+		.pill-title {
+			font-size: 1.875rem;
+		}
+	}
+
+	.pill-actions {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-shrink: 0;
+	}
+
+	.action-link {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: 0.5rem;
+		border-radius: 9999px;
+		color: var(--color-text-muted);
+		transition: all 0.15s ease;
+	}
+
+	.action-link:hover {
+		color: var(--pill-accent);
+		background: color-mix(in srgb, var(--pill-accent) 15%, transparent);
+	}
+
+	.action-icon {
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+
+	.pill-bottom {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.5rem 1rem;
+		background: color-mix(in srgb, var(--pill-accent) 8%, transparent);
+		font-size: 0.875rem;
+		text-transform: lowercase;
+	}
+
+	.project-code {
+		font-family: var(--font-mono);
+		font-weight: 600;
+		color: var(--pill-accent);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+
+	.dot-sep {
+		color: var(--pill-accent);
+		font-weight: 700;
+		font-size: 1.25rem;
+		line-height: 1;
+	}
+
+	.status-badge {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		color: var(--pill-accent);
+	}
+
+	.status-icon {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.status-label {
+		font-weight: 500;
+	}
+
+	.project-meta {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		text-transform: lowercase;
+	}
+
+	.meta-row,
+	.date-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		column-gap: 0.75rem;
+		row-gap: 0.25rem;
+	}
+
+	@media (max-width: 480px) {
+		.description {
+			text-align: center;
+		}
+		.meta-row,
+		.date-row {
+			justify-content: center;
+		}
+		.date-sep {
+			display: none;
+		}
+	}
+
+	.meta-item {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+	}
+
+	.link-item {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		color: var(--color-text-muted);
+		transition: color 0.15s ease;
+	}
+
+	.link-item:hover {
+		color: var(--color-link);
+	}
+
+	.link-icon {
+		width: 0.875rem;
+		height: 0.875rem;
+	}
+
+	/* Status-specific colors */
+	.project-header-pill[data-status="init"] {
+		--pill-accent: var(--color-variant-3);
+	}
+
+	.project-header-pill[data-status="plan"] {
+		--pill-accent: var(--color-variant-0);
+	}
+
+	.project-header-pill[data-status="exec"] {
+		--pill-accent: var(--color-variant-1);
+	}
+
+	.project-header-pill[data-status="hold"] {
+		--pill-accent: var(--color-text-muted);
+	}
+
+	.project-header-pill[data-status="done"] {
+		--pill-accent: var(--color-variant-2);
+	}
+</style>
