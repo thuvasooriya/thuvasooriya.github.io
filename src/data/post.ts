@@ -1,6 +1,6 @@
 import { type CollectionEntry, getCollection } from "astro:content";
 
-type ContentCollection = "post" | "note" | "proj";
+type ContentCollection = "post" | "tweet" | "project";
 type ContentEntry<T extends ContentCollection> = CollectionEntry<T>;
 
 // filter out drafts in production
@@ -26,14 +26,14 @@ export async function getAllPosts(): Promise<ContentEntry<"post">[]> {
 	return filterDrafts(posts);
 }
 
-// get all notes
-export async function getAllNotes(): Promise<ContentEntry<"note">[]> {
-	return await getCollection("note");
+// get all tweets
+export async function getAllTweets(): Promise<ContentEntry<"tweet">[]> {
+	return await getCollection("tweet");
 }
 
 // get all projects
-export async function getAllProjects(): Promise<ContentEntry<"proj">[]> {
-	return await getCollection("proj");
+export async function getAllProjects(): Promise<ContentEntry<"project">[]> {
+	return await getCollection("project");
 }
 
 // group entries by year

@@ -1,12 +1,12 @@
 ---
 import { getCollection } from "astro:content";
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
-import Note from "@/components/note/Note.astro";
+import Tweet from "@/components/tweet/Tweet.astro";
 import PageLayout from "@/layouts/Base.astro";
 
 // if you're using an adaptor in SSR mode, getStaticPaths wont work -> https://docs.astro.build/en/guides/routing/#modifying-the-slug-example-for-ssr
 export const getStaticPaths = (async () => {
-	const all_tweets = await getCollection("note");
+	const all_tweets = await getCollection("tweet");
 	return all_tweets.map((tweet) => ({
 		params: { slug: tweet.id },
 		props: { tweet },
@@ -18,13 +18,11 @@ export type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 const { tweet } = Astro.props;
 
 const meta = {
-	description:
-		tweet.data.description ||
-		`read about my tweet posted on: ${tweet.data.published.toLocaleDateString()}`,
+	description: `read about my tweet posted on: ${tweet.data.published.toLocaleDateString()}`,
 	title: tweet.data.title,
 };
 ---
 
 <PageLayout meta={meta} pageType="article">
-	<Note as="h1" tweet={tweet} />
+	<Tweet as="h1" tweet={tweet} />
 </PageLayout>

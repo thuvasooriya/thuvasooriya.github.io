@@ -1,7 +1,7 @@
 ---
 import { type CollectionEntry, render } from "astro:content";
-import Masthead from "@/components/content/Masthead.astro";
-import PostLayout from "./Post.astro";
+import PostHeader from "@/components/post/PostHeader.astro";
+import ArticleLayout from "./ArticleLayout.astro";
 
 interface Props {
 	post: CollectionEntry<"post">;
@@ -15,7 +15,7 @@ const { headings, remarkPluginFrontmatter } = await render(post);
 const readingTime: string = remarkPluginFrontmatter.readingTime;
 ---
 
-<PostLayout
+<ArticleLayout
 	meta={{
 		articleDate,
 		description,
@@ -26,6 +26,6 @@ const readingTime: string = remarkPluginFrontmatter.readingTime;
 	heroId="blog-hero"
 	likeButton={{ slug: post.id, contentType: "post" }}
 >
-	<Masthead slot="hero" content={post} readingTime={readingTime} postId={post.id} />
+	<PostHeader slot="hero" content={post} readingTime={readingTime} postId={post.id} />
 	<slot />
-</PostLayout>
+</ArticleLayout>

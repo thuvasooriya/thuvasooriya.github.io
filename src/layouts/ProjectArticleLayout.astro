@@ -1,0 +1,63 @@
+---
+import type { CollectionEntry } from "astro:content";
+import type { MarkdownHeading } from "astro";
+import FloatingActions from "@/components/floating/FloatingActions.astro";
+import ProjectHeader from "@/components/project/ProjectHeader.astro";
+import ProjectSidebar from "@/components/project/ProjectSidebar.astro";
+import AnimateIn from "@/components/ui/AnimateIn.astro";
+import ArticleLayout from "./ArticleLayout.astro";
+import BaseLayout from "./Base.astro";
+
+interface Props {
+	entry: CollectionEntry<"project">;
+	headings: MarkdownHeading[];
+	isLog?: boolean;
+	projectFolder?: string | undefined;
+	relatedLogs?: CollectionEntry<"project">[];
+}
+
+const { entry, headings, isLog = false, projectFolder, relatedLogs = [] } = Astro.props;
+const hasLogs = relatedLogs.length > 0 && !isLog && !!projectFolder;
+
+const meta = {
+	description: entry.data.description || `project: ${entry.data.title}`,
+	title: entry.data.title,
+};
+---
+
+{hasLogs ? (
+	<BaseLayout meta={meta} pageType="wide">
+		<div class="project-layout">
+			<ProjectSidebar logs={relatedLogs} projectFolder={projectFolder!} currentSlug={entry.id} />
+			<article class="project-content grow break-words" data-pagefind-body>
+				<div id="project-hero" class="mb-4" data-animate data-animate-immediate>
+					<ProjectHeader entry={entry} isLog={false} />
+				</div>
+				<div class="prose prose-sm max-w-none" data-animate data-animate-immediate data-delay="1">
+					<slot />
+				</div>
+			</article>
+			<div class="project-spacer" aria-hidden="true"></div>
+		</div>
+		<FloatingActions
+			targetId="project-hero"
+			showBackToTop={true}
+			showToc={headings.length > 0}
+			headings={headings}
+			like={{ slug: entry.id, contentType: "project" }}
+		/>
+		<AnimateIn />
+	</BaseLayout>
+) : (
+	<ArticleLayout
+		meta={meta}
+		headings={headings}
+		heroId="project-hero"
+		likeButton={{ slug: entry.id, contentType: "project" }}
+	>
+		<Fragment slot="hero">
+			<ProjectHeader entry={entry} isLog={isLog} projectFolder={projectFolder} />
+		</Fragment>
+		<slot />
+	</ArticleLayout>
+)}

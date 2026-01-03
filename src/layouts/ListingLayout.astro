@@ -1,0 +1,57 @@
+---
+import { Icon } from "astro-icon/components";
+import AnimateIn from "@/components/ui/AnimateIn.astro";
+import TagFilter from "@/components/ui/TagFilter.astro";
+import PageLayout from "@/layouts/Base.astro";
+import type { SiteMeta } from "@/types";
+
+interface Props {
+	meta: SiteMeta;
+	title: string;
+	rssUrl?: string;
+	showFilter?: boolean;
+	filterProps?: {
+		all_tags: string[];
+		min_usage: number;
+		tag_counts: Record<string, number>;
+	};
+	gridClass?: string;
+}
+
+const {
+	meta,
+	title,
+	rssUrl,
+	showFilter = false,
+	filterProps,
+	gridClass = "card-list",
+} = Astro.props;
+---
+
+<PageLayout meta={meta} pageType="listing">
+	<div class="mb-6 flex items-center justify-center gap-3 sm:justify-start" data-animate>
+		<h1 class="title">{title}</h1>
+		{rssUrl && (
+			<a class="text-accent" href={rssUrl} target="_blank">
+				<span class="sr-only">rss feed</span>
+				<Icon aria-hidden="true" class="h-6 w-6" focusable="false" name="mdi:rss" />
+			</a>
+		)}
+	</div>
+
+	{showFilter && filterProps && (
+		<TagFilter
+			all_tags={filterProps.all_tags}
+			min_usage={filterProps.min_usage}
+			tag_counts={filterProps.tag_counts}
+		/>
+	)}
+
+	<div class={gridClass} data-animate data-delay="1">
+		<slot />
+	</div>
+
+	<slot name="pagination" />
+</PageLayout>
+
+<AnimateIn />

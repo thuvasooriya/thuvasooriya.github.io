@@ -32,7 +32,7 @@ export interface PostMeta {
 	ogImage?: string;
 }
 
-export interface NoteMeta {
+export interface TweetMeta {
 	title: string;
 	description?: string;
 	publishDate: Date;
@@ -79,7 +79,7 @@ export interface ThemeConfig {
 
 export type SortOrder = "asc" | "desc";
 
-export type CollectionType = "post" | "note";
+export type CollectionType = "post" | "tweet";
 
 export interface PaginationData {
 	currentPage: number;

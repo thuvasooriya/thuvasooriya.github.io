@@ -1,10 +1,6 @@
 ---
 import { getEntry, render } from "astro:content";
-import TOC from "@/components/content/TOC.astro";
-import AnimateIn from "@/components/ui/AnimateIn.astro";
-import DocHeader from "@/components/wiki/DocHeader.astro";
-import WikiSidebar from "@/components/wiki/WikiSidebar.astro";
-import BaseLayout from "@/layouts/Base.astro";
+import WikiLayout from "@/layouts/WikiLayout.astro";
 
 const entry = await getEntry("wiki", "index");
 if (!entry) {
@@ -12,31 +8,8 @@ if (!entry) {
 }
 
 const { Content, headings } = await render(entry);
-const description = entry.data.description;
 ---
 
-<BaseLayout
-	meta={{
-		title: entry.data.title,
-		...(description && { description }),
-	}}
-	pageType="wiki"
-	hideFooter
->
-	<div class="wiki-layout">
-		<WikiSidebar currentSlug="index" />
-		<article class="wiki-content">
-			<header class="wiki-header" data-animate data-animate-immediate>
-				<h1>{entry.data.title}</h1>
-				{entry.data.description && <p class="wiki-description">{entry.data.description}</p>}
-			</header>
-			<DocHeader slug="index" status={entry.data.status} updated={entry.data.updated} tags={entry.data.tags} />
-			{!!headings.length && <TOC headings={headings} />}
-			<div class="prose prose-sm max-w-none" data-animate data-animate-immediate data-delay="1">
-				<Content />
-			</div>
-		</article>
-		<div class="wiki-toc-space" aria-hidden="true"></div>
-	</div>
-	<AnimateIn />
-</BaseLayout>
+<WikiLayout entry={entry} headings={headings}>
+	<Content />
+</WikiLayout>

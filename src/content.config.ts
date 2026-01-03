@@ -5,14 +5,11 @@ function removeDupsAndLowerCase(array: string[]) {
 	return [...new Set(array.map((str) => str.toLowerCase()))];
 }
 
-const baseSchema = z.object({
-	title: z.string().max(60),
-});
-
 const post = defineCollection({
-	loader: glob({ base: "./src/content/posts", pattern: "**/*.{md,mdx}" }),
+	loader: glob({ base: "./src/content/post", pattern: "**/*.{md,mdx}" }),
 	schema: ({ image }) =>
-		baseSchema.extend({
+		z.object({
+			title: z.string().max(60),
 			description: z.string(),
 			cover_image: z
 				.object({
@@ -34,10 +31,10 @@ const post = defineCollection({
 		}),
 });
 
-const note = defineCollection({
-	loader: glob({ base: "./src/content/tweets", pattern: "**/*.{md,mdx}" }),
-	schema: baseSchema.extend({
-		description: z.string().optional(),
+const tweet = defineCollection({
+	loader: glob({ base: "./src/content/tweet", pattern: "**/*.{md,mdx}" }),
+	schema: z.object({
+		title: z.string().max(60),
 		published: z
 			.string()
 			.or(z.date())
@@ -51,17 +48,10 @@ const note = defineCollection({
 });
 
 const page = defineCollection({
-	loader: glob({ base: "./src/content/pages", pattern: "**/*.{md,mdx}" }),
+	loader: glob({ base: "./src/content/page", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		title: z.string(),
 		description: z.string().optional(),
-		hero: z
-			.object({
-				title: z.string(),
-				subtitle: z.string(),
-				tagline: z.string(),
-			})
-			.optional(),
 		tiles: z
 			.array(
 				z.object({
@@ -93,46 +83,11 @@ const page = defineCollection({
 				}),
 			)
 			.optional(),
-		// legacy fields for backward compatibility
-		now: z
-			.array(
-				z.object({
-					tag: z.string(),
-					title: z.string(),
-					description: z.string(),
-					icon: z.string(),
-				}),
-			)
-			.optional(),
-		skills: z
-			.array(
-				z.object({
-					category: z.string(),
-					icon: z.string(),
-					items: z.array(z.string()),
-				}),
-			)
-			.optional(),
-		philosophy: z
-			.array(
-				z.object({
-					title: z.string(),
-					description: z.string(),
-					icon: z.string(),
-				}),
-			)
-			.optional(),
-		stay_updated: z
-			.object({
-				title: z.string(),
-				description: z.string(),
-			})
-			.optional(),
 	}),
 });
 
-const proj = defineCollection({
-	loader: glob({ base: "./src/content/proj", pattern: "**/*.{md,mdx}" }),
+const project = defineCollection({
+	loader: glob({ base: "./src/content/project", pattern: "**/*.{md,mdx}" }),
 	schema: z.object({
 		title: z.string(),
 		description: z.string().optional(),
@@ -145,16 +100,6 @@ const proj = defineCollection({
 			.optional()
 			.transform((val) => (val ? new Date(val) : undefined)),
 		updated: z
-			.string()
-			.or(z.date())
-			.optional()
-			.transform((val) => (val ? new Date(val) : undefined)),
-		date: z
-			.string()
-			.or(z.date())
-			.optional()
-			.transform((val) => (val ? new Date(val) : undefined)),
-		publishDate: z
 			.string()
 			.or(z.date())
 			.optional()
@@ -193,22 +138,7 @@ const wiki = defineCollection({
 				hidden: z.boolean().default(false),
 			})
 			.default({}),
-		hero: z
-			.object({
-				tagline: z.string().optional(),
-				actions: z
-					.array(
-						z.object({
-							text: z.string(),
-							link: z.string(),
-							icon: z.string().optional(),
-							variant: z.enum(["primary", "secondary", "minimal"]).default("primary"),
-						}),
-					)
-					.optional(),
-			})
-			.optional(),
 	}),
 });
 
-export const collections = { post, note, page, proj, wiki };
+export const collections = { post, tweet, page, project, wiki };

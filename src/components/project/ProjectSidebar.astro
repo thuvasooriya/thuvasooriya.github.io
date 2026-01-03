@@ -2,7 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 
 interface Props {
-	logs: CollectionEntry<"proj">[];
+	logs: CollectionEntry<"project">[];
 	projectFolder: string;
 	currentSlug?: string;
 }
@@ -10,13 +10,13 @@ interface Props {
 const { logs, projectFolder, currentSlug = "" } = Astro.props;
 
 const sortedLogs = [...logs].sort((a, b) => {
-	const dateA = a.data.date;
-	const dateB = b.data.date;
+	const dateA = a.data.updated;
+	const dateB = b.data.updated;
 	if (!dateA || !dateB) return 0;
 	return dateB.getTime() - dateA.getTime();
 });
 
-function getLogSlug(log: CollectionEntry<"proj">): string {
+function getLogSlug(log: CollectionEntry<"project">): string {
 	return log.id.replace(`${projectFolder}/`, "");
 }
 

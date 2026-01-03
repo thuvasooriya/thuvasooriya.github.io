@@ -1,10 +1,10 @@
 ---
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
-import FormattedDate from "@/components/content/FormattedDate.astro";
+import FormattedDate from "@/components/shared/FormattedDate.astro";
 import Card from "@/components/ui/Card.astro";
 
-type ContentEntry = CollectionEntry<"post"> | CollectionEntry<"proj">;
+type ContentEntry = CollectionEntry<"post"> | CollectionEntry<"project">;
 
 export interface Props {
 	as?: string;
@@ -28,7 +28,7 @@ const title = entry.data.title;
 const description = entry.data.description;
 const tags = entry.data.tags;
 
-const publishDate = entry.collection === "post" ? entry.data.published : entry.data.date;
+const publishDate = entry.collection === "post" ? entry.data.published : entry.data.started;
 const coverImage = entry.collection === "post" ? entry.data.cover_image : undefined;
 const isDraft = entry.collection === "post" ? entry.data.draft : entry.data.status === "init";
 ---

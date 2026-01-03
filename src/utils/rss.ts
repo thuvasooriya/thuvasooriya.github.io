@@ -2,12 +2,12 @@ import type { CollectionEntry } from "astro:content";
 import rss from "@astrojs/rss";
 import { siteConfig } from "@/site.config";
 
-interface generate_rss_config<t extends "post" | "note"> {
+interface generate_rss_config<t extends "post" | "tweet"> {
 	items: CollectionEntry<t>[];
 	path_prefix: string;
 }
 
-export function generate_rss<t extends "post" | "note">({
+export function generate_rss<t extends "post" | "tweet">({
 	items,
 	path_prefix,
 }: generate_rss_config<t>) {

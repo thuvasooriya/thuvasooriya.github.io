@@ -1,8 +1,8 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import { Icon } from "astro-icon/components";
-import ContentCard from "@/components/content/ContentCard.astro";
-import Note from "@/components/note/Note.astro";
+import ContentCard from "@/components/shared/ContentCard.astro";
+import Tweet from "@/components/tweet/Tweet.astro";
 import AnimateIn from "@/components/ui/AnimateIn.astro";
 import LanguageGreeting from "@/components/ui/LanguageGreeting.astro";
 import { PAGINATION } from "@/constants";
@@ -15,7 +15,7 @@ const allPostsByDate = allPosts
 	.sort(collectionDateSort)
 	.slice(0, PAGINATION.MAX_POSTS_HOME) as CollectionEntry<"post">[];
 
-const all_tweets = await getCollection("note");
+const all_tweets = await getCollection("tweet");
 const latest_tweets = all_tweets.sort(collectionDateSort).slice(0, 2);
 ---
 
@@ -78,7 +78,7 @@ const latest_tweets = all_tweets.sort(collectionDateSort).slice(0, 2);
 				<ul class="card-list-single" role="list">
 					{latest_tweets.map((tweet) => (
 						<li>
-							<Note tweet={tweet} as="h3" />
+							<Tweet tweet={tweet} as="h3" />
 						</li>
 					))}
 					</ul>

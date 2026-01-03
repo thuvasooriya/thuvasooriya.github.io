@@ -7,7 +7,7 @@ import ViewCounter from "@/components/social/ViewCounter.astro";
 import Card from "@/components/ui/Card.astro";
 
 type Props<Tag extends HTMLTag> = Polymorphic<{ as: Tag }> & {
-	tweet: CollectionEntry<"note">;
+	tweet: CollectionEntry<"tweet">;
 };
 
 const { as: Tag = "article", tweet, class: className } = Astro.props;
@@ -17,11 +17,13 @@ const display_name = tweet.data.title;
 ---
 
 <Card as={Tag} class={`tweet-card not-prose block ${className || ""}`} data-pagefind-body>
+	<a class="tweet-link-overlay" href={`/tweets/${tweet.id}/`} aria-label={display_name}>
+		<span class="sr-only">Read tweet: {display_name}</span>
+	</a>
+
 	<div class="tweet-header flex items-center justify-between gap-2">
-		<a class="cactus-link text-sm" href={`/tweets/${tweet.id}/`}>
-			<span class="tweet-heading font-semibold text-base text-text-primary">{display_name}</span>
-		</a>
-		<div class="flex items-center gap-1 shrink-0">
+		<span class="tweet-heading font-semibold text-base">{display_name}</span>
+		<div class="tweet-actions flex items-center gap-1 shrink-0">
 			<LikeButton slug={tweet.id} content_type="tweet" show_count={false} icon_size="sm" class="tweet-like-btn text-text-muted hover:text-red-500 dark:hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10" />
 			<button
 				type="button"
@@ -39,11 +41,9 @@ const display_name = tweet.data.title;
 		</div>
 	</div>
 
-	<a class="cactus-link text-sm block tweet-link px-4 pt-3" href={`/tweets/${tweet.id}/`}>
-		<div class="tweet-content prose prose-sm prose-cactus max-w-none [&>p:last-of-type]:mb-0">
-			<Content />
-		</div>
-	</a>
+	<div class="tweet-content prose prose-sm prose-cactus max-w-none px-4 pt-3 [&>p:last-of-type]:mb-0">
+		<Content />
+	</div>
 
 	<div class="tweet-footer flex items-center px-4 pb-4 pt-3">
 		<div class="flex items-center gap-2 text-xs text-text-muted lowercase">
@@ -59,6 +59,32 @@ const display_name = tweet.data.title;
 </Card>
 
 <style>
+	.tweet-card {
+		position: relative;
+	}
+
+	.tweet-link-overlay {
+		position: absolute;
+		inset: 0;
+		z-index: 0;
+	}
+
+	.tweet-card:hover {
+		background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);
+	}
+
+	.tweet-header,
+	.tweet-content,
+	.tweet-footer {
+		position: relative;
+		z-index: 1;
+		pointer-events: none;
+	}
+
+	.tweet-actions {
+		pointer-events: auto;
+	}
+
 	.tweet-footer {
 		font-variant-numeric: tabular-nums;
 	}

@@ -1,10 +1,10 @@
 ---
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import type { GetStaticPaths } from "astro";
-import ProjectPostLayout from "@/layouts/ProjectPost.astro";
+import ProjectArticleLayout from "@/layouts/ProjectArticleLayout.astro";
 
 export const getStaticPaths = (async () => {
-	const all_proj = await getCollection("proj");
+	const all_proj = await getCollection("project");
 
 	const project_indexes = all_proj.filter((entry) => !entry.id.includes("/"));
 
@@ -23,7 +23,7 @@ export const getStaticPaths = (async () => {
 }) satisfies GetStaticPaths;
 
 interface Props {
-	entry: CollectionEntry<"proj">;
+	entry: CollectionEntry<"project">;
 	is_article: boolean;
 }
 
@@ -32,7 +32,7 @@ const { Content, headings } = await render(entry);
 
 const project_folder = is_article ? entry.id.split("/")[0] : entry.id;
 
-const all_proj = await getCollection("proj");
+const all_proj = await getCollection("project");
 const related_articles = is_article
 	? []
 	: all_proj
@@ -41,14 +41,14 @@ const related_articles = is_article
 				return folder === project_folder && e.id.includes("/");
 			})
 			.sort((a, b) => {
-				const date_a = a.data.date ?? a.data.publishDate;
-				const date_b = b.data.date ?? b.data.publishDate;
+				const date_a = a.data.updated;
+				const date_b = b.data.updated;
 				if (!date_a || !date_b) return 0;
 				return date_b.getTime() - date_a.getTime();
 			});
 ---
 
-<ProjectPostLayout
+<ProjectArticleLayout
 	entry={entry}
 	headings={headings}
 	isLog={is_article}
@@ -56,4 +56,4 @@ const related_articles = is_article
 	relatedLogs={related_articles}
 >
 	<Content />
-</ProjectPostLayout>
+</ProjectArticleLayout>
