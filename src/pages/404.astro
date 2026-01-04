@@ -4,68 +4,74 @@ import GradientBlurs from "@/components/ui/GradientBlurs.astro";
 import PageLayout from "@/layouts/Base.astro";
 
 const meta = {
-	description: "Oops! It looks like this page is lost in space!",
+	description: "This page has faded into the void. Only shades remain here.",
 	title: "404 - page not found",
 };
+
+const blurs = [
+	{ color: "var(--color-global-text)", size: "16rem", top: "15%", right: "5%", opacity: 0.25 },
+	{ color: "var(--color-text-secondary)", size: "12rem", top: "45%", left: "0%", opacity: 0.2 },
+	{ color: "var(--color-text-muted)", size: "18rem", bottom: "5%", right: "15%", opacity: 0.22 },
+	{ color: "var(--color-global-text)", size: "6rem", top: "30%", left: "20%", opacity: 0.15 },
+	{ color: "var(--color-text-secondary)", size: "5rem", top: "70%", right: "30%", opacity: 0.18 },
+	{ color: "var(--color-text-muted)", size: "4rem", top: "10%", left: "40%", opacity: 0.12 },
+];
 ---
 
 <PageLayout meta={meta} pageType="home">
-	<GradientBlurs variant="error" />
+	<GradientBlurs blurs={blurs} />
 
 	<section class="error-page">
 
 		<div class="error-content" data-animate>
 			<div class="error-illustration">
-				<svg
-					class="ghost-svg"
-					viewBox="0 0 200 200"
+<svg
+					class="shade-svg"
+					viewBox="0 0 60.395 158.384"
 					fill="none"
 					xmlns="http://www.w3.org/2000/svg"
 					aria-hidden="true"
 				>
-					<g class="ghost-body">
-						<path
-							d="M100 20C55.8 20 20 55.8 20 100v60c0 5.5 6.3 8.5 10.6 5l15.4-12.3c2.4-1.9 5.8-1.9 8.2 0l15.4 12.3c2.6 2.1 6.2 2.1 8.8 0l15.4-12.3c2.4-1.9 5.8-1.9 8.2 0l15.4 12.3c2.6 2.1 6.2 2.1 8.8 0l15.4-12.3c2.4-1.9 5.8-1.9 8.2 0l15.4 12.3c4.3 3.5 10.6.5 10.6-5v-60c0-44.2-35.8-80-80-80z"
-							fill="currentColor"
-							class="ghost-fill"
-						/>
-						<circle cx="70" cy="90" r="12" class="ghost-eye" />
-						<circle cx="130" cy="90" r="12" class="ghost-eye" />
-						<path
-							d="M85 115c0 8.3 6.7 15 15 15s15-6.7 15-15"
-							stroke="currentColor"
-							stroke-width="4"
-							stroke-linecap="round"
-							class="ghost-mouth"
-						/>
-					</g>
-					<g class="sparkles">
-						<circle cx="35" cy="50" r="3" class="sparkle sparkle-1" />
-						<circle cx="165" cy="45" r="2" class="sparkle sparkle-2" />
-						<circle cx="25" cy="130" r="2" class="sparkle sparkle-3" />
-						<circle cx="175" cy="120" r="3" class="sparkle sparkle-4" />
-						<circle cx="50" cy="170" r="2" class="sparkle sparkle-5" />
-						<circle cx="150" cy="175" r="2" class="sparkle sparkle-6" />
-					</g>
+					<path class="shade-body" fill-rule="evenodd" d="M31.96.451c4.19-1.82 7.55 2.25 9.68 5.3 5.69 8.4 10.06 18.6 8.65 28.93-.3 3.03-2 5.7-2.36 8.71 1.54 3 3.97 5.52 5.11 8.75 3.75 8.66 3.02 18.92-1.4 27.17-1.55 2.15-3.56 3.91-5.02 6.12 2.47-1.56 4.35-3.83 6.55-5.72 2.67-2.4 8.08-.02 7.11 3.77-1.8 2.81-4.13 5.22-6.21 7.82.4 1.03.77 2.08 1.1 3.14-2.33 2.49-4.97 4.66-7.39 7.06 2.86 6.68 5.78 13.64 5.74 21.02.29 5.73 1.11 11.41 1.52 17.12.29 5 2.83 9.48 3.32 14.45-4.44 2.03-8.4-2.76-9.3-6.73.2 3.61.65 7.2 1.37 10.74-3.72 1.44-4.71-2.96-5.69-5.52-.34 1.98.26 4.82-2.04 5.75-2.37-2.09-3.55-5.11-4.88-7.89-.28 3.07-.94 6.52-4.07 7.93-1.48-5.33-3.27-10.59-4.3-16.04-.65 4 .45 8.16-.48 12.07-4.89.72-5.54-5.77-6.94-9.06-.99 3.01-2.75 6.92-6.63 5.8-.17-4.44.71-8.92-.05-13.32.29 4.93-3.34 9.4-8.29 9.79 1.39-8.64 1.3-17.38 2.14-26.08.19-10.97 3.34-21.78 8.77-31.29-2.74-.27-5.78.06-8.13-1.67-4.32-3.25-7.5-8.06-8.23-13.48-1.58-9.91-2.51-21.4 4.02-29.83-5.27-9.91-7.25-21.81-4.17-32.71 1.19-3.48 3.57-8.37 8.01-7.67 2.74.89 1.56 4.41 1.79 6.59 1.29.79 3.51 1.23 3.3 3.19-.04 3.66-1.47 7.17-1.27 10.86.14 5.3 2.37 10.24 4.99 14.75 5.07.22 10.14-.17 15.13-1.05 3.03-6.28 2.31-13.95-1.29-19.84-1.54-2.83-4.4-5.39-3.71-8.92 1.01-.97 2.17-1.76 3.3-2.58-.49-2.47-2.87-5.8.25-7.43m-12.46 64.18c-1.84 3.88-1.14 9.15 2.29 11.93 1.52 1.01 3.95 2.09 5.38.34 2.79-3.11 1.72-7.76.38-11.28-.8-2.47-3.363-3.353-5.438-3.007-1.563.26-2.612 2.017-2.612 2.017m-16.08.4c-.03 4.4.62 8.81 2.22 12.92 1.867 1.615 2.627.836 3.44.12.46-4.52-.354-9.263-2.18-13.13-.152-.323-1.152-.992-1.845-.96-.647.029-1.635 1.05-1.635 1.05m43.64 25c-.59-.43-1.78-1.3-2.38-1.73-.65 1.01-1.31 2.02-1.96 3.03 1.14 1.82 2.27 3.65 3.4 5.48 1.34-1.06 2.68-2.11 4.02-3.16-.42-.93-.85-1.86-1.28-2.78 2.77-3.04 6.49-5.48 7.79-9.56-3.57 2.49-6.17 6.05-9.59 8.72Z"/>
 				</svg>
 			</div>
 
 			<div class="error-text">
 				<h1 class="error-code">404</h1>
-				<p class="error-message">looks like this page wandered off</p>
-				<p class="error-hint">maybe it's exploring the void...</p>
-				<a href="/" class="error-link">
-					<span>take me home</span>
-					<svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-						<path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
-					</svg>
-				</a>
+				<p class="error-message">this page has faded into the void</p>
+				<p class="error-hint">only shades remain here...</p>
+				<div class="error-actions">
+					<button type="button" class="error-link error-back" data-back>
+						<svg class="arrow-icon arrow-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M19 12H5M12 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+						<span>take me back</span>
+					</button>
+					<a href="/" class="error-link error-home" data-home hidden>
+						<span>take me home</span>
+						<svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+						</svg>
+					</a>
+				</div>
 			</div>
 		</div>
 	</section>
 </PageLayout>
 
 <AnimateIn />
+
+<script>
+	const backBtn = document.querySelector<HTMLButtonElement>("[data-back]");
+	const homeLink = document.querySelector<HTMLAnchorElement>("[data-home]");
+	
+	if (history.length > 1 && document.referrer) {
+		backBtn?.addEventListener("click", () => history.back());
+	} else {
+		if (backBtn) backBtn.hidden = true;
+		if (homeLink) homeLink.hidden = false;
+	}
+</script>
 
 <style>
 	.error-page {
@@ -89,59 +95,33 @@ const meta = {
 	}
 
 	.error-illustration {
-		width: 10rem;
-		height: 10rem;
+		width: 6rem;
+		height: auto;
 	}
 
 	@media (min-width: 640px) {
 		.error-illustration {
-			width: 14rem;
-			height: 14rem;
+			width: 8rem;
 		}
 	}
 
-	.ghost-svg {
+	.shade-svg {
 		width: 100%;
 		height: 100%;
-		color: var(--color-primary);
+		animation: shade-float 5s ease-in-out infinite;
+		transform-origin: center 25%;
+		filter: drop-shadow(0 0 20px color-mix(in srgb, var(--color-global-text) 20%, transparent));
 	}
 
-	.ghost-body {
-		animation: ghost-float 3s ease-in-out infinite;
-		transform-origin: center;
+	@keyframes shade-float {
+		0%, 100% { transform: translateY(0) skewX(0deg); }
+		25% { transform: translateY(-6px) skewX(0.8deg); }
+		50% { transform: translateY(-12px) skewX(0deg); }
+		75% { transform: translateY(-6px) skewX(-0.8deg); }
 	}
 
-	@keyframes ghost-float {
-		0%, 100% { transform: translateY(0) rotate(-2deg); }
-		50% { transform: translateY(-10px) rotate(2deg); }
-	}
-
-	.ghost-fill {
-		opacity: 0.15;
-	}
-
-	.ghost-eye {
-		fill: var(--color-primary);
-	}
-
-	.ghost-mouth {
-		stroke: var(--color-primary);
-	}
-
-	.sparkle {
-		animation: sparkle 2s ease-in-out infinite;
-	}
-
-	.sparkle-1 { animation-delay: 0s; fill: var(--color-peach); }
-	.sparkle-2 { animation-delay: 0.3s; fill: var(--color-red); }
-	.sparkle-3 { animation-delay: 0.6s; fill: var(--color-maroon); }
-	.sparkle-4 { animation-delay: 0.9s; fill: var(--color-peach); }
-	.sparkle-5 { animation-delay: 1.2s; fill: var(--color-red); }
-	.sparkle-6 { animation-delay: 1.5s; fill: var(--color-maroon); }
-
-	@keyframes sparkle {
-		0%, 100% { opacity: 0.3; transform: scale(1); }
-		50% { opacity: 1; transform: scale(1.5); }
+	.shade-body {
+		fill: var(--color-global-text);
 	}
 
 	.error-text {
@@ -157,9 +137,9 @@ const meta = {
 		line-height: 1;
 		background: linear-gradient(
 			135deg,
-			var(--color-peach) 0%,
-			var(--color-red) 50%,
-			var(--color-maroon) 100%
+			var(--color-global-text) 0%,
+			var(--color-text-secondary) 50%,
+			var(--color-text-muted) 100%
 		);
 		-webkit-background-clip: text;
 		background-clip: text;
@@ -197,24 +177,41 @@ const meta = {
 		font-style: italic;
 	}
 
+	.error-actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem;
+		margin-top: 1rem;
+		justify-content: center;
+	}
+
 	.error-link {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.5rem;
-		margin-top: 1rem;
 		padding: 0.75rem 1.5rem;
 		font-size: 0.875rem;
 		font-weight: 500;
-		color: var(--color-global-bg);
-		background: color-mix(in srgb, var(--color-primary) 85%, transparent);
+		color: var(--color-global-text);
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-global-text) 10%, transparent) 0%,
+			color-mix(in srgb, var(--color-global-text) 5%, transparent) 100%
+		);
+		border: 1px solid color-mix(in srgb, var(--color-global-text) 15%, transparent);
 		border-radius: 0.5rem;
 		text-decoration: none;
+		cursor: pointer;
 		transition: all 200ms ease;
 	}
 
 	.error-link:hover {
-		background: var(--color-primary);
-		box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 50%, transparent);
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-global-text) 15%, transparent) 0%,
+			color-mix(in srgb, var(--color-global-text) 10%, transparent) 100%
+		);
+		border-color: color-mix(in srgb, var(--color-global-text) 25%, transparent);
 	}
 
 	.error-link .arrow-icon {

@@ -1,21 +1,46 @@
 ---
+interface Blur {
+	color: string;
+	size?: string;
+	top?: string;
+	right?: string;
+	bottom?: string;
+	left?: string;
+	opacity?: number;
+}
+
 interface Props {
-	variant?: "home" | "error";
+	blurs?: Blur[];
 	animate?: boolean;
 }
 
-const { variant = "home", animate = true } = Astro.props;
-const isError = variant === "error";
+const default_blurs: Blur[] = [
+	{ color: "var(--color-primary)", size: "10rem", top: "0", right: "15%" },
+	{ color: "var(--color-variant-6)", size: "9rem", top: "60%", left: "5%", opacity: 0.25 },
+	{ color: "var(--color-variant-2)", size: "14rem", top: "25%", right: "0", opacity: 0.3 },
+	{ color: "var(--color-accent)", size: "12rem", top: "45%", left: "20%" },
+	{ color: "var(--color-variant-3)", size: "10rem", top: "85%", right: "25%" },
+];
+
+const { blurs = default_blurs, animate = true } = Astro.props;
 ---
 
-<div class:list={["gradient-blurs", { "gradient-blurs--error": isError, "gradient-blurs--animate": animate }]} aria-hidden="true">
-	<div class="gradient-blur gradient-blur-1"></div>
-	<div class="gradient-blur gradient-blur-2"></div>
-	<div class="gradient-blur gradient-blur-3"></div>
-	{!isError && <div class="gradient-blur gradient-blur-4"></div>}
-	{!isError && <div class="gradient-blur gradient-blur-5"></div>}
-	{isError && <div class="gradient-blur gradient-blur-4"></div>}
-	{isError && <div class="gradient-blur gradient-blur-5"></div>}
+<div class:list={["gradient-blurs", { "gradient-blurs--animate": animate }]} aria-hidden="true">
+	{blurs.map((blur, i) => (
+		<div
+			class="gradient-blur"
+			style={{
+				"--blur-color": blur.color,
+				"--blur-size": blur.size ?? "10rem",
+				"--blur-opacity": blur.opacity ?? 0.5,
+				"--blur-top": blur.top ?? "auto",
+				"--blur-right": blur.right ?? "auto",
+				"--blur-bottom": blur.bottom ?? "auto",
+				"--blur-left": blur.left ?? "auto",
+				"--blur-delay": `${-i * 2}s`,
+			}}
+		/>
+	))}
 </div>
 
 <style>
@@ -31,150 +56,19 @@ const isError = variant === "error";
 		position: absolute;
 		border-radius: 50%;
 		filter: blur(60px);
-		opacity: 0.5;
+		background-color: var(--blur-color);
+		width: var(--blur-size);
+		height: var(--blur-size);
+		opacity: var(--blur-opacity);
+		top: var(--blur-top);
+		right: var(--blur-right);
+		bottom: var(--blur-bottom);
+		left: var(--blur-left);
 	}
 
-	/* home variant: 5 blurs distributed vertically with varied x positions */
-	.gradient-blur-1 {
-		background-color: var(--color-primary);
-		width: 20vw;
-		height: 20vw;
-		min-width: 6rem;
-		min-height: 6rem;
-		max-width: 10rem;
-		max-height: 10rem;
-		top: 0;
-		right: 15%;
-	}
-
-	.gradient-blur-2 {
-		background-color: var(--color-variant-6);
-		width: 18vw;
-		height: 18vw;
-		min-width: 5rem;
-		min-height: 5rem;
-		max-width: 9rem;
-		max-height: 9rem;
-		top: 60%;
-		left: 5%;
-		opacity: 0.25;
-	}
-
-	.gradient-blur-3 {
-		background-color: var(--color-variant-2);
-		width: 28vw;
-		height: 28vw;
-		min-width: 10rem;
-		min-height: 10rem;
-		max-width: 14rem;
-		max-height: 14rem;
-		top: 25%;
-		right: 0;
-		opacity: 0.3;
-	}
-
-	.gradient-blur-4 {
-		background-color: var(--color-accent);
-		width: 24vw;
-		height: 24vw;
-		min-width: 7rem;
-		min-height: 7rem;
-		max-width: 12rem;
-		max-height: 12rem;
-		top: 45%;
-		left: 20%;
-	}
-
-	.gradient-blur-5 {
-		background-color: var(--color-variant-3);
-		width: 22vw;
-		height: 22vw;
-		min-width: 6rem;
-		min-height: 6rem;
-		max-width: 10rem;
-		max-height: 10rem;
-		top: 85%;
-		right: 25%;
-	}
-
-	/* error variant: warning/danger colors, fullpage fixed */
-	.gradient-blurs--error {
-		position: fixed;
-	}
-
-	.gradient-blurs--error .gradient-blur {
-		filter: blur(80px);
-		opacity: 0.4;
-		top: auto;
-		right: auto;
-		bottom: auto;
-		left: auto;
-	}
-
-	.gradient-blurs--error .gradient-blur-1 {
-		background-color: var(--color-peach);
-		width: 300px;
-		height: 300px;
-		top: 30%;
-		right: -80px;
-	}
-
-	.gradient-blurs--error .gradient-blur-2 {
-		background-color: var(--color-red);
-		width: 250px;
-		height: 250px;
-		bottom: -50px;
-		right: -50px;
-	}
-
-	.gradient-blurs--error .gradient-blur-3 {
-		background-color: var(--color-maroon);
-		width: 200px;
-		height: 200px;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-	}
-
-	.gradient-blurs--error .gradient-blur-4 {
-		background-color: var(--color-red);
-		width: 180px;
-		height: 180px;
-		top: 20%;
-		right: 15%;
-	}
-
-	.gradient-blurs--error .gradient-blur-5 {
-		background-color: var(--color-peach);
-		width: 150px;
-		height: 150px;
-		bottom: 20%;
-		left: 10%;
-	}
-
-	/* slow drift animation */
 	.gradient-blurs--animate .gradient-blur {
 		animation: drift 12s ease-in-out infinite;
-	}
-
-	.gradient-blurs--animate .gradient-blur-1 {
-		animation-delay: 0s;
-	}
-
-	.gradient-blurs--animate .gradient-blur-2 {
-		animation-delay: -2s;
-	}
-
-	.gradient-blurs--animate .gradient-blur-3 {
-		animation-delay: -4s;
-	}
-
-	.gradient-blurs--animate .gradient-blur-4 {
-		animation-delay: -6s;
-	}
-
-	.gradient-blurs--animate .gradient-blur-5 {
-		animation-delay: -8s;
+		animation-delay: var(--blur-delay);
 	}
 
 	@keyframes drift {
@@ -189,26 +83,6 @@ const isError = variant === "error";
 		}
 		75% {
 			transform: translate(-15px, -10px) scale(1.02);
-		}
-	}
-
-	/* error variant needs different transform origin for centered blur */
-	.gradient-blurs--error.gradient-blurs--animate .gradient-blur-3 {
-		animation-name: drift-centered;
-	}
-
-	@keyframes drift-centered {
-		0%, 100% {
-			transform: translate(-50%, -50%) scale(1);
-		}
-		25% {
-			transform: translate(-45%, -55%) scale(1.02);
-		}
-		50% {
-			transform: translate(-55%, -45%) scale(1.05);
-		}
-		75% {
-			transform: translate(-52%, -48%) scale(1.02);
 		}
 	}
 </style>
