@@ -13,11 +13,13 @@ interface Props {
 	headings: MarkdownHeading[];
 	isLog?: boolean;
 	projectFolder?: string | undefined;
+	projectTitle?: string | undefined;
 	relatedLogs?: CollectionEntry<"project">[];
 }
 
-const { entry, headings, isLog = false, projectFolder, relatedLogs = [] } = Astro.props;
-const hasLogs = relatedLogs.length > 0 && !isLog && !!projectFolder;
+const { entry, headings, isLog = false, projectFolder, projectTitle, relatedLogs = [] } = Astro.props;
+const hasLogs = relatedLogs.length > 0 && !!projectFolder;
+const showSidebar = hasLogs;
 
 const meta = {
 	description: entry.data.description || `project: ${entry.data.title}`,
@@ -25,13 +27,18 @@ const meta = {
 };
 ---
 
-{hasLogs ? (
+{showSidebar ? (
 	<BaseLayout meta={meta} pageType="wide" sidebarType="project">
 		<div class="project-layout">
-			<ProjectSidebar logs={relatedLogs} projectFolder={projectFolder!} currentSlug={entry.id} />
+			<ProjectSidebar
+				logs={relatedLogs}
+				projectFolder={projectFolder!}
+				projectTitle={projectTitle ?? projectFolder!}
+				currentSlug={entry.id}
+			/>
 			<article class="project-content grow break-words" data-pagefind-body data-pagefind-filter="content_type:project">
 				<div id="project-hero" class="mb-4" data-animate data-animate-immediate>
-					<ProjectHeader entry={entry} isLog={false} />
+					<ProjectHeader entry={entry} isLog={isLog} />
 				</div>
 				<div class="prose prose-sm max-w-none" data-animate data-animate-immediate data-delay="1">
 					<slot />
@@ -57,7 +64,7 @@ const meta = {
 		likeButton={{ slug: entry.id, contentType: "project" }}
 	>
 		<Fragment slot="hero">
-			<ProjectHeader entry={entry} isLog={isLog} projectFolder={projectFolder} />
+			<ProjectHeader entry={entry} isLog={isLog} />
 		</Fragment>
 		<slot />
 	</ArticleLayout>

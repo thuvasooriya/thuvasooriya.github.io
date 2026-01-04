@@ -17,7 +17,7 @@
 	--color-blockquote-background: transparent;
 
 	--img-border-radius: 0.25rem;
-	--color-figcaption: var(--color-gray-400);
+	--color-figcaption: var(--color-text-muted);
 }
 
 .prose {
@@ -97,7 +97,7 @@
 	}
 
 	code {
-		border: 1px dotted #666;
+		border: 1px dotted var(--color-border-strong);
 		border-radius: 2px;
 	}
 
@@ -121,7 +121,7 @@
 	}
 
 	del {
-		color: var(--color-gray-500);
+		color: var(--color-text-muted);
 	}
 
 	ul:has(li > input[type="checkbox"]) {
@@ -257,10 +257,10 @@
 	--tw-prose-bullets: var(--color-global-text);
 	--tw-prose-code: var(--color-variant-5);
 	--tw-prose-headings: var(--color-accent);
-	--tw-prose-hr: 0.5px dashed #666;
+	--tw-prose-hr: 0.5px dashed var(--color-border-strong);
 	--tw-prose-links: var(--color-global-text);
 	--tw-prose-quotes: var(--color-quote);
-	--tw-prose-th-borders: #666;
+	--tw-prose-th-borders: var(--color-border-strong);
 }
 
 @layer components {

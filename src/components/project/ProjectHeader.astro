@@ -9,10 +9,9 @@ import ViewCounter from "@/components/social/ViewCounter.astro";
 interface Props {
 	entry: CollectionEntry<"project">;
 	isLog?: boolean;
-	projectFolder?: string | undefined;
 }
 
-const { entry, isLog = false, projectFolder } = Astro.props;
+const { entry, isLog = false } = Astro.props;
 
 const dateTimeOptions: Intl.DateTimeFormatOptions = {
 	month: "short",
@@ -30,18 +29,6 @@ const status = entry.data.status;
 const currentStatus = status ? statusConfig[status] : null;
 const additionalLinks = entry.data.links ?? [];
 ---
-
-{isLog && projectFolder && (
-	<div class="mb-4">
-		<a
-			class="hover:text-accent inline-flex items-center gap-1 text-sm transition-colors"
-			href={`/project/${projectFolder}/`}
-		>
-			<Icon name="lucide:arrow-left" class="h-4 w-4" />
-			back to {projectFolder}
-		</a>
-	</div>
-)}
 
 {isLog ? (
 	<h1 class="title text-accent mb-3">{entry.data.title}</h1>
@@ -302,12 +289,15 @@ const additionalLinks = entry.data.links ?? [];
 		display: inline-flex;
 		align-items: center;
 		gap: 0.25rem;
-		color: var(--color-text-muted);
-		transition: color 0.15s ease;
+		color: var(--color-link);
+		text-decoration: none;
+		transition: text-decoration-color 0.15s ease;
 	}
 
 	.link-item:hover {
-		color: var(--color-link);
+		text-decoration: underline;
+		text-decoration-color: var(--color-link);
+		text-underline-offset: 0.15em;
 	}
 
 	.link-icon {

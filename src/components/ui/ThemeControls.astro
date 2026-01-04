@@ -1,0 +1,251 @@
+---
+import { themeConfig } from "@/site.config";
+
+interface Props {
+	variant?: "desktop" | "mobile";
+}
+
+const { variant = "desktop" } = Astro.props;
+const isDesktop = variant === "desktop";
+---
+
+<div class:list={["theme-controls", { "theme-controls--desktop": isDesktop, "theme-controls--mobile": !isDesktop }]}>
+	<div class="controls-section">
+		<div class="section-label">typography</div>
+		<div class="button-row">
+			<button
+				class="typo-btn"
+				data-typography="mono"
+				title="monospace"
+				type="button"
+			>
+				Aa
+			</button>
+			<button
+				class="typo-btn typo-btn--sans"
+				data-typography="sans"
+				title="sans-serif"
+				type="button"
+			>
+				Aa
+			</button>
+			<button
+				class="typo-btn typo-btn--serif"
+				data-typography="serif"
+				title="serif"
+				type="button"
+			>
+				Aa
+			</button>
+		</div>
+	</div>
+
+	<div class="controls-section">
+		<div class="section-label">font size</div>
+		<div class="button-row">
+			<button
+				class="size-btn size-btn--medium"
+				data-fontsize="medium"
+				title="medium"
+				type="button"
+			>
+				A
+			</button>
+			<button
+				class="size-btn size-btn--large"
+				data-fontsize="large"
+				title="large"
+				type="button"
+			>
+				A
+			</button>
+			<button
+				class="size-btn size-btn--xlarge"
+				data-fontsize="xlarge"
+				title="extra large"
+				type="button"
+			>
+				A
+			</button>
+		</div>
+	</div>
+
+	<div class="controls-section">
+		<div class="section-label">theme</div>
+		<div class:list={["theme-grid", { "theme-grid--column": isDesktop, "theme-grid--2col": !isDesktop }]}>
+			{themeConfig.themes.map((theme) => (
+				<button
+					class="theme-btn"
+					data-theme={theme.name}
+					type="button"
+				>
+					<span class:list={["theme-dot", { "theme-dot--dark": theme.isDark, "theme-dot--light": !theme.isDark }]} />
+					<span class="theme-label">{theme.label}</span>
+				</button>
+			))}
+		</div>
+	</div>
+</div>
+
+<style>
+	.theme-controls {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.theme-controls--desktop {
+		gap: 0.5rem;
+	}
+
+	.theme-controls--mobile {
+		gap: 0.75rem;
+	}
+
+	.controls-section {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.section-label {
+		color: var(--color-text-muted);
+		font-size: 0.75rem;
+		text-transform: lowercase;
+		margin-bottom: 0.375rem;
+	}
+
+	.theme-controls--desktop .section-label {
+		padding-left: 0.25rem;
+		margin-bottom: 0.375rem;
+	}
+
+	.theme-controls--mobile .section-label {
+		margin-bottom: 0.5rem;
+	}
+
+	.button-row {
+		display: flex;
+		gap: 0.25rem;
+	}
+
+	.theme-controls--mobile .button-row {
+		gap: 0.5rem;
+	}
+
+	.typo-btn,
+	.size-btn,
+	.theme-btn {
+		background: var(--color-surface-1);
+		border: none;
+		cursor: pointer;
+		transition: background-color 0.15s ease, color 0.15s ease;
+	}
+
+	.typo-btn:hover,
+	.size-btn:hover,
+	.theme-btn:hover {
+		background: var(--color-surface-2);
+	}
+
+	.typo-btn,
+	.size-btn {
+		flex: 1;
+		padding: 0.375rem 0.5rem;
+		border-radius: 0.25rem;
+		font-size: 0.875rem;
+	}
+
+	.theme-controls--mobile .typo-btn,
+	.theme-controls--mobile .size-btn {
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.375rem;
+	}
+
+	.typo-btn {
+		font-family: var(--font-mono);
+	}
+
+	.typo-btn--sans {
+		font-family: Inter, system-ui, sans-serif;
+	}
+
+	.typo-btn--serif {
+		font-family: Merriweather, Georgia, serif;
+	}
+
+	.size-btn--medium {
+		font-size: 0.875rem;
+	}
+
+	.size-btn--large {
+		font-size: 1rem;
+	}
+
+	.size-btn--xlarge {
+		font-size: 1.125rem;
+	}
+
+	.theme-grid {
+		display: flex;
+		gap: 0.25rem;
+	}
+
+	.theme-grid--column {
+		flex-direction: column;
+	}
+
+	.theme-grid--2col {
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 0.5rem;
+	}
+
+	.theme-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.375rem 0.5rem;
+		border-radius: 0.25rem;
+		font-size: 0.875rem;
+		text-align: start;
+		text-transform: lowercase;
+		overflow: hidden;
+	}
+
+	.theme-controls--mobile .theme-btn {
+		padding: 0.5rem 0.75rem;
+		border-radius: 0.375rem;
+	}
+
+	.theme-dot {
+		width: 0.5rem;
+		height: 0.5rem;
+		flex-shrink: 0;
+		border-radius: 9999px;
+	}
+
+	.theme-dot--dark {
+		background: var(--color-surface-3);
+		border: 1px solid var(--color-border-muted);
+	}
+
+	.theme-dot--light {
+		background: var(--color-yellow);
+	}
+
+	.theme-label {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.typo-btn[aria-pressed="true"],
+	.size-btn[aria-pressed="true"],
+	.theme-btn[aria-current="true"] {
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-primary) 30%, transparent) 0%,
+			color-mix(in srgb, var(--color-primary) 15%, transparent) 100%
+		);
+		color: var(--color-primary);
+	}
+</style>

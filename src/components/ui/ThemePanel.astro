@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
-import { themeConfig } from "@/site.config";
+import ThemeControls from "./ThemeControls.astro";
 ---
 
 <theme-panel class="relative ms-2 sm:ms-4">
@@ -18,93 +18,7 @@ import { themeConfig } from "@/site.config";
 		class="panel-dropdown bg-surface-0 border-border-muted absolute end-0 top-full z-50 mt-2 hidden min-w-48 rounded-md border p-2 shadow-lg"
 		role="menu"
 	>
-		<div class="mb-2">
-			<div class="text-text-muted mb-1.5 px-1 text-xs lowercase">
-				typography
-			</div>
-			<div class="flex gap-1">
-				<button
-					class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 font-mono text-sm transition-colors"
-					data-typography="mono"
-					title="monospace"
-					type="button"
-				>
-					Aa
-				</button>
-				<button
-					class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 text-sm transition-colors"
-					data-typography="sans"
-					title="sans-serif"
-					type="button"
-					style="font-family: Inter, system-ui, sans-serif;"
-				>
-					Aa
-				</button>
-				<button
-					class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 text-sm transition-colors"
-					data-typography="serif"
-					title="serif"
-					type="button"
-					style="font-family: Merriweather, Georgia, serif;"
-				>
-					Aa
-				</button>
-			</div>
-		</div>
-
-		<div class="mb-2">
-			<div class="text-text-muted mb-1.5 px-1 text-xs lowercase">
-				font size
-			</div>
-			<div class="flex gap-1">
-				<button
-					class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 text-sm transition-colors"
-					data-fontsize="medium"
-					title="medium"
-					type="button"
-				>
-					A
-				</button>
-				<button
-					class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 text-base transition-colors"
-					data-fontsize="large"
-					title="large"
-					type="button"
-				>
-					A
-				</button>
-				<button
-					class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 text-lg transition-colors"
-					data-fontsize="xlarge"
-					title="extra large"
-					type="button"
-				>
-					A
-				</button>
-			</div>
-		</div>
-
-		<div>
-			<div class="text-text-muted mb-1.5 px-1 text-xs lowercase">
-				theme
-			</div>
-			<div class="flex flex-col gap-0.5">
-				{
-					themeConfig.themes.map((theme) => (
-					<button
-						class="theme-btn bg-surface-1 hover:bg-surface-2 flex items-center gap-2 rounded px-2 py-1.5 text-start text-sm lowercase transition-colors overflow-hidden"
-						data-theme={theme.name}
-						type="button"
-					>
-						<span
-							class={`h-2 w-2 shrink-0 rounded-full ${theme.isDark ? "bg-surface-3 border-border-muted border" : "bg-yellow"}`}
-						/>
-						<span class="truncate">{theme.label}</span>
-					</button>
-					))
-				}
-			</div>
-		</div>
+		<ThemeControls variant="desktop" />
 	</div>
 </theme-panel>
 
@@ -134,17 +48,6 @@ import { themeConfig } from "@/site.config";
 			opacity: 1;
 			transform: translateY(0);
 		}
-	}
-
-	.typo-btn[aria-pressed="true"],
-	.size-btn[aria-pressed="true"],
-	.theme-btn[aria-current="true"] {
-		background: linear-gradient(
-			135deg,
-			color-mix(in srgb, var(--color-primary) 30%, transparent) 0%,
-			color-mix(in srgb, var(--color-primary) 15%, transparent) 100%
-		);
-		color: var(--color-primary);
 	}
 </style>
 

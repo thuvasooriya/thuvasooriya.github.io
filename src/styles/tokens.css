@@ -104,6 +104,11 @@
 
 	--color-profile-casual: var(--color-accent);
 	--color-profile-formal: var(--color-link);
+
+	/* utility tokens */
+	--color-shadow-light: color-mix(in srgb, var(--color-global-text) 10%, transparent);
+	--color-shadow-medium: color-mix(in srgb, var(--color-global-text) 15%, transparent);
+	--ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* typography options */

@@ -1,7 +1,8 @@
 ---
 import { Icon } from "astro-icon/components";
 import Logo from "@/components/ui/Logo.astro";
-import { menuLinks, themeConfig } from "@/site.config";
+import ThemeControls from "@/components/ui/ThemeControls.astro";
+import { menuLinks } from "@/site.config";
 
 interface Props {
 	sidebarType?: "wiki" | "project";
@@ -88,7 +89,7 @@ const hasLeftAction = hasSidebar || isTagsPage;
 	</div>
 
 	<div
-		class="mobile-menu bg-surface-0/95 border-border-muted absolute inset-x-0 bottom-full hidden border-t backdrop-blur-sm"
+		class="mobile-menu absolute inset-x-0 bottom-full hidden"
 		role="menu"
 	>
 		<nav aria-label="Mobile navigation" class="flex flex-col p-2">
@@ -108,89 +109,11 @@ const hasLeftAction = hasSidebar || isTagsPage;
 	</div>
 
 	<div
-		class="mobile-theme-panel bg-surface-0/95 border-border-muted absolute inset-x-0 bottom-full hidden border-t backdrop-blur-sm"
+		class="mobile-theme-panel absolute inset-x-0 bottom-full hidden"
 		role="menu"
 	>
 		<div class="p-4">
-			<div class="mb-3">
-				<div class="text-text-muted mb-2 text-xs lowercase">typography</div>
-				<div class="flex gap-2">
-					<button
-						class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 font-mono text-sm transition-colors"
-						data-typography="mono"
-						title="monospace"
-						type="button"
-					>
-						Aa
-					</button>
-					<button
-						class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 text-sm transition-colors"
-						data-typography="sans"
-						title="sans-serif"
-						type="button"
-						style="font-family: Inter, system-ui, sans-serif;"
-					>
-						Aa
-					</button>
-					<button
-						class="typo-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 text-sm transition-colors"
-						data-typography="serif"
-						title="serif"
-						type="button"
-						style="font-family: Merriweather, Georgia, serif;"
-					>
-						Aa
-					</button>
-				</div>
-			</div>
-			<div class="mb-3">
-				<div class="text-text-muted mb-2 text-xs lowercase">font size</div>
-				<div class="flex gap-2">
-					<button
-						class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 text-sm transition-colors"
-						data-fontsize="medium"
-						title="medium"
-						type="button"
-					>
-						A
-					</button>
-					<button
-						class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 text-base transition-colors"
-						data-fontsize="large"
-						title="large"
-						type="button"
-					>
-						A
-					</button>
-					<button
-						class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 text-lg transition-colors"
-						data-fontsize="xlarge"
-						title="extra large"
-						type="button"
-					>
-						A
-					</button>
-				</div>
-			</div>
-			<div>
-				<div class="text-text-muted mb-2 text-xs lowercase">theme</div>
-				<div class="grid grid-cols-2 gap-2">
-					{
-						themeConfig.themes.map((theme) => (
-							<button
-								class="theme-btn bg-surface-1 hover:bg-surface-2 flex items-center gap-2 rounded-md px-3 py-2 text-start text-sm lowercase transition-colors overflow-hidden"
-								data-theme={theme.name}
-								type="button"
-							>
-								<span
-									class={`h-2 w-2 shrink-0 rounded-full ${theme.isDark ? "bg-surface-3 border-border-muted border" : "bg-yellow"}`}
-								/>
-								<span class="truncate">{theme.label}</span>
-							</button>
-						))
-					}
-				</div>
-			</div>
+			<ThemeControls variant="mobile" />
 		</div>
 	</div>
 </mobile-nav>
@@ -233,6 +156,8 @@ const hasLeftAction = hasSidebar || isTagsPage;
 
 	.mobile-menu,
 	.mobile-theme-panel {
+		background: var(--color-global-bg);
+		border-top: 1px solid color-mix(in srgb, var(--color-global-text) 10%, transparent);
 		animation: slide-up 100ms ease-out;
 	}
 
@@ -245,17 +170,6 @@ const hasLeftAction = hasSidebar || isTagsPage;
 			opacity: 1;
 			transform: translateY(0);
 		}
-	}
-
-	.typo-btn[aria-pressed="true"],
-	.size-btn[aria-pressed="true"],
-	.theme-btn[aria-current="true"] {
-		background: linear-gradient(
-			135deg,
-			color-mix(in srgb, var(--color-primary) 30%, transparent) 0%,
-			color-mix(in srgb, var(--color-primary) 15%, transparent) 100%
-		);
-		color: var(--color-primary);
 	}
 
 	.mobile-random-trigger {

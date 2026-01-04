@@ -33,19 +33,22 @@ const { Content, headings } = await render(entry);
 const project_folder = is_article ? entry.id.split("/")[0] : entry.id;
 
 const all_proj = await getCollection("project");
-const related_articles = is_article
-	? []
-	: all_proj
-			.filter((e) => {
-				const folder = e.id.split("/")[0];
-				return folder === project_folder && e.id.includes("/");
-			})
-			.sort((a, b) => {
-				const date_a = a.data.updated;
-				const date_b = b.data.updated;
-				if (!date_a || !date_b) return 0;
-				return date_b.getTime() - date_a.getTime();
-			});
+
+const project_entry = is_article
+	? all_proj.find((e) => e.id === project_folder)
+	: entry;
+
+const related_articles = all_proj
+	.filter((e) => {
+		const folder = e.id.split("/")[0];
+		return folder === project_folder && e.id.includes("/");
+	})
+	.sort((a, b) => {
+		const date_a = a.data.updated;
+		const date_b = b.data.updated;
+		if (!date_a || !date_b) return 0;
+		return date_b.getTime() - date_a.getTime();
+	});
 ---
 
 <ProjectArticleLayout
@@ -53,6 +56,7 @@ const related_articles = is_article
 	headings={headings}
 	isLog={is_article}
 	projectFolder={project_folder}
+	projectTitle={project_entry?.data.title ?? project_folder}
 	relatedLogs={related_articles}
 >
 	<Content />

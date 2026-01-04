@@ -58,19 +58,8 @@
 }
 
 .tile-glow {
-  --card-glow-color: color-mix(in srgb, var(--tile-color) 20%, transparent);
-  border: 1px solid color-mix(in srgb, var(--tile-color) 15%, transparent);
-  transition: all 0.2s var(--ease-snappy);
-}
-
-.tile-glow:hover {
-  transform: scale(1.03);
-  box-shadow: 0 8px 24px var(--card-glow-color);
-}
-
-.tile-glow:active {
-  transform: scale(0.98);
-  box-shadow: 0 2px 8px var(--card-glow-color);
+	--card-glow-color: color-mix(in srgb, var(--tile-color) 20%, transparent);
+	border: 1px solid color-mix(in srgb, var(--tile-color) 15%, transparent);
 }
 
 .tile-halted {

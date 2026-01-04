@@ -4,10 +4,11 @@ import type { CollectionEntry } from "astro:content";
 interface Props {
 	logs: CollectionEntry<"project">[];
 	projectFolder: string;
+	projectTitle?: string;
 	currentSlug?: string;
 }
 
-const { logs, projectFolder, currentSlug = "" } = Astro.props;
+const { logs, projectFolder, projectTitle = projectFolder, currentSlug = "" } = Astro.props;
 
 const sortedLogs = [...logs].sort((a, b) => {
 	const dateA = a.data.updated;
@@ -23,108 +24,123 @@ function getLogSlug(log: CollectionEntry<"project">): string {
 function isActive(logSlug: string): boolean {
 	return currentSlug === `${projectFolder}/${logSlug}`;
 }
+
+function isProjectIndex(): boolean {
+	return currentSlug === projectFolder;
+}
 ---
 
 {logs.length > 0 && (
-	<nav class="project-sidebar" aria-label="Project logs" id="project-sidebar" data-open="false">
-		<ul class="sidebar-list">
-			{sortedLogs.map((log) => {
-				const logSlug = getLogSlug(log);
-				const href = `/project/${projectFolder}/${logSlug}/`;
-				const active = isActive(logSlug);
+	<nav class="sidebar project-sidebar" aria-label="Project logs" id="project-sidebar" data-open="false">
+		<div class="project-sidebar-content">
+			<a
+				href={`/project/${projectFolder}/`}
+				class:list={["project-title-link", { active: isProjectIndex() }]}
+				aria-current={isProjectIndex() ? "page" : undefined}
+			>
+				{projectTitle}
+			</a>
+			<ul class="project-logs-list">
+				{sortedLogs.map((log) => {
+					const logSlug = getLogSlug(log);
+					const href = `/project/${projectFolder}/${logSlug}/`;
+					const active = isActive(logSlug);
 
-				return (
-					<li>
-						<a
-							href={href}
-							class:list={["sidebar-link", { active }]}
-							aria-current={active ? "page" : undefined}
-						>
-							{log.data.title}
-						</a>
-					</li>
-				);
-			})}
-		</ul>
+					return (
+						<li>
+							<a
+								href={href}
+								class:list={["project-log-link", { active }]}
+								aria-current={active ? "page" : undefined}
+							>
+								{log.data.title}
+							</a>
+						</li>
+					);
+				})}
+			</ul>
+		</div>
 	</nav>
 )}
 
 <style>
 	.project-sidebar {
-		width: var(--layout-sidebar-width);
-		flex-shrink: 0;
-		position: sticky;
-		top: 10rem;
-		height: fit-content;
-		max-height: calc(100vh - 12rem);
-		overflow-y: auto;
-		overscroll-behavior: contain;
-		transition: top 0.1s ease-out, max-height 0.1s ease-out;
+		background: linear-gradient(
+			145deg,
+			color-mix(in srgb, var(--color-accent) 8%, var(--color-global-bg)) 0%,
+			color-mix(in srgb, var(--color-accent) 3%, var(--color-global-bg)) 100%
+		);
+		border: 1px solid color-mix(in srgb, var(--color-accent) 15%, transparent);
+		border-radius: 0.5rem;
+		overflow: hidden;
 	}
 
-	.sidebar-list {
+	.project-sidebar-content {
+		padding: 0.75rem;
+	}
+
+	.project-title-link {
+		display: block;
+		padding: 0.25rem 0.5rem;
+		margin-bottom: 0.25rem;
+		color: var(--color-accent);
+		font-weight: 600;
+		font-size: 0.875rem;
+		text-decoration: none;
+		border-radius: 0.25rem;
+		transition: background-color 0.15s ease;
+	}
+
+	.project-title-link:hover {
+		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+	}
+
+	.project-title-link.active {
+		background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+	}
+
+	.project-logs-list {
 		list-style: none;
 		padding: 0;
 		margin: 0;
-		display: flex;
-		flex-direction: column;
+		margin-left: 0.75rem;
+		padding-left: 0.75rem;
+		border-left: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
 	}
 
-	.sidebar-link {
+	.project-log-link {
 		display: block;
 		padding: 0.25rem 0.5rem;
 		color: var(--color-global-text);
+		font-size: 0.8125rem;
 		text-decoration: none;
 		border-radius: 0.25rem;
-		font-size: 0.8125rem;
-		line-height: 1.4;
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		transition: background-color 0.15s ease, color 0.15s ease;
 	}
 
-	.sidebar-link:hover {
-		background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
+	.project-log-link:hover {
+		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
 		color: var(--color-accent);
 	}
 
-	.sidebar-link.active {
-		background-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+	.project-log-link.active {
+		background: color-mix(in srgb, var(--color-accent) 15%, transparent);
 		color: var(--color-accent);
 		font-weight: 500;
 	}
 
 	@media (max-width: 1023px) {
 		.project-sidebar {
-			position: fixed;
-			left: 0;
-			top: 0;
-			bottom: 3.5rem;
-			height: auto;
-			max-height: none;
-			width: 16rem;
-			padding: 1rem;
+			border-radius: 0;
+			border: none;
 			background: var(--color-global-bg);
-			border-right: 1px solid var(--color-border-default);
-			box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
-			z-index: 80;
-			transform: translateX(-100%);
-			transition: transform 0.3s ease;
-			display: flex;
-			flex-direction: column;
-			justify-content: flex-end;
-			overscroll-behavior: contain;
 		}
 
-		.project-sidebar[data-open="true"] {
-			transform: translateX(0);
-		}
-
-		.sidebar-list {
-			flex: 0 1 auto;
-			overflow-y: auto;
-			overscroll-behavior: contain;
+		.project-logs-list {
+			border-left-color: color-mix(in srgb, var(--color-global-text) 15%, transparent);
 		}
 	}
 </style>
@@ -134,39 +150,18 @@ function initProjectSidebar() {
 	const sidebar = document.getElementById("project-sidebar") as HTMLElement | null;
 	if (!sidebar) return;
 
-	const updatePosition = () => {
-		if (window.innerWidth < 1024) return;
-		
-		const navHeight = 80;
-		const baseTop = 80;
-		const scrollY = window.scrollY;
-		const dynamicTop = Math.max(16, baseTop + navHeight - scrollY);
-		sidebar.style.top = `${dynamicTop}px`;
-		sidebar.style.maxHeight = `${window.innerHeight - dynamicTop - 32}px`;
-	};
-
-	updatePosition();
-	window.addEventListener("scroll", updatePosition, { passive: true });
-	window.addEventListener("resize", updatePosition);
-
 	const checkVisibility = () => {
 		const isMobile = window.innerWidth < 1024;
 		if (!isMobile) {
 			sidebar.dataset.open = "false";
-			updatePosition();
-		} else {
-			sidebar.style.top = "";
-			sidebar.style.maxHeight = "";
 		}
 	};
 
 	checkVisibility();
 	window.addEventListener("resize", checkVisibility);
 
-	// close on outside click (mobile)
 	document.addEventListener("click", (e) => {
 		const target = e.target as Node;
-		// don't close if click is on the sidebar toggle button in mobile nav
 		if ((target as Element).closest?.(".mobile-sidebar-trigger")) return;
 		if (
 			sidebar.dataset.open === "true" &&
@@ -176,7 +171,6 @@ function initProjectSidebar() {
 		}
 	});
 
-	// close on escape key (mobile)
 	document.addEventListener("keydown", (e) => {
 		if (e.key === "Escape" && sidebar.dataset.open === "true") {
 			sidebar.dataset.open = "false";
