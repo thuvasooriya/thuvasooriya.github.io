@@ -48,64 +48,37 @@ const { slug, content_type, format = "icon", class: className, ...rest } = Astro
 </style>
 
 <script>
-	interface ViewResponse {
-		views: number;
-	}
+	import { analytics } from "@/utils/analytics";
 
-	const WORKER_URL = import.meta.env.PUBLIC_ANALYTICS_URL || "http://localhost:8787";
+	type ContentType = "post" | "tweet" | "project" | "wiki";
 
 	class ViewCounter {
 		private wrapper: HTMLElement;
 		private count_el: HTMLSpanElement;
 		private slug: string;
-		private type: string;
-		private has_incremented = false;
+		private type: ContentType;
+		private has_recorded = false;
 
 		constructor(wrapper: HTMLElement) {
 			this.wrapper = wrapper;
 			this.count_el = wrapper.querySelector(".view-count")!;
 			this.slug = wrapper.dataset.slug!;
-			this.type = wrapper.dataset.type!;
+			this.type = wrapper.dataset.type as ContentType;
 
 			this.init();
 		}
 
-		private async init() {
-			await this.fetch_views();
+		private init() {
+			analytics.request_stats(this.type, this.slug, (data) => {
+				this.update_count(data.views);
+			});
 			this.setup_intersection_observer();
 		}
 
-		private async fetch_views() {
-			try {
-				const url = `${WORKER_URL}/api/analytics/view/${this.type}/${this.slug}`;
-				const res = await fetch(url);
-				if (!res.ok) return;
-
-				const data: ViewResponse = await res.json();
-				this.update_count(data.views);
-			} catch (error) {
-				console.error("Failed to fetch views:", error);
-				this.count_el.textContent = "—";
-			}
-		}
-
-		private async increment_view() {
-			if (this.has_incremented) return;
-			this.has_incremented = true;
-
-			try {
-				const url = `${WORKER_URL}/api/analytics/view/${this.type}/${this.slug}`;
-				const res = await fetch(url, {
-					method: "POST",
-				});
-
-				if (!res.ok) return;
-
-				const data: ViewResponse = await res.json();
-				this.update_count(data.views);
-			} catch (error) {
-				console.error("Failed to increment view:", error);
-			}
+		private record_view() {
+			if (this.has_recorded) return;
+			this.has_recorded = true;
+			analytics.record_view(this.type, this.slug);
 		}
 
 		private update_count(count: number) {
@@ -121,7 +94,7 @@ const { slug, content_type, format = "icon", class: className, ...rest } = Astro
 				(entries) => {
 					entries.forEach((entry) => {
 						if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
-							this.increment_view();
+							this.record_view();
 							observer.disconnect();
 						}
 					});
@@ -133,23 +106,19 @@ const { slug, content_type, format = "icon", class: className, ...rest } = Astro
 		}
 	}
 
-	// handle both initial load and view transitions
 	function init_view_counters() {
 		document.querySelectorAll<HTMLElement>(".view-counter").forEach((wrapper) => {
-			// skip if already initialized
 			if (wrapper.dataset.initialized === "true") return;
 			wrapper.dataset.initialized = "true";
 			new ViewCounter(wrapper);
 		});
 	}
 
-	// initial load
 	if (document.readyState === "loading") {
 		document.addEventListener("DOMContentLoaded", init_view_counters);
 	} else {
 		init_view_counters();
 	}
 
-	// view transitions
 	document.addEventListener("astro:page-load", init_view_counters);
 </script>

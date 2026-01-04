@@ -1,0 +1,160 @@
+---
+/**
+ * ProfileCardLinks - Flexible link group for ProfileCard
+ * Renders a group of links with consistent styling, positioned at card corner
+ */
+import { Icon } from "astro-icon/components";
+
+export interface ProfileLink {
+	href: string;
+	label?: string;
+	icon: string;
+	external?: boolean;
+	hideOnAbout?: boolean;
+	iconOnly?: boolean;
+	glisten?: boolean;
+}
+
+interface Props {
+	links: ProfileLink[];
+	hideAboutLinks?: boolean;
+}
+
+const { links, hideAboutLinks = false } = Astro.props;
+
+const visibleLinks = hideAboutLinks ? links.filter((link) => !link.hideOnAbout) : links;
+---
+
+{visibleLinks.length > 0 && (
+	<div class="link-group">
+		{visibleLinks.map((link, index) => (
+			<a 
+				href={link.href} 
+				class:list={[
+					"link-item",
+					{ "link-first": index === 0 },
+					{ "link-last": index === visibleLinks.length - 1 },
+					{ "link-only": visibleLinks.length === 1 },
+					{ "link-icon-only": link.iconOnly },
+					{ "link-glisten": link.glisten },
+				]}
+				target={link.external ? "_blank" : undefined}
+				rel={link.external ? "noopener" : undefined}
+				title={link.label}
+				aria-label={link.label}
+			>
+				{!link.iconOnly && link.label && <span>{link.label}</span>}
+				<Icon name={link.icon} class="link-icon" />
+			</a>
+		))}
+	</div>
+)}
+
+<style>
+	.link-group {
+		position: absolute;
+		top: 0;
+		right: 0;
+		display: flex;
+		z-index: 5;
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--profile-color, var(--color-accent)) 10%, transparent) 0%,
+			color-mix(in srgb, var(--color-global-text) 6%, transparent) 100%
+		);
+		border-bottom-left-radius: var(--card-radius, 0.5rem);
+		border-top-right-radius: var(--card-radius, 0.5rem);
+		transition: background 150ms ease-in-out;
+	}
+
+	.link-item {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--color-text-muted);
+		background: transparent;
+		text-decoration: none;
+		transition: color 150ms ease-in-out, background 150ms ease-in-out;
+	}
+
+	.link-item:hover {
+		color: var(--profile-color, var(--color-accent));
+		background: color-mix(in srgb, var(--profile-color, var(--color-accent)) 10%, transparent);
+	}
+
+	.link-icon {
+		width: 0.875rem;
+		height: 0.875rem;
+		transition: transform 150ms ease-in-out;
+	}
+
+	.link-icon-only {
+		padding: 0.5rem;
+	}
+
+	.link-icon-only .link-icon {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.link-last:hover .link-icon {
+		transform: translateX(2px);
+	}
+
+	.link-icon-only:hover .link-icon {
+		transform: scale(1.1);
+	}
+
+	/* glisten animation */
+	@keyframes glisten {
+		0%, 100% { background-position: 200% 0; }
+		50% { background-position: -100% 0; }
+	}
+
+	.link-glisten {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.link-glisten::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			120deg,
+			transparent 0%,
+			transparent 20%,
+			color-mix(in srgb, var(--profile-color, var(--color-accent)) 12%, transparent) 50%,
+			transparent 80%,
+			transparent 100%
+		);
+		background-size: 200% 100%;
+		animation: glisten 4s ease-in-out infinite;
+		pointer-events: none;
+	}
+
+	.link-glisten:hover::after {
+		animation-play-state: paused;
+	}
+
+	/* mobile: full width at bottom */
+	@media (max-width: 479px) {
+		.link-group {
+			top: auto;
+			bottom: 0;
+			left: 0;
+			right: 0;
+			border-radius: 0;
+			border-bottom-left-radius: var(--card-radius, 0.5rem);
+			border-bottom-right-radius: var(--card-radius, 0.5rem);
+		}
+
+		.link-item {
+			flex: 1;
+		}
+	}
+</style>

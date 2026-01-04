@@ -106,8 +106,12 @@ import { themeConfig } from "@/site.config";
 
 	.typo-btn[aria-pressed="true"],
 	.theme-btn[aria-current="true"] {
-		background-color: var(--color-primary);
-		color: var(--color-surface-0);
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-primary) 30%, transparent) 0%,
+			color-mix(in srgb, var(--color-primary) 15%, transparent) 100%
+		);
+		color: var(--color-primary);
 	}
 </style>
 

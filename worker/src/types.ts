@@ -29,3 +29,22 @@ export interface ErrorResponse {
 	error: string;
 	message?: string;
 }
+
+export interface BatchQuery {
+	type: ContentType;
+	slugs: string[];
+}
+
+export interface BatchItemResponse {
+	views: number;
+	likes: number;
+}
+
+export interface BatchResponse {
+	[slug: string]: BatchItemResponse;
+}
+
+export interface BatchIncrementQuery {
+	type: ContentType;
+	slugs: string[];
+}

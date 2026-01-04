@@ -2,6 +2,7 @@ import type { Env } from "./types";
 import { cors_options } from "./utils/cors";
 import { increment_view, get_view, get_all_views } from "./routes/views";
 import { update_like, get_like, get_all_likes } from "./routes/likes";
+import { get_batch, increment_batch } from "./routes/batch";
 
 export default {
 	async fetch(request: Request, env: Env): Promise<Response> {
@@ -12,7 +13,18 @@ export default {
 			return cors_options();
 		}
 
-		// route matching
+		// batch endpoint
+		if (url.pathname === "/api/analytics/batch") {
+			if (request.method === "GET") {
+				return get_batch(request, env);
+			}
+			if (request.method === "POST") {
+				return increment_batch(request, env);
+			}
+			return new Response("Method not allowed", { status: 405 });
+		}
+
+		// route matching for individual endpoints
 		const path_match = url.pathname.match(/^\/api\/analytics\/(view|like)(?:\/([^/]+)\/(.+))?$/);
 
 		if (!path_match) {

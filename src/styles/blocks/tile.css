@@ -7,32 +7,59 @@
   overflow: hidden;
   border-radius: 0.5rem;
   backdrop-filter: blur(4px);
-  background: color-mix(in srgb, var(--tile-color) 5%, transparent);
-  background-image: linear-gradient(
-    to bottom right,
-    color-mix(in srgb, var(--tile-color) 10%, transparent),
-    transparent
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--tile-color) 8%, transparent) 0%,
+    color-mix(in srgb, var(--tile-color) 3%, transparent) 50%,
+    transparent 100%
   );
-  border: 1px solid color-mix(in srgb, var(--tile-color) 20%, transparent);
 }
 
 .tile-static {
+  border: 1px solid color-mix(in srgb, var(--tile-color) 15%, transparent);
 }
 
 .tile-interactive {
-  border-color: transparent;
-  transition:
-    border-color 150ms ease-out,
-    box-shadow 150ms ease-out;
+  border: 1px solid transparent;
+  background-clip: padding-box;
+  transition: box-shadow 150ms ease-out;
+}
+
+.tile-interactive::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--tile-color) 30%, transparent) 0%,
+    color-mix(in srgb, var(--tile-color) 15%, transparent) 50%,
+    transparent 100%
+  );
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 .tile-interactive:hover {
-  border-color: color-mix(in srgb, var(--tile-color) 40%, transparent);
   box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+.tile-interactive:hover::before {
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--tile-color) 50%, transparent) 0%,
+    color-mix(in srgb, var(--tile-color) 30%, transparent) 50%,
+    color-mix(in srgb, var(--tile-color) 10%, transparent) 100%
+  );
 }
 
 .tile-glow {
   --card-glow-color: color-mix(in srgb, var(--tile-color) 20%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tile-color) 15%, transparent);
   transition: all 0.2s var(--ease-snappy);
 }
 
@@ -44,4 +71,17 @@
 .tile-glow:active {
   transform: scale(0.98);
   box-shadow: 0 2px 8px var(--card-glow-color);
+}
+
+.tile-halted {
+  opacity: 0.5;
+}
+
+.tile-halted::before {
+  display: none;
+}
+
+/* now tile - decorative icon style */
+.tile-now {
+  min-height: 7rem;
 }

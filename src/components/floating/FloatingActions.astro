@@ -51,11 +51,11 @@ const hasToc = showToc && headings.length > 0;
 		z-index: 50;
 		opacity: 0;
 		visibility: hidden;
-		transform: translateY(1rem);
+		transform: translateY(0.5rem);
 		transition:
-			opacity 0.3s var(--ease-snappy),
-			visibility 0.3s var(--ease-snappy),
-			transform 0.3s var(--ease-snappy);
+			opacity 0.15s var(--ease-snappy),
+			visibility 0.15s var(--ease-snappy),
+			transform 0.15s var(--ease-snappy);
 	}
 
 	.floating-actions.visible {
@@ -109,14 +109,14 @@ const hasToc = showToc && headings.length > 0;
 		border-radius: 0.25rem;
 		opacity: 0;
 		visibility: hidden;
-		transition: opacity 0.2s ease, visibility 0.2s ease;
+		transition: opacity 0.1s ease, visibility 0.1s ease;
 		pointer-events: none;
 	}
 
 	:global(.floating-action:hover .action-tooltip) {
 		opacity: 1;
 		visibility: visible;
-		transition-delay: 0.5s;
+		transition-delay: 0.3s;
 	}
 
 	:global(.floating-action .action-icon) {
@@ -147,13 +147,16 @@ const hasToc = showToc && headings.length > 0;
 </style>
 
 <script>
+	import { WORKER_URL } from "@/utils/analytics";
+
+	type ContentType = "post" | "tweet" | "project" | "wiki";
+
 	interface LikeResponse {
 		user_likes: number;
 		total_likes: number;
 		unique_users: number;
 	}
 
-	const WORKER_URL = import.meta.env.PUBLIC_ANALYTICS_URL || "http://localhost:8787";
 	const MAX_LIKES = 13;
 	const COOKIE_NAME = "user_likes";
 
@@ -268,9 +271,10 @@ const hasToc = showToc && headings.length > 0;
 			if (!this.likeButton) return;
 
 			const slug = this.likeButton.dataset.slug!;
-			const type = this.likeButton.dataset.type!;
+			const type = this.likeButton.dataset.type as ContentType;
 			let userLikes = 0;
 			let isUpdating = false;
+			let userLikesFetched = false;
 
 			const fillRect = this.likeButton.querySelector<SVGRectElement>(".heart-fill-rect");
 			const popupContainer = this.likeButton.querySelector<HTMLDivElement>(".popup-container");
@@ -341,7 +345,10 @@ const hasToc = showToc && headings.length > 0;
 				setTimeout(() => { this.likeButton!.style.animation = ""; }, 300);
 			};
 
-			const fetchLikes = async () => {
+			const fetchUserLikes = async () => {
+				if (userLikesFetched) return;
+				userLikesFetched = true;
+
 				try {
 					const res = await fetch(`${WORKER_URL}/api/analytics/like/${type}/${slug}`);
 					if (!res.ok) return;
@@ -351,13 +358,17 @@ const hasToc = showToc && headings.length > 0;
 					updateFill(userLikes);
 					saveCookieLikes(userLikes);
 				} catch (error) {
-					console.error("Failed to fetch likes:", error);
+					console.error("Failed to fetch user likes:", error);
 				}
 			};
 
 			const handleClick = async (e: MouseEvent) => {
 				e.preventDefault();
 				e.stopPropagation();
+
+				if (!userLikesFetched) {
+					await fetchUserLikes();
+				}
 
 				if (isUpdating) return;
 				if (userLikes >= MAX_LIKES) {
@@ -388,7 +399,8 @@ const hasToc = showToc && headings.length > 0;
 					saveCookieLikes(userLikes);
 				} catch (error) {
 					console.error("Failed to update like:", error);
-					await fetchLikes();
+					userLikesFetched = false;
+					await fetchUserLikes();
 				} finally {
 					isUpdating = false;
 				}
@@ -401,7 +413,6 @@ const hasToc = showToc && headings.length > 0;
 				updateFill(savedLikes);
 			}
 
-			fetchLikes();
 			this.likeButton.addEventListener("click", handleClick);
 		}
 

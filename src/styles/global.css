@@ -43,3 +43,16 @@
 		color: var(--color-text-muted);
 	}
 }
+
+/* reusable inline link style for frontmatter/html links */
+.inline-links a {
+	color: var(--link-color, var(--color-accent));
+	text-decoration: underline;
+	text-decoration-color: color-mix(in srgb, var(--link-color, var(--color-accent)) 40%, transparent);
+	text-underline-offset: 2px;
+	transition: text-decoration-color 150ms ease-in-out, color 150ms ease-in-out;
+}
+
+.inline-links a:hover {
+	text-decoration-color: var(--link-color, var(--color-accent));
+}

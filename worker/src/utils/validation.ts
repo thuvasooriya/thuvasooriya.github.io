@@ -1,6 +1,6 @@
 import type { ContentType } from "../types";
 
-const valid_content_types: ContentType[] = ["post", "tweet", "project"];
+const valid_content_types: ContentType[] = ["post", "tweet", "project", "wiki"];
 
 export function validate_content_type(type: string): ContentType | null {
 	if (valid_content_types.includes(type as ContentType)) {

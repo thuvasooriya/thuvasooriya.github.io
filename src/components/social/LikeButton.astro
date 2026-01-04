@@ -219,13 +219,16 @@ const {
 </style>
 
 <script>
+	import { analytics, WORKER_URL } from "@/utils/analytics";
+
+	type ContentType = "post" | "tweet" | "project" | "wiki";
+
 	interface LikeResponse {
 		user_likes: number;
 		total_likes: number;
 		unique_users: number;
 	}
 
-	const WORKER_URL = import.meta.env.PUBLIC_ANALYTICS_URL || "http://localhost:8787";
 	const MAX_LIKES = 13;
 	const COOKIE_NAME = "user_likes";
 
@@ -236,9 +239,10 @@ const {
 		private popup_container: HTMLDivElement | null;
 		private particles_container: HTMLDivElement | null;
 		private slug: string;
-		private type: string;
+		private type: ContentType;
 		private user_likes = 0;
 		private is_updating = false;
+		private user_likes_fetched = false;
 
 		constructor(button: HTMLButtonElement) {
 			this.button = button;
@@ -247,40 +251,55 @@ const {
 			this.popup_container = button.querySelector(".popup-container");
 			this.particles_container = button.querySelector(".particles-container");
 			this.slug = button.dataset.slug!;
-			this.type = button.dataset.type!;
+			this.type = button.dataset.type as ContentType;
 
 			this.init();
 		}
 
-		private async init() {
+		private init() {
 			const saved_likes = this.get_cookie_likes();
-
 			if (saved_likes !== null) {
 				this.user_likes = saved_likes;
 				this.button.dataset.userLikes = String(saved_likes);
 				this.update_fill(saved_likes);
 			}
 
-			await this.fetch_likes();
+			analytics.request_stats(this.type, this.slug, (data) => {
+				if (this.count_el) {
+					this.count_el.textContent = String(data.likes);
+				}
+			});
+
 			this.button.addEventListener("click", (e) => this.handle_click(e));
 		}
 
-		private async fetch_likes() {
+		private async fetch_user_likes(): Promise<void> {
+			if (this.user_likes_fetched) return;
+			this.user_likes_fetched = true;
+
 			try {
 				const res = await fetch(`${WORKER_URL}/api/analytics/like/${this.type}/${this.slug}`);
 				if (!res.ok) return;
 
 				const data: LikeResponse = await res.json();
 				this.user_likes = data.user_likes;
-				this.update_ui(data.user_likes, data.total_likes);
+				this.update_fill(data.user_likes);
+				this.button.dataset.userLikes = String(data.user_likes);
+				if (this.count_el) {
+					this.count_el.textContent = String(data.total_likes);
+				}
 			} catch (error) {
-				console.error("Failed to fetch likes:", error);
+				console.error("Failed to fetch user likes:", error);
 			}
 		}
 
 		private async handle_click(e: MouseEvent) {
 			e.preventDefault();
 			e.stopPropagation();
+
+			if (!this.user_likes_fetched) {
+				await this.fetch_user_likes();
+			}
 
 			if (this.is_updating) return;
 			if (this.user_likes >= MAX_LIKES) {
@@ -309,7 +328,8 @@ const {
 				this.update_ui(data.user_likes, data.total_likes);
 			} catch (error) {
 				console.error("Failed to update like:", error);
-				await this.fetch_likes();
+				this.user_likes_fetched = false;
+				await this.fetch_user_likes();
 			} finally {
 				this.is_updating = false;
 			}

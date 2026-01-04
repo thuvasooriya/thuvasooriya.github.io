@@ -77,6 +77,7 @@ const page = defineCollection({
 					link: z.string().optional(),
 					previewImage: z.string().optional(),
 					items: z.array(z.string()).optional(),
+					status: z.enum(["active", "halted"]).default("active"),
 					span: z.enum(["1", "2", "3", "4", "6", "full"]).default("2"),
 					color: z
 						.enum([

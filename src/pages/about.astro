@@ -2,6 +2,8 @@
 import { getEntry, render } from "astro:content";
 import { Icon } from "astro-icon/components";
 import AnimateIn from "@/components/ui/AnimateIn.astro";
+import NowTile from "@/components/ui/NowTile.astro";
+import ProfileCard from "@/components/ui/ProfileCard.astro";
 import PageLayout from "@/layouts/Base.astro";
 
 const aboutPage = await getEntry("page", "about");
@@ -18,6 +20,14 @@ const meta = {
 };
 
 const tiles = aboutPage.data.tiles || [];
+
+// sort tiles: active before halted (for "now" tiles)
+const sorted_tiles = [...tiles].sort((a, b) => {
+	if (a.type !== "now" || b.type !== "now") return 0;
+	if (a.status === "active" && b.status === "halted") return -1;
+	if (a.status === "halted" && b.status === "active") return 1;
+	return 0;
+});
 
 // helper function to get color classes
 function get_tile_colors(color: string) {
@@ -101,13 +111,18 @@ function get_span_classes(span: string) {
 ---
 
 <PageLayout meta={meta} pageType="home">
-	<div class="w-full space-y-8 py-0 sm:py-8">
+	<div class="w-full space-y-6">
+		<!-- Profile Card -->
+		<section data-animate>
+			<ProfileCard hideMoreLink />
+		</section>
+
 		<!-- Masonry Grid Layout -->
 		{
 			tiles.length > 0 && (
 				<section data-animate>
 					<div class="grid grid-cols-2 gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-6" style="grid-auto-rows: minmax(120px, auto);">
-						{tiles.map((tile) => {
+						{sorted_tiles.map((tile) => {
 							const colors = get_tile_colors(tile.color);
 							const span_class = get_span_classes(tile.span);
 
@@ -184,27 +199,16 @@ function get_span_classes(span: string) {
 						// now card
 						if (tile.type === "now") {
 							return (
-								<div
-									class={`tile tile-interactive group row-span-1 p-4 ${span_class}`}
-									style={`--tile-color: ${colors.shadow};`}
-								>
-									<div class="flex h-full flex-col">
-										<div class="mb-3 flex items-center gap-3">
-											<div class={`${colors.bg} flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110 group-hover:rotate-3`}>
-												<Icon name={tile.icon} class={`${colors.icon} h-6 w-6`} />
-											</div>
-											{tile.tag && (
-												<span class={`${colors.icon} text-sm font-bold uppercase tracking-wider`}>
-													{tile.tag}
-												</span>
-											)}
-										</div>
-										<h4 class="mb-1.5 text-base font-bold leading-tight">{tile.title}</h4>
-										{tile.description && (
-											<p class="text-muted text-xs leading-relaxed">{tile.description}</p>
-										)}
-									</div>
-								</div>
+								<NowTile
+									tag={tile.tag}
+									title={tile.title}
+									description={tile.description}
+									icon={tile.icon}
+									link={tile.link}
+									status={tile.status}
+									color={colors.shadow}
+									class={span_class}
+								/>
 							);
 						}
 

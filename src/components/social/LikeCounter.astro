@@ -48,43 +48,27 @@ const { slug, content_type, format = "text", class: className, ...rest } = Astro
 </style>
 
 <script>
-	interface LikeResponse {
-		user_likes: number;
-		total_likes: number;
-		unique_users: number;
-	}
+	import { analytics } from "@/utils/analytics";
 
-	const WORKER_URL = import.meta.env.PUBLIC_ANALYTICS_URL || "http://localhost:8787";
+	type ContentType = "post" | "tweet" | "project" | "wiki";
 
 	class LikeCounterController {
 		private count_el: HTMLSpanElement;
 		private slug: string;
-		private type: string;
+		private type: ContentType;
 
 		constructor(wrapper: HTMLElement) {
 			this.count_el = wrapper.querySelector(".like-count")!;
 			this.slug = wrapper.dataset.slug!;
-			this.type = wrapper.dataset.type!;
+			this.type = wrapper.dataset.type as ContentType;
 
 			this.init();
 		}
 
-		private async init() {
-			await this.fetch_likes();
-		}
-
-		private async fetch_likes() {
-			try {
-				const url = `${WORKER_URL}/api/analytics/like/${this.type}/${this.slug}`;
-				const res = await fetch(url);
-				if (!res.ok) return;
-
-				const data: LikeResponse = await res.json();
-				this.update_count(data.total_likes);
-			} catch (error) {
-				console.error("Failed to fetch likes:", error);
-				this.count_el.textContent = "—";
-			}
+		private init() {
+			analytics.request_stats(this.type, this.slug, (data) => {
+				this.update_count(data.likes);
+			});
 		}
 
 		private update_count(count: number) {

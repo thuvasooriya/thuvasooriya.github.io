@@ -1,0 +1,66 @@
+---
+/**
+ * LucideIcon - wrapper for @lucide/astro with stroke-width support
+ * Maps icon names (lucide:name format) to actual lucide components
+ */
+import {
+	BookOpen,
+	Brush,
+	Circle,
+	Cog,
+	Construction,
+	Dumbbell,
+	Footprints,
+	Gamepad2,
+	MapPin,
+	Pause,
+	Pencil,
+	Tv,
+	Volleyball,
+} from "@lucide/astro";
+
+interface Props {
+	name: string;
+	"stroke-width"?: number | undefined;
+	size?: number | string | undefined;
+	class?: string | undefined;
+	style?: string | undefined;
+	fill?: string | undefined;
+}
+
+const { name, "stroke-width": strokeWidth = 2, size, class: className, style, fill } = Astro.props;
+
+const iconMap: Record<string, typeof Circle> = {
+	"lucide:book-open": BookOpen,
+	"lucide:brush": Brush,
+	"lucide:circle": Circle,
+	"lucide:cog": Cog,
+	"lucide:construction": Construction,
+	"lucide:dumbbell": Dumbbell,
+	"lucide:footprints": Footprints,
+	"lucide:gamepad-2": Gamepad2,
+	"lucide:map-pin": MapPin,
+	"lucide:pause": Pause,
+	"lucide:pencil": Pencil,
+	"lucide:tv": Tv,
+	"lucide:volleyball": Volleyball,
+};
+
+const IconComponent = iconMap[name] || Circle;
+
+type IconProps = {
+	class?: string;
+	"stroke-width"?: number;
+	size?: number | string;
+	style?: string;
+	fill?: string;
+};
+
+const props: IconProps = { "stroke-width": strokeWidth };
+if (className) props.class = className;
+if (size) props.size = size;
+if (style) props.style = style;
+if (fill) props.fill = fill;
+---
+
+<IconComponent {...props} />

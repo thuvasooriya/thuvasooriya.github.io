@@ -11,7 +11,7 @@ export async function update_like(
 ): Promise<Response> {
 	const content_type = validate_content_type(type);
 	if (!content_type) {
-		return cors_error("Invalid content type. Must be: post, tweet, or project", 400);
+		return cors_error("Invalid content type. Must be: post, tweet, project, or wiki", 400);
 	}
 
 	if (!validate_slug(slug)) {
@@ -102,7 +102,7 @@ export async function get_like(
 ): Promise<Response> {
 	const content_type = validate_content_type(type);
 	if (!content_type) {
-		return cors_error("Invalid content type. Must be: post, tweet, or project", 400);
+		return cors_error("Invalid content type. Must be: post, tweet, project, or wiki", 400);
 	}
 
 	if (!validate_slug(slug)) {
