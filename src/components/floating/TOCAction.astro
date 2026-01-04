@@ -23,13 +23,7 @@ const { class: className } = Astro.props;
 		color: var(--color-primary);
 	}
 
-	.toc-action .action-icon {
-		filter: drop-shadow(0 0 4px var(--color-primary));
-		transition: filter 0.3s ease, transform 0.3s ease;
-	}
-
 	.toc-action:hover .action-icon {
-		filter: drop-shadow(0 0 12px var(--color-primary)) drop-shadow(0 0 20px var(--color-primary));
-		transform: translateX(-2px);
+		filter: drop-shadow(0 0 3px currentColor);
 	}
 </style>

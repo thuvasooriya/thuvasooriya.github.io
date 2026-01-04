@@ -25,14 +25,14 @@ const display_name = tweet.data.title;
 	<div class="tweet-header flex items-center justify-between gap-2">
 		<span class="tweet-heading font-semibold text-base">{display_name}</span>
 		<div class="tweet-actions flex items-center gap-1 shrink-0">
-			<LikeButton slug={tweet.id} content_type="tweet" show_count={false} icon_size="sm" class="tweet-like-btn text-text-muted hover:text-red-500 dark:hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10" />
+			<LikeButton slug={tweet.id} content_type="tweet" icon_size="sm" class="tweet-like-btn text-text-muted hover:text-red-500 dark:hover:text-red-400 transition-colors p-2 rounded-full hover:bg-red-500/10" />
 			<button
 				type="button"
-				class="copy-link-btn flex items-center justify-center text-text-muted hover:text-blue-500 dark:hover:text-blue-400 transition-all p-2 rounded-full hover:bg-blue-500/10 active:scale-90"
+				class="copy-link-btn flex items-center justify-center text-text-muted transition-all p-2 rounded-full active:scale-90"
 				data-slug={tweet.id}
 				aria-label="Copy link to clipboard"
 			>
-				<Icon name="lucide:share-2" class="share-icon h-4 w-4 transition-transform" />
+				<Icon name="lucide:share-2" class="share-icon h-4 w-4 transition-all" />
 				<Icon name="lucide:check" class="check-icon h-4 w-4 hidden" />
 			</button>
 		</div>
@@ -99,12 +99,16 @@ const display_name = tweet.data.title;
 		position: relative;
 	}
 
+	.copy-link-btn:hover {
+		color: var(--color-link);
+	}
+
 	.copy-link-btn:hover .share-icon {
-		transform: scale(1.1);
+		transform: scale(1.15);
 	}
 
 	.copy-link-btn.copied {
-		color: var(--color-green) !important;
+		color: var(--color-green);
 	}
 
 	.copy-link-btn.copied .share-icon {

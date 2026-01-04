@@ -12,6 +12,9 @@ const size_classes = {
 	md: "h-6 w-6",
 	lg: "h-7 w-7",
 };
+
+const heart_path =
+	"M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z";
 ---
 
 <svg
@@ -21,45 +24,203 @@ const size_classes = {
 >
 	<defs>
 		<clipPath id={`heart-clip-${id}`}>
-			<rect class="heart-fill-rect" x="0" y="24" width="24" height="0" />
+			<path class="heart-wave-path" d="M-2 24 Q3 24 6 24 T12 24 T18 24 T24 24 T30 24 V30 H-2 Z" />
+		</clipPath>
+		<clipPath id={`heart-shape-${id}`}>
+			<path d={heart_path} />
 		</clipPath>
 		<linearGradient id={`heart-gradient-${id}`} x1="0%" y1="100%" x2="0%" y2="0%">
 			<stop offset="0%" stop-color="var(--color-red)" />
 			<stop offset="100%" stop-color="var(--color-pink)" />
 		</linearGradient>
+		<linearGradient id={`glisten-grad-${id}`} x1="0%" y1="0%" x2="100%" y2="0%">
+			<stop offset="0%" stop-color="rgba(255,255,255,0)" />
+			<stop offset="40%" stop-color="rgba(255,255,255,0.4)" />
+			<stop offset="50%" stop-color="rgba(255,255,255,0.6)" />
+			<stop offset="60%" stop-color="rgba(255,255,255,0.4)" />
+			<stop offset="100%" stop-color="rgba(255,255,255,0)" />
+		</linearGradient>
 	</defs>
-	<path
-		class="heart-outline"
-		d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-		fill="none"
-		stroke="var(--color-red)"
-		stroke-width="1.5"
-	/>
-	<path
-		class="heart-fill"
-		d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"
-		fill={`url(#heart-gradient-${id})`}
-		clip-path={`url(#heart-clip-${id})`}
-	/>
+
+	<!-- normal heart group -->
+	<g class="heart-normal">
+		<path
+			class="heart-outline"
+			d={heart_path}
+			fill="none"
+			stroke="var(--color-red)"
+			stroke-width="1.5"
+		/>
+		<g clip-path={`url(#heart-clip-${id})`}>
+			<path
+				class="heart-fill"
+				d={heart_path}
+				fill={`url(#heart-gradient-${id})`}
+			/>
+		</g>
+		<g class="heart-glisten-group" clip-path={`url(#heart-shape-${id})`}>
+			<rect class="heart-glisten" x="-10" y="0" width="12" height="24" fill={`url(#glisten-grad-${id})`} />
+		</g>
+	</g>
+
+	<!-- shattered heart fragments -->
+	<g class="heart-shattered-group">
+		<path
+			class="shard shard-1"
+			d="M7.5 3c1.74 0 3.41.81 4.5 2.09L12 8L8 10L5 7L7.5 3z"
+			fill="var(--color-text-tertiary)"
+		/>
+		<path
+			class="shard shard-2"
+			d="M12 5.09C13.09 3.81 14.76 3 16.5 3L19 7L16 10L12 8L12 5.09z"
+			fill="var(--color-text-muted)"
+		/>
+		<path
+			class="shard shard-3"
+			d="M5 7L8 10L6 14L2 8.5C2 6.5 3.5 4.5 5 7z"
+			fill="var(--color-text-muted)"
+		/>
+		<path
+			class="shard shard-4"
+			d="M19 7L22 8.5C22 11 20 13 18 15L16 10L19 7z"
+			fill="var(--color-text-tertiary)"
+		/>
+		<path
+			class="shard shard-5"
+			d="M8 10L12 8L12 14L9 12L6 14L8 10z"
+			fill="var(--color-text-tertiary)"
+		/>
+		<path
+			class="shard shard-6"
+			d="M12 8L16 10L18 15L14 13L12 14L12 8z"
+			fill="var(--color-text-muted)"
+		/>
+		<path
+			class="shard shard-7"
+			d="M6 14L9 12L12 14L10.55 20.03L6 14z"
+			fill="var(--color-text-muted)"
+		/>
+		<path
+			class="shard shard-8"
+			d="M12 14L14 13L18 15L13.45 20.03L12 21.35L10.55 20.03L12 14z"
+			fill="var(--color-text-tertiary)"
+		/>
+	</g>
 </svg>
 
 <style>
 	.heart-icon {
-		transition: transform 0.15s ease;
+		transition: transform 0.15s ease, filter 0.3s ease, opacity 0.3s ease;
 		position: relative;
+		overflow: visible;
 	}
 
 	.heart-outline {
-		transition: stroke-width 0.2s ease, stroke 0.2s ease;
+		transition: stroke-width 0.2s ease, stroke 0.3s ease;
 	}
 
 	.heart-fill {
-		transition: opacity 0.3s ease;
+		transition: opacity 0.3s ease, fill 0.3s ease;
 	}
 
-	.heart-fill-rect {
-		transition:
-			height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
-			y 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+	.heart-glisten-group {
+		pointer-events: none;
+		opacity: 0;
+	}
+
+	.heart-glisten-group.glisten-active {
+		opacity: 1;
+	}
+
+	.heart-glisten {
+		transform: translateX(-20px) skewX(-20deg);
+	}
+
+	.heart-glisten-group.glisten-active .heart-glisten {
+		animation: glisten-sweep 3s ease-in-out infinite;
+		animation-delay: 1s;
+	}
+
+	@keyframes glisten-sweep {
+		0%, 100% {
+			transform: translateX(-20px) skewX(-20deg);
+			opacity: 0;
+		}
+		10% { opacity: 1; }
+		50% {
+			transform: translateX(30px) skewX(-20deg);
+			opacity: 1;
+		}
+		60%, 100% {
+			transform: translateX(40px) skewX(-20deg);
+			opacity: 0;
+		}
+	}
+
+	/* heartbeat when maxed */
+	.heart-icon.heartbeat {
+		animation: heartbeat 2s ease-in-out infinite;
+	}
+
+	@keyframes heartbeat {
+		0%, 100% { transform: scale(1); }
+		5% { transform: scale(1.08); }
+		10% { transform: scale(1); }
+		15% { transform: scale(1.05); }
+		20% { transform: scale(1); }
+	}
+
+	/* void heart (19+ clicks) - solid black/dark heart */
+	.heart-icon.heart-void .heart-outline {
+		stroke: var(--color-text-primary);
+	}
+
+	.heart-icon.heart-void .heart-fill {
+		fill: var(--color-text-primary);
+	}
+
+	.heart-icon.heart-void .heart-glisten-group {
+		opacity: 0 !important;
+	}
+
+	/* shattered heart (28+ clicks) */
+	.heart-shattered-group {
+		display: none;
+	}
+
+	.heart-icon.heart-shattered .heart-normal {
+		display: none;
+	}
+
+	.heart-icon.heart-shattered .heart-shattered-group {
+		display: block;
+	}
+
+	.heart-icon.heart-shattered .shard {
+		transform-origin: center;
+		animation: shatter-fade 0.8s ease-out forwards;
+	}
+
+	.heart-icon.heart-shattered .shard-1 { animation-delay: 0ms; --shard-x: -8px; --shard-y: -6px; --shard-r: -25deg; }
+	.heart-icon.heart-shattered .shard-2 { animation-delay: 30ms; --shard-x: 8px; --shard-y: -6px; --shard-r: 20deg; }
+	.heart-icon.heart-shattered .shard-3 { animation-delay: 60ms; --shard-x: -10px; --shard-y: 2px; --shard-r: -15deg; }
+	.heart-icon.heart-shattered .shard-4 { animation-delay: 90ms; --shard-x: 10px; --shard-y: 2px; --shard-r: 18deg; }
+	.heart-icon.heart-shattered .shard-5 { animation-delay: 50ms; --shard-x: -4px; --shard-y: 4px; --shard-r: -10deg; }
+	.heart-icon.heart-shattered .shard-6 { animation-delay: 70ms; --shard-x: 4px; --shard-y: 4px; --shard-r: 12deg; }
+	.heart-icon.heart-shattered .shard-7 { animation-delay: 100ms; --shard-x: -6px; --shard-y: 8px; --shard-r: -20deg; }
+	.heart-icon.heart-shattered .shard-8 { animation-delay: 120ms; --shard-x: 2px; --shard-y: 10px; --shard-r: 5deg; }
+
+	@keyframes shatter-fade {
+		0% {
+			transform: translate(0, 0) rotate(0deg) scale(1);
+			opacity: 1;
+		}
+		60% {
+			opacity: 0.6;
+		}
+		100% {
+			transform: translate(var(--shard-x), var(--shard-y)) rotate(var(--shard-r)) scale(0.3);
+			opacity: 0;
+		}
 	}
 </style>

@@ -19,7 +19,7 @@ const hasLeftAction = hasSidebar || isTagsPage;
 	data-sidebar-type={sidebarType}
 	data-is-tags-page={isTagsPage ? "true" : undefined}
 >
-	<div class:list={["mobile-nav-bar flex h-14 items-center px-2", hasLeftAction ? "justify-between" : "justify-around"]}>
+	<div class="mobile-nav-bar flex h-14 items-center justify-between px-2">
 		{hasSidebar && (
 			<button
 				aria-label={`Toggle ${sidebarType} sidebar`}
@@ -39,6 +39,16 @@ const hasLeftAction = hasSidebar || isTagsPage;
 			>
 				<Icon name="lucide:hash" class="sort-icon sort-icon-count h-5 w-5" />
 				<Icon name="lucide:a-arrow-down" class="sort-icon sort-icon-alpha hidden h-5 w-5" />
+			</button>
+		)}
+
+		{!hasLeftAction && (
+			<button
+				aria-label="Random content"
+				class="mobile-nav-btn mobile-random-trigger flex h-11 w-11 items-center justify-center rounded-full"
+				type="button"
+			>
+				<Icon name="lucide:dices" class="dice-icon h-5 w-5" />
 			</button>
 		)}
 
@@ -102,7 +112,7 @@ const hasLeftAction = hasSidebar || isTagsPage;
 		role="menu"
 	>
 		<div class="p-4">
-			<div class="mb-4">
+			<div class="mb-3">
 				<div class="text-text-muted mb-2 text-xs lowercase">typography</div>
 				<div class="flex gap-2">
 					<button
@@ -130,6 +140,35 @@ const hasLeftAction = hasSidebar || isTagsPage;
 						style="font-family: Merriweather, Georgia, serif;"
 					>
 						Aa
+					</button>
+				</div>
+			</div>
+			<div class="mb-3">
+				<div class="text-text-muted mb-2 text-xs lowercase">font size</div>
+				<div class="flex gap-2">
+					<button
+						class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 text-sm transition-colors"
+						data-fontsize="medium"
+						title="medium"
+						type="button"
+					>
+						A
+					</button>
+					<button
+						class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 text-base transition-colors"
+						data-fontsize="large"
+						title="large"
+						type="button"
+					>
+						A
+					</button>
+					<button
+						class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded-md px-3 py-2 text-lg transition-colors"
+						data-fontsize="xlarge"
+						title="extra large"
+						type="button"
+					>
+						A
 					</button>
 				</div>
 			</div>
@@ -209,19 +248,111 @@ const hasLeftAction = hasSidebar || isTagsPage;
 	}
 
 	.typo-btn[aria-pressed="true"],
+	.size-btn[aria-pressed="true"],
 	.theme-btn[aria-current="true"] {
-		background-color: var(--color-primary);
-		color: var(--color-surface-0);
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-primary) 30%, transparent) 0%,
+			color-mix(in srgb, var(--color-primary) 15%, transparent) 100%
+		);
+		color: var(--color-primary);
+	}
+
+	.mobile-random-trigger {
+		position: relative;
+		overflow: hidden;
+	}
+
+	.mobile-random-trigger::before {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			105deg,
+			transparent 0%,
+			transparent 35%,
+			rgba(255, 255, 255, 0.4) 45%,
+			rgba(255, 255, 255, 0.6) 50%,
+			rgba(255, 255, 255, 0.4) 55%,
+			transparent 65%,
+			transparent 100%
+		);
+		transform: translateX(-150%);
+		pointer-events: none;
+		opacity: 0;
+	}
+
+	.mobile-random-trigger.idle::before {
+		animation: dice-glisten-sweep 3s ease-in-out infinite;
+		animation-delay: 1s;
+	}
+
+	@keyframes dice-glisten-sweep {
+		0%, 100% {
+			transform: translateX(-150%);
+			opacity: 0;
+		}
+		10% {
+			opacity: 1;
+		}
+		50% {
+			transform: translateX(150%);
+			opacity: 1;
+		}
+		60%, 100% {
+			transform: translateX(150%);
+			opacity: 0;
+		}
+	}
+
+	.dice-icon {
+		transition: transform 0.2s ease;
+	}
+
+	.mobile-random-trigger:hover .dice-icon {
+		transform: rotate(15deg) scale(1.1);
+	}
+
+	.mobile-random-trigger.rolling .dice-icon {
+		animation: dice-tumble 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+	}
+
+	@keyframes dice-tumble {
+		0% {
+			transform: rotate(0deg) scale(1);
+		}
+		20% {
+			transform: rotate(-30deg) scale(1.15);
+		}
+		40% {
+			transform: rotate(60deg) scale(1.2);
+		}
+		60% {
+			transform: rotate(-20deg) scale(1.1);
+		}
+		80% {
+			transform: rotate(15deg) scale(1.05);
+		}
+		100% {
+			transform: rotate(0deg) scale(1);
+		}
 	}
 </style>
 
 <script>
+	const RANDOM_CONTENT_URLS = [
+		"/post/",
+		"/wiki/",
+	];
+
 	class MobileNavController extends HTMLElement {
 		#lastScrollY = 0;
 		#isMenuOpen = false;
 		#isThemeOpen = false;
 		#abortController: AbortController | null = null;
 		#initialized = false;
+		#idleTimeout: number | null = null;
+		#randomBtn: HTMLButtonElement | null = null;
 
 		connectedCallback() {
 			this.#setup();
@@ -290,11 +421,11 @@ const hasLeftAction = hasSidebar || isTagsPage;
 				}
 			};
 
-		const openSearch = () => {
-			closeAll();
-			const siteSearch = document.querySelector<HTMLElement & { openModal: () => void }>("site-search");
-			siteSearch?.openModal();
-		};
+			const openSearch = () => {
+				closeAll();
+				const siteSearch = document.querySelector<HTMLElement & { openModal: () => void }>("site-search");
+				siteSearch?.openModal();
+			};
 
 			const sidebarTrigger = this.querySelector<HTMLButtonElement>(".mobile-sidebar-trigger");
 			const sidebarType = this.dataset.sidebarType;
@@ -332,6 +463,12 @@ const hasLeftAction = hasSidebar || isTagsPage;
 				}, { signal });
 			}
 
+			const randomTrigger = this.querySelector<HTMLButtonElement>(".mobile-random-trigger");
+			if (randomTrigger) {
+				this.#setupRandomButton(randomTrigger, closeAll, signal);
+				this.#startIdle();
+			}
+
 			menuTrigger.addEventListener("click", toggleMenu, { signal });
 			themeTrigger.addEventListener("click", toggleTheme, { signal });
 			searchTrigger.addEventListener("click", openSearch, { signal });
@@ -341,6 +478,7 @@ const hasLeftAction = hasSidebar || isTagsPage;
 			});
 
 			const typoButtons = themePanel.querySelectorAll<HTMLButtonElement>(".typo-btn");
+			const sizeButtons = themePanel.querySelectorAll<HTMLButtonElement>(".size-btn");
 			const themeButtons = themePanel.querySelectorAll<HTMLButtonElement>(".theme-btn");
 
 			typoButtons.forEach((btn) => {
@@ -348,6 +486,14 @@ const hasLeftAction = hasSidebar || isTagsPage;
 					const typo = btn.dataset.typography;
 					if (!typo) return;
 					document.dispatchEvent(new CustomEvent("typography-change", { detail: { typography: typo } }));
+				}, { signal });
+			});
+
+			sizeButtons.forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const size = btn.dataset.fontsize;
+					if (!size) return;
+					document.dispatchEvent(new CustomEvent("fontsize-change", { detail: { size } }));
 				}, { signal });
 			});
 
@@ -361,8 +507,67 @@ const hasLeftAction = hasSidebar || isTagsPage;
 
 			document.addEventListener("theme-applied", () => this.#updateActiveStates(), { signal });
 			document.addEventListener("typography-applied", () => this.#updateActiveStates(), { signal });
+			document.addEventListener("fontsize-applied", () => this.#updateActiveStates(), { signal });
 
 			window.addEventListener("scroll", () => this.#handleScroll(), { passive: true, signal });
+		}
+
+		#setupRandomButton(btn: HTMLButtonElement, closeAll: () => void, signal: AbortSignal) {
+			this.#randomBtn = btn;
+
+			btn.addEventListener("click", async () => {
+				closeAll();
+				this.#stopIdle();
+				btn.classList.add("rolling");
+
+				try {
+					const baseUrl = RANDOM_CONTENT_URLS[Math.floor(Math.random() * RANDOM_CONTENT_URLS.length)] as string;
+					const response = await fetch(`${baseUrl}?_data=random`);
+					
+				await new Promise(resolve => setTimeout(resolve, 700));
+				btn.classList.remove("rolling");
+
+					if (response.ok) {
+						const links = document.querySelectorAll<HTMLAnchorElement>(`a[href^="${baseUrl}"]`);
+						const validLinks = Array.from(links).filter(a => a.href !== window.location.href && !a.href.endsWith(baseUrl));
+						if (validLinks.length > 0) {
+							const randomLink = validLinks[Math.floor(Math.random() * validLinks.length)];
+							if (randomLink) {
+								window.location.href = randomLink.href;
+								return;
+							}
+						}
+					}
+					
+					window.location.href = baseUrl;
+				} catch {
+					btn.classList.remove("rolling");
+					const baseUrl = RANDOM_CONTENT_URLS[Math.floor(Math.random() * RANDOM_CONTENT_URLS.length)] as string;
+					window.location.href = baseUrl;
+				}
+			}, { signal });
+		}
+
+		#startIdle() {
+			if (!this.#randomBtn) return;
+			if (this.#idleTimeout) clearTimeout(this.#idleTimeout);
+			this.#idleTimeout = window.setTimeout(() => {
+				if (this.getAttribute("data-visible") === "true") {
+					this.#randomBtn?.classList.add("idle");
+				}
+			}, 3000);
+		}
+
+		#stopIdle() {
+			if (this.#idleTimeout) clearTimeout(this.#idleTimeout);
+			this.#randomBtn?.classList.remove("idle");
+		}
+
+		#resetIdle() {
+			this.#stopIdle();
+			if (this.getAttribute("data-visible") === "true") {
+				this.#startIdle();
+			}
 		}
 
 		#handleScroll() {
@@ -372,8 +577,10 @@ const hasLeftAction = hasSidebar || isTagsPage;
 
 			if (isAtTop || isScrollingUp) {
 				this.setAttribute("data-visible", "true");
+				this.#resetIdle();
 			} else {
 				this.setAttribute("data-visible", "false");
+				this.#stopIdle();
 				const menu = this.querySelector<HTMLDivElement>(".mobile-menu");
 				const themePanel = this.querySelector<HTMLDivElement>(".mobile-theme-panel");
 				menu?.classList.add("hidden");
@@ -391,9 +598,13 @@ const hasLeftAction = hasSidebar || isTagsPage;
 
 			const currentTheme = document.documentElement.getAttribute("data-theme");
 			const currentTypo = document.documentElement.getAttribute("data-typography") || "mono";
+			const currentSize = document.documentElement.getAttribute("data-font-size") || "medium";
 
 			themePanel.querySelectorAll<HTMLButtonElement>(".typo-btn").forEach((btn) => {
 				btn.setAttribute("aria-pressed", String(btn.dataset.typography === currentTypo));
+			});
+			themePanel.querySelectorAll<HTMLButtonElement>(".size-btn").forEach((btn) => {
+				btn.setAttribute("aria-pressed", String(btn.dataset.fontsize === currentSize));
 			});
 			themePanel.querySelectorAll<HTMLButtonElement>(".theme-btn").forEach((btn) => {
 				btn.setAttribute("aria-current", String(btn.dataset.theme === currentTheme));

@@ -48,9 +48,7 @@ const { slug, content_type, format = "icon", class: className, ...rest } = Astro
 </style>
 
 <script>
-	import { analytics } from "@/utils/analytics";
-
-	type ContentType = "post" | "tweet" | "project" | "wiki";
+	import { analytics, type ContentType } from "@/utils/analytics";
 
 	class ViewCounter {
 		private wrapper: HTMLElement;
@@ -72,6 +70,14 @@ const { slug, content_type, format = "icon", class: className, ...rest } = Astro
 			analytics.request_stats(this.type, this.slug, (data) => {
 				this.update_count(data.views);
 			});
+
+			// subscribe to cache updates (e.g., after view increment flush)
+			analytics.on_update((type, slug, data) => {
+				if (type === this.type && slug === this.slug) {
+					this.update_count(data.views);
+				}
+			});
+
 			this.setup_intersection_observer();
 		}
 
@@ -82,6 +88,7 @@ const { slug, content_type, format = "icon", class: className, ...rest } = Astro
 		}
 
 		private update_count(count: number) {
+			if (this.count_el.textContent === String(count)) return;
 			this.count_el.classList.add("updating");
 			this.count_el.textContent = String(count);
 			setTimeout(() => {

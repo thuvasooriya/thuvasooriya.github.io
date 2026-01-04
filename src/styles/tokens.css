@@ -101,6 +101,9 @@
 	--color-sapphire: var(--rad-sapphire);
 	--color-blue: var(--rad-blue);
 	--color-lavender: var(--rad-lavender);
+
+	--color-profile-casual: var(--color-accent);
+	--color-profile-formal: var(--color-link);
 }
 
 /* typography options */

@@ -48,9 +48,7 @@ const { slug, content_type, format = "text", class: className, ...rest } = Astro
 </style>
 
 <script>
-	import { analytics } from "@/utils/analytics";
-
-	type ContentType = "post" | "tweet" | "project" | "wiki";
+	import { analytics, type ContentType } from "@/utils/analytics";
 
 	class LikeCounterController {
 		private count_el: HTMLSpanElement;
@@ -69,9 +67,17 @@ const { slug, content_type, format = "text", class: className, ...rest } = Astro
 			analytics.request_stats(this.type, this.slug, (data) => {
 				this.update_count(data.likes);
 			});
+
+			// subscribe to cache updates (e.g., after like button updates)
+			analytics.on_update((type, slug, data) => {
+				if (type === this.type && slug === this.slug) {
+					this.update_count(data.likes);
+				}
+			});
 		}
 
 		private update_count(count: number) {
+			if (this.count_el.textContent === String(count)) return;
 			this.count_el.classList.add("updating");
 			this.count_el.textContent = String(count);
 			setTimeout(() => {

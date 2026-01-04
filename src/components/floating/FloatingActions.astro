@@ -1,7 +1,7 @@
 ---
 import type { MarkdownHeading } from "astro";
+import LikeButton from "@/components/social/LikeButton.astro";
 import BackToTopAction from "./BackToTopAction.astro";
-import LikeAction from "./LikeAction.astro";
 import TOCAction from "./TOCAction.astro";
 import TOCSidebar from "./TOCSidebar.astro";
 
@@ -36,7 +36,7 @@ const hasToc = showToc && headings.length > 0;
 >
 	<div class="floating-actions-container">
 		{hasToc && <TOCAction />}
-		{like && <LikeAction slug={like.slug} contentType={like.contentType} />}
+		{like && <LikeButton slug={like.slug} content_type={like.contentType} variant="floating" class="floating-action" />}
 		{showBackToTop && <BackToTopAction />}
 	</div>
 </div>
@@ -46,7 +46,7 @@ const hasToc = showToc && headings.length > 0;
 <style>
 	.floating-actions {
 		position: fixed;
-		bottom: 2rem;
+		bottom: 5rem;
 		right: 1.5rem;
 		z-index: 50;
 		opacity: 0;
@@ -74,6 +74,17 @@ const hasToc = showToc && headings.length > 0;
 		flex-direction: column;
 		align-items: center;
 		gap: 0.5rem;
+		padding: 0.5rem;
+		border-radius: 1.5rem;
+		background: linear-gradient(
+			145deg,
+			color-mix(in oklch, var(--color-primary) 8%, var(--color-surface-0) 60%) 0%,
+			color-mix(in oklch, var(--color-accent) 6%, var(--color-surface-0) 55%) 100%
+		);
+		backdrop-filter: blur(12px);
+		-webkit-backdrop-filter: blur(12px);
+		border: 1px solid color-mix(in srgb, var(--color-border-muted) 50%, transparent);
+		box-shadow: 0 4px 16px color-mix(in srgb, var(--color-global-text) 8%, transparent);
 	}
 
 	:global(.floating-action) {
@@ -95,10 +106,9 @@ const hasToc = showToc && headings.length > 0;
 
 	:global(.floating-action .action-tooltip) {
 		position: absolute;
-		right: 100%;
+		right: calc(100% + 0.5rem);
 		top: 50%;
 		transform: translateY(-50%);
-		margin-right: 0.5rem;
 		padding: 0.25rem 0.5rem;
 		font-size: 0.75rem;
 		font-weight: 500;
@@ -108,25 +118,24 @@ const hasToc = showToc && headings.length > 0;
 		border: 1px solid var(--color-border-default);
 		border-radius: 0.25rem;
 		opacity: 0;
-		visibility: hidden;
-		transition: opacity 0.1s ease, visibility 0.1s ease;
 		pointer-events: none;
+		transition: opacity 0.15s ease;
 	}
 
 	:global(.floating-action:hover .action-tooltip) {
 		opacity: 1;
-		visibility: visible;
-		transition-delay: 0.3s;
+		transition-delay: 0.4s;
 	}
 
 	:global(.floating-action .action-icon) {
 		width: 1.5rem;
 		height: 1.5rem;
+		transition: filter 0.2s ease, transform 0.2s ease;
 	}
 
 	@media (max-width: 640px) {
 		.floating-actions {
-			bottom: 1.5rem;
+			bottom: 5rem;
 			right: 1rem;
 		}
 
@@ -147,34 +156,23 @@ const hasToc = showToc && headings.length > 0;
 </style>
 
 <script>
-	import { WORKER_URL } from "@/utils/analytics";
-
-	type ContentType = "post" | "tweet" | "project" | "wiki";
-
-	interface LikeResponse {
-		user_likes: number;
-		total_likes: number;
-		unique_users: number;
-	}
-
-	const MAX_LIKES = 13;
-	const COOKIE_NAME = "user_likes";
-
 	class FloatingActionsController {
 		private container: HTMLDivElement;
 		private targetId: string;
 		private observer: IntersectionObserver | null = null;
-		private fallbackTimer: number | null = null;
 		private hasScrolledPastHero = false;
-		private likeButton: HTMLButtonElement | null;
+		private hasLikeButton: boolean;
 		private tocButton: HTMLButtonElement | null;
 		private backToTopButton: HTMLButtonElement | null;
 		private tocSidebar: HTMLElement | null;
+		private lastScrollY = 0;
+		private isMobile = false;
+		private isScrollable = false;
 
 		constructor(container: HTMLDivElement) {
 			this.container = container;
 			this.targetId = container.dataset.targetId || "article-hero";
-			this.likeButton = container.querySelector('[data-action="like"]');
+			this.hasLikeButton = !!container.querySelector(".like-button");
 			this.tocButton = container.querySelector('[data-action="toggle-toc"]');
 			this.backToTopButton = container.querySelector('[data-action="back-to-top"]');
 			this.tocSidebar = document.getElementById("toc-sidebar");
@@ -183,16 +181,27 @@ const hasToc = showToc && headings.length > 0;
 		}
 
 		private init() {
+			this.isMobile = window.innerWidth < 640;
+			this.isScrollable = document.documentElement.scrollHeight > window.innerHeight + 100;
+
 			this.setupVisibility();
 			this.setupBackToTop();
 			this.setupTOC();
-			this.setupLike();
 		}
 
 		private setupVisibility() {
+			// short content: show like immediately, hide TOC/back-to-top
+			if (!this.isScrollable) {
+				if (this.hasLikeButton) {
+					this.container.classList.add("visible", "like-only");
+				}
+				return;
+			}
+
 			const target = document.getElementById(this.targetId);
 			if (!target) return;
 
+			// desktop: intersection-based visibility
 			this.observer = new IntersectionObserver(
 				(entries) => {
 					entries.forEach((entry) => {
@@ -203,12 +212,10 @@ const hasToc = showToc && headings.length > 0;
 							}
 						} else {
 							this.hasScrolledPastHero = true;
-							if (this.fallbackTimer) {
-								clearTimeout(this.fallbackTimer);
-								this.fallbackTimer = null;
-							}
 							this.container.classList.remove("like-only");
-							this.container.classList.add("visible");
+							if (!this.isMobile) {
+								this.container.classList.add("visible");
+							}
 						}
 					});
 				},
@@ -217,14 +224,30 @@ const hasToc = showToc && headings.length > 0;
 
 			this.observer.observe(target);
 
-			if (this.likeButton) {
-				this.fallbackTimer = window.setTimeout(() => {
-					if (!this.hasScrolledPastHero) {
-						this.container.classList.add("visible", "like-only");
-					}
-				}, 2000);
+			// mobile: scroll-direction based (like MobileNav)
+			if (this.isMobile) {
+				this.lastScrollY = window.scrollY;
+				window.addEventListener("scroll", this.handleScroll, { passive: true });
 			}
 		}
+
+		private handleScroll = () => {
+			if (!this.hasScrolledPastHero) return;
+
+			const currentScrollY = window.scrollY;
+			const isAtTop = currentScrollY < 50;
+			const isScrollingUp = currentScrollY < this.lastScrollY;
+
+			if (isAtTop) {
+				this.container.classList.remove("visible");
+			} else if (isScrollingUp) {
+				this.container.classList.add("visible");
+			} else {
+				this.container.classList.remove("visible");
+			}
+
+			this.lastScrollY = currentScrollY;
+		};
 
 		private setupBackToTop() {
 			if (!this.backToTopButton) return;
@@ -267,180 +290,15 @@ const hasToc = showToc && headings.length > 0;
 			});
 		}
 
-		private setupLike() {
-			if (!this.likeButton) return;
-
-			const slug = this.likeButton.dataset.slug!;
-			const type = this.likeButton.dataset.type as ContentType;
-			let userLikes = 0;
-			let isUpdating = false;
-			let userLikesFetched = false;
-
-			const fillRect = this.likeButton.querySelector<SVGRectElement>(".heart-fill-rect");
-			const popupContainer = this.likeButton.querySelector<HTMLDivElement>(".popup-container");
-			const particlesContainer = this.likeButton.querySelector<HTMLDivElement>(".particles-container");
-
-			const updateFill = (likes: number) => {
-				if (!fillRect) return;
-				const fillHeight = (likes / MAX_LIKES) * 24;
-				const yPosition = 24 - fillHeight;
-				fillRect.setAttribute("height", String(fillHeight));
-				fillRect.setAttribute("y", String(yPosition));
-			};
-
-			const getCookieLikes = (): number | null => {
-				const cookies = document.cookie.split(";");
-				for (const cookie of cookies) {
-					const [name, value] = cookie.trim().split("=");
-					if (name === `${COOKIE_NAME}_${type}_${slug}`) {
-						return Number.parseInt(value || "0") || 0;
-					}
-				}
-				return null;
-			};
-
-			const saveCookieLikes = (count: number) => {
-				const expires = new Date();
-				expires.setFullYear(expires.getFullYear() + 1);
-				document.cookie = `${COOKIE_NAME}_${type}_${slug}=${count}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
-			};
-
-			const showPopup = (text = "+1", isMax = false) => {
-				if (!popupContainer) return;
-				const popup = document.createElement("span");
-				popup.className = isMax ? "like-popup max-popup" : "like-popup";
-				popup.textContent = text;
-				popupContainer.appendChild(popup);
-				setTimeout(() => popup.remove(), isMax ? 1200 : 800);
-			};
-
-			const showParticles = () => {
-				if (!particlesContainer) return;
-				const count = 6;
-				for (let i = 0; i < count; i++) {
-					const particle = document.createElement("span");
-					particle.className = "heart-particle";
-					const angle = (i / count) * Math.PI * 2;
-					const distance = 20 + Math.random() * 10;
-					const x = Math.cos(angle) * distance;
-					const y = Math.sin(angle) * distance;
-					particle.style.setProperty("--particle-end", `translate(${x}px, ${y}px)`);
-					particle.style.background = i % 2 === 0 ? "var(--color-red)" : "var(--color-pink)";
-					particlesContainer.appendChild(particle);
-					setTimeout(() => particle.remove(), 600);
-				}
-			};
-
-			const animateLike = () => {
-				this.likeButton!.classList.add("bounce");
-				setTimeout(() => this.likeButton!.classList.remove("bounce"), 400);
-				showPopup();
-				showParticles();
-			};
-
-			const shakeAnimation = () => {
-				this.likeButton!.style.animation = "none";
-				this.likeButton!.offsetHeight;
-				this.likeButton!.style.animation = "shake 0.3s ease";
-				setTimeout(() => { this.likeButton!.style.animation = ""; }, 300);
-			};
-
-			const fetchUserLikes = async () => {
-				if (userLikesFetched) return;
-				userLikesFetched = true;
-
-				try {
-					const res = await fetch(`${WORKER_URL}/api/analytics/like/${type}/${slug}`);
-					if (!res.ok) return;
-					const data: LikeResponse = await res.json();
-					userLikes = data.user_likes;
-					this.likeButton!.dataset.userLikes = String(userLikes);
-					updateFill(userLikes);
-					saveCookieLikes(userLikes);
-				} catch (error) {
-					console.error("Failed to fetch user likes:", error);
-				}
-			};
-
-			const handleClick = async (e: MouseEvent) => {
-				e.preventDefault();
-				e.stopPropagation();
-
-				if (!userLikesFetched) {
-					await fetchUserLikes();
-				}
-
-				if (isUpdating) return;
-				if (userLikes >= MAX_LIKES) {
-					shakeAnimation();
-					showPopup("max!", true);
-					return;
-				}
-
-				const newCount = userLikes + 1;
-				isUpdating = true;
-				userLikes = newCount;
-				this.likeButton!.dataset.userLikes = String(newCount);
-				updateFill(newCount);
-				animateLike();
-
-				try {
-					const res = await fetch(`${WORKER_URL}/api/analytics/like/${type}/${slug}`, {
-						method: "POST",
-						headers: { "Content-Type": "application/json" },
-						body: JSON.stringify({ count: newCount }),
-					});
-
-					if (!res.ok) throw new Error("Failed to update like");
-					const data: LikeResponse = await res.json();
-					userLikes = data.user_likes;
-					this.likeButton!.dataset.userLikes = String(userLikes);
-					updateFill(userLikes);
-					saveCookieLikes(userLikes);
-				} catch (error) {
-					console.error("Failed to update like:", error);
-					userLikesFetched = false;
-					await fetchUserLikes();
-				} finally {
-					isUpdating = false;
-				}
-			};
-
-			const savedLikes = getCookieLikes();
-			if (savedLikes !== null) {
-				userLikes = savedLikes;
-				this.likeButton.dataset.userLikes = String(savedLikes);
-				updateFill(savedLikes);
-			}
-
-			this.likeButton.addEventListener("click", handleClick);
-		}
-
 		destroy() {
 			if (this.observer) {
 				this.observer.disconnect();
 				this.observer = null;
 			}
-			if (this.fallbackTimer) {
-				clearTimeout(this.fallbackTimer);
-				this.fallbackTimer = null;
+			if (this.isMobile) {
+				window.removeEventListener("scroll", this.handleScroll);
 			}
 		}
-	}
-
-	if (!document.getElementById("floating-actions-keyframes")) {
-		const style = document.createElement("style");
-		style.id = "floating-actions-keyframes";
-		style.textContent = `
-			@keyframes shake {
-				0%, 100% { transform: translateX(0); }
-				20% { transform: translateX(-3px); }
-				40% { transform: translateX(3px); }
-				60% { transform: translateX(-2px); }
-				80% { transform: translateX(2px); }
-			}
-		`;
-		document.head.appendChild(style);
 	}
 
 	const controllers = new Map<HTMLDivElement, FloatingActionsController>();

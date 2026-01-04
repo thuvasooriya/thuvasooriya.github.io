@@ -2,9 +2,11 @@
 	(function() {
 		const VALID_THEMES = ["hollowknight", "catppuccin-mocha", "radiant", "tokyo-night", "dracula", "onedark"];
 		const VALID_TYPOGRAPHY = ["mono", "sans", "serif"];
+		const VALID_FONT_SIZES = ["medium", "large", "xlarge"];
 		const DEFAULT_DARK = "hollowknight";
 		const DEFAULT_LIGHT = "radiant";
 		const DEFAULT_TYPOGRAPHY = "mono";
+		const DEFAULT_FONT_SIZE = "medium";
 
 		function getStoredTheme() {
 			if (typeof localStorage === "undefined") return null;
@@ -16,6 +18,12 @@
 			if (typeof localStorage === "undefined") return DEFAULT_TYPOGRAPHY;
 			const stored = localStorage.getItem("typography");
 			return stored && VALID_TYPOGRAPHY.includes(stored) ? stored : DEFAULT_TYPOGRAPHY;
+		}
+
+		function getStoredFontSize() {
+			if (typeof localStorage === "undefined") return DEFAULT_FONT_SIZE;
+			const stored = localStorage.getItem("font-size");
+			return stored && VALID_FONT_SIZES.includes(stored) ? stored : DEFAULT_FONT_SIZE;
 		}
 
 		function getSystemTheme() {
@@ -38,6 +46,14 @@
 				localStorage.setItem("typography", typo);
 			}
 			document.dispatchEvent(new CustomEvent("typography-applied"));
+		}
+
+		function applyFontSize(size) {
+			document.documentElement.setAttribute("data-font-size", size);
+			if (typeof localStorage !== "undefined") {
+				localStorage.setItem("font-size", size);
+			}
+			document.dispatchEvent(new CustomEvent("fontsize-applied"));
 		}
 
 		function withTransition(callback) {
@@ -86,9 +102,21 @@
 			}
 		}
 
+		function setFontSize(size, animate) {
+			if (!VALID_FONT_SIZES.includes(size)) return;
+			if (size === document.documentElement.getAttribute("data-font-size")) return;
+
+			if (animate) {
+				withTransition(() => applyFontSize(size));
+			} else {
+				applyFontSize(size);
+			}
+		}
+
 		const storedTheme = getStoredTheme();
 		setTheme(storedTheme || getSystemTheme(), false);
 		setTypography(getStoredTypography(), false);
+		setFontSize(getStoredFontSize(), false);
 
 		document.addEventListener("theme-change", (e) => {
 			setTheme(e.detail.theme, true);
@@ -96,6 +124,10 @@
 
 		document.addEventListener("typography-change", (e) => {
 			setTypography(e.detail.typography, true);
+		});
+
+		document.addEventListener("fontsize-change", (e) => {
+			setFontSize(e.detail.size, true);
 		});
 
 		window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
@@ -107,8 +139,10 @@
 		document.addEventListener("astro:before-swap", (e) => {
 			const theme = getStoredTheme() || getSystemTheme();
 			const typo = getStoredTypography();
+			const fontSize = getStoredFontSize();
 			e.newDocument.documentElement.setAttribute("data-theme", theme);
 			e.newDocument.documentElement.setAttribute("data-typography", typo);
+			e.newDocument.documentElement.setAttribute("data-font-size", fontSize);
 		});
 	})();
 </script>

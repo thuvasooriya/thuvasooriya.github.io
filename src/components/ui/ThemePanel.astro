@@ -15,7 +15,7 @@ import { themeConfig } from "@/site.config";
 	</button>
 
 	<div
-		class="panel-dropdown bg-surface-0 border-border-muted absolute end-0 top-full z-50 mt-2 hidden min-w-44 rounded-md border p-2 shadow-lg"
+		class="panel-dropdown bg-surface-0 border-border-muted absolute end-0 top-full z-50 mt-2 hidden min-w-48 rounded-md border p-2 shadow-lg"
 		role="menu"
 	>
 		<div class="mb-2">
@@ -48,6 +48,38 @@ import { themeConfig } from "@/site.config";
 					style="font-family: Merriweather, Georgia, serif;"
 				>
 					Aa
+				</button>
+			</div>
+		</div>
+
+		<div class="mb-2">
+			<div class="text-text-muted mb-1.5 px-1 text-xs lowercase">
+				font size
+			</div>
+			<div class="flex gap-1">
+				<button
+					class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 text-sm transition-colors"
+					data-fontsize="medium"
+					title="medium"
+					type="button"
+				>
+					A
+				</button>
+				<button
+					class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 text-base transition-colors"
+					data-fontsize="large"
+					title="large"
+					type="button"
+				>
+					A
+				</button>
+				<button
+					class="size-btn bg-surface-1 hover:bg-surface-2 flex-1 rounded px-2 py-1.5 text-lg transition-colors"
+					data-fontsize="xlarge"
+					title="extra large"
+					type="button"
+				>
+					A
 				</button>
 			</div>
 		</div>
@@ -105,6 +137,7 @@ import { themeConfig } from "@/site.config";
 	}
 
 	.typo-btn[aria-pressed="true"],
+	.size-btn[aria-pressed="true"],
 	.theme-btn[aria-current="true"] {
 		background: linear-gradient(
 			135deg,
@@ -129,6 +162,7 @@ import { themeConfig } from "@/site.config";
 		const trigger = panel.querySelector<HTMLButtonElement>(".panel-trigger");
 		const dropdown = panel.querySelector<HTMLDivElement>(".panel-dropdown");
 		const typoButtons = panel.querySelectorAll<HTMLButtonElement>(".typo-btn");
+		const sizeButtons = panel.querySelectorAll<HTMLButtonElement>(".size-btn");
 		const themeButtons = panel.querySelectorAll<HTMLButtonElement>(".theme-btn");
 
 		if (!trigger || !dropdown) return;
@@ -136,9 +170,13 @@ import { themeConfig } from "@/site.config";
 		const updateActiveStates = () => {
 			const currentTheme = document.documentElement.getAttribute("data-theme");
 			const currentTypo = document.documentElement.getAttribute("data-typography") || "mono";
+			const currentSize = document.documentElement.getAttribute("data-font-size") || "medium";
 
 			typoButtons.forEach((btn) => {
 				btn.setAttribute("aria-pressed", String(btn.dataset.typography === currentTypo));
+			});
+			sizeButtons.forEach((btn) => {
+				btn.setAttribute("aria-pressed", String(btn.dataset.fontsize === currentSize));
 			});
 			themeButtons.forEach((btn) => {
 				btn.setAttribute("aria-current", String(btn.dataset.theme === currentTheme));
@@ -182,6 +220,18 @@ import { themeConfig } from "@/site.config";
 			);
 		});
 
+		sizeButtons.forEach((btn) => {
+			btn.addEventListener(
+				"click",
+				() => {
+					const size = btn.dataset.fontsize;
+					if (!size) return;
+					document.dispatchEvent(new CustomEvent("fontsize-change", { detail: { size } }));
+				},
+				{ signal },
+			);
+		});
+
 		themeButtons.forEach((btn) => {
 			btn.addEventListener(
 				"click",
@@ -196,6 +246,7 @@ import { themeConfig } from "@/site.config";
 
 		document.addEventListener("theme-applied", updateActiveStates, { signal });
 		document.addEventListener("typography-applied", updateActiveStates, { signal });
+		document.addEventListener("fontsize-applied", updateActiveStates, { signal });
 
 		updateActiveStates();
 	}

@@ -1,4 +1,4 @@
-// analytics manager - batches view/like fetches and view increments
+// analytics manager - batches view/like fetches and increments
 // singleton pattern with debounced batch requests
 
 interface BatchItemResponse {
@@ -11,29 +11,45 @@ interface BatchResponse {
 }
 
 type ContentType = "post" | "tweet" | "project" | "wiki";
-type Callback = (data: BatchItemResponse) => void;
+type StatsCallback = (data: BatchItemResponse) => void;
 
-interface PendingRequest {
+interface PendingFetch {
 	slug: string;
 	type: ContentType;
-	callback: Callback;
+	callback: StatsCallback;
+}
+
+interface CacheEntry {
+	data: BatchItemResponse;
+	expires_at: number;
 }
 
 export const WORKER_URL = import.meta.env.PUBLIC_ANALYTICS_URL || "http://localhost:8787";
+
 const BATCH_DELAY = 50; // ms to wait before sending batch request
-const VIEW_INCREMENT_DELAY = 5000; // ms to wait before sending view increments
+const VIEW_INCREMENT_DELAY = 3000; // ms to wait before sending view increments
 const VIEW_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour cooldown per slug
+const CACHE_TTL = 60_000; // 60 seconds cache TTL
+
+export type UpdateListener = (type: ContentType, slug: string, data: BatchItemResponse) => void;
+export type { ContentType, BatchItemResponse };
 
 class AnalyticsManager {
 	private static instance: AnalyticsManager;
 
-	private pending_fetches: Map<ContentType, PendingRequest[]> = new Map();
+	// stats fetching
+	private pending_fetches: Map<ContentType, PendingFetch[]> = new Map();
 	private fetch_timer: number | null = null;
 
+	// view increments
 	private pending_views: Map<ContentType, Set<string>> = new Map();
 	private view_timer: number | null = null;
 
-	private cache: Map<string, BatchItemResponse> = new Map();
+	// cache with TTL
+	private cache: Map<string, CacheEntry> = new Map();
+
+	// listeners for cache updates (so UI can refresh)
+	private update_listeners: Set<UpdateListener> = new Set();
 
 	private constructor() {
 		this.setup_unload_handler();
@@ -75,11 +91,24 @@ class AnalyticsManager {
 		}
 	}
 
-	request_stats(type: ContentType, slug: string, callback: Callback): void {
+	// subscribe to cache updates (for UI refresh after view increment)
+	on_update(listener: UpdateListener): () => void {
+		this.update_listeners.add(listener);
+		return () => this.update_listeners.delete(listener);
+	}
+
+	private notify_update(type: ContentType, slug: string, data: BatchItemResponse): void {
+		for (const listener of this.update_listeners) {
+			listener(type, slug, data);
+		}
+	}
+
+	request_stats(type: ContentType, slug: string, callback: StatsCallback): void {
 		const key = this.cache_key(type, slug);
 		const cached = this.cache.get(key);
-		if (cached) {
-			callback(cached);
+
+		if (cached && cached.expires_at > Date.now()) {
+			callback(cached.data);
 			return;
 		}
 
@@ -102,6 +131,21 @@ class AnalyticsManager {
 		this.pending_views.set(type, pending);
 
 		this.schedule_view_increment();
+	}
+
+	// update cache and notify listeners (used by LikeButton for optimistic updates)
+	update_cache(type: ContentType, slug: string, data: Partial<BatchItemResponse>): void {
+		const key = this.cache_key(type, slug);
+		const cached = this.cache.get(key);
+		const current = cached?.data || { views: 0, likes: 0 };
+		const updated = { ...current, ...data };
+
+		this.cache.set(key, {
+			data: updated,
+			expires_at: Date.now() + CACHE_TTL,
+		});
+
+		this.notify_update(type, slug, updated);
 	}
 
 	private schedule_fetch(): void {
@@ -140,11 +184,15 @@ class AnalyticsManager {
 				}
 
 				const data: BatchResponse = await res.json();
+				const now = Date.now();
 
 				for (const slug of slugs) {
 					const key = this.cache_key(type, slug);
 					const item = data[slug] || { views: 0, likes: 0 };
-					this.cache.set(key, item);
+					this.cache.set(key, {
+						data: item,
+						expires_at: now + CACHE_TTL,
+					});
 				}
 
 				for (const req of requests) {
@@ -158,7 +206,7 @@ class AnalyticsManager {
 		}
 	}
 
-	private notify_error(requests: PendingRequest[]): void {
+	private notify_error(requests: PendingFetch[]): void {
 		for (const req of requests) {
 			req.callback({ views: 0, likes: 0 });
 		}
@@ -178,12 +226,13 @@ class AnalyticsManager {
 					body: JSON.stringify({ type, slugs: [...slugs] }),
 				});
 
-				// update cache with incremented views
+				// update cache and notify listeners
 				for (const slug of slugs) {
 					const key = this.cache_key(type, slug);
 					const cached = this.cache.get(key);
 					if (cached) {
-						cached.views += 1;
+						cached.data.views += 1;
+						this.notify_update(type, slug, cached.data);
 					}
 				}
 			} catch (error) {
@@ -207,27 +256,15 @@ class AnalyticsManager {
 			this.pending_views.clear();
 		};
 
-		// view transitions (Astro)
 		document.addEventListener("astro:before-swap", flush_on_unload);
 
-		// regular page unload
 		window.addEventListener("visibilitychange", () => {
 			if (document.visibilityState === "hidden") {
 				flush_on_unload();
 			}
 		});
 	}
-
-	// clear cache on page navigation (for fresh data on revisit)
-	clear_cache(): void {
-		this.cache.clear();
-	}
 }
 
 // global instance
 export const analytics = AnalyticsManager.get_instance();
-
-// re-init on page load for view transitions
-document.addEventListener("astro:page-load", () => {
-	analytics.clear_cache();
-});

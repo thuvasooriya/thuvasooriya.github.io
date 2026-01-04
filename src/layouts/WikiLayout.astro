@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import type { MarkdownHeading } from "astro";
-import TOC from "@/components/post/TOC.astro";
+import FloatingActions from "@/components/floating/FloatingActions.astro";
 import AnimateIn from "@/components/ui/AnimateIn.astro";
 import DocHeader from "@/components/wiki/DocHeader.astro";
 import WikiSidebar from "@/components/wiki/WikiSidebar.astro";
@@ -29,7 +29,7 @@ const currentSlug = entry.id === "index" ? "index" : entry.id;
 	<div class="wiki-layout">
 		<WikiSidebar currentSlug={currentSlug} />
 		<article class="wiki-content" data-pagefind-body data-pagefind-filter="content_type:wiki">
-			<header class="wiki-header" data-animate data-animate-immediate>
+			<header class="wiki-header" id="wiki-hero" data-animate data-animate-immediate>
 				<h1>{entry.data.title}</h1>
 				{entry.data.description && <p class="wiki-description">{entry.data.description}</p>}
 			</header>
@@ -39,12 +39,17 @@ const currentSlug = entry.id === "index" ? "index" : entry.id;
 				updated={entry.data.updated}
 				tags={entry.data.tags}
 			/>
-			{!!headings.length && <TOC headings={headings} />}
 			<div class="prose prose-sm max-w-none" data-animate data-animate-immediate data-delay="1">
 				<slot />
 			</div>
 		</article>
 		<div class="wiki-toc-space" aria-hidden="true"></div>
 	</div>
+	<FloatingActions
+		targetId="wiki-hero"
+		showToc={headings.length > 0}
+		headings={headings}
+		like={{ slug: currentSlug, contentType: "wiki" }}
+	/>
 	<AnimateIn />
 </BaseLayout>
