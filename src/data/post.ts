@@ -36,6 +36,40 @@ export async function getAllProjects(): Promise<ContentEntry<"project">[]> {
 	return await getCollection("project");
 }
 
+// get parent project code for a project entry (works for both main and log entries)
+export async function getProjectCode(entry: ContentEntry<"project">): Promise<string | undefined> {
+	if (entry.data.code) return entry.data.code;
+	if (!entry.id.includes("/")) return undefined;
+	const folder = entry.id.split("/")[0];
+	const allProjects = await getCollection("project");
+	const parent = allProjects.find((p) => p.id === folder);
+	return parent?.data.code;
+}
+
+// build a map of project codes for all projects (efficient batch lookup)
+export async function getProjectCodeMap(): Promise<Map<string, string>> {
+	const allProjects = await getCollection("project");
+	const codeMap = new Map<string, string>();
+	const folderCodes = new Map<string, string>();
+	for (const p of allProjects) {
+		if (p.data.code) {
+			const folder = p.id.includes("/") ? p.id.split("/")[0] : p.id;
+			if (folder) folderCodes.set(folder, p.data.code);
+			codeMap.set(p.id, p.data.code);
+		}
+	}
+	for (const p of allProjects) {
+		if (!codeMap.has(p.id) && p.id.includes("/")) {
+			const folder = p.id.split("/")[0];
+			if (folder) {
+				const code = folderCodes.get(folder);
+				if (code) codeMap.set(p.id, code);
+			}
+		}
+	}
+	return codeMap;
+}
+
 // group entries by year
 export function groupByYear<T extends { data: { published: Date } }>(
 	entries: T[],

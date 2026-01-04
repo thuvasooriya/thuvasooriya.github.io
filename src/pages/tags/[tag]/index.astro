@@ -4,6 +4,7 @@ import ContentCard from "@/components/shared/ContentCard.astro";
 import FormattedDate from "@/components/shared/FormattedDate.astro";
 import AnimateIn from "@/components/ui/AnimateIn.astro";
 import { getContentByTag, getGlobalTagNames } from "@/data/content";
+import { getProjectCodeMap } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
 import { collectionDateSort } from "@/utils";
 
@@ -14,6 +15,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
 const { tag } = Astro.params;
 const content = await getContentByTag(String(tag));
+const projectCodeMap = await getProjectCodeMap();
 
 const posts = content.posts.sort(collectionDateSort);
 const projects = content.projects.sort((a, b) => {
@@ -36,18 +38,21 @@ const meta = {
 ---
 
 <PageLayout meta={meta} pageType="listing">
-	<div class="mb-8 flex items-center" data-animate>
+	<div class="tag-page-header" data-animate>
 		<h1 class="sr-only">content with the tag {tag}</h1>
 		<a class="title text-accent" href="/tags/">tags</a>
-		<span aria-hidden="true" class="ms-2 me-3 text-xl">→</span>
-		<span aria-hidden="true" class="text-xl font-semibold">#{tag}</span>
-		<span class="ms-3 text-sm text-text-muted">({totalCount} items)</span>
+		<span aria-hidden="true" class="sep text-primary">•</span>
+		<span class="tag-name">#{tag}</span>
+		<span aria-hidden="true" class="sep text-primary">•</span>
+		<span class="tag-count">{totalCount}</span>
 	</div>
 
 	{posts.length > 0 && (
 		<section class="mb-10" data-animate data-delay="1">
-			<h2 class="mb-4 text-lg font-semibold text-text-muted">
-				posts <span class="text-sm font-normal">({posts.length})</span>
+			<h2 class="section-heading">
+				<span>posts</span>
+				<span aria-hidden="true" class="sep text-primary">•</span>
+				<span class="section-count">{posts.length}</span>
 			</h2>
 			<ul class="card-list">
 				{posts.map((post) => (
@@ -61,13 +66,15 @@ const meta = {
 
 	{projects.length > 0 && (
 		<section class="mb-10" data-animate data-delay="2">
-			<h2 class="mb-4 text-lg font-semibold text-text-muted">
-				projects <span class="text-sm font-normal">({projects.length})</span>
+			<h2 class="section-heading">
+				<span>projects</span>
+				<span aria-hidden="true" class="sep text-primary">•</span>
+				<span class="section-count">{projects.length}</span>
 			</h2>
 			<ul class="card-list">
 				{projects.map((project) => (
 					<li>
-						<ContentCard entry={project} />
+						<ContentCard entry={project} projectCode={projectCodeMap.get(project.id)} />
 					</li>
 				))}
 			</ul>
@@ -76,8 +83,10 @@ const meta = {
 
 	{wiki.length > 0 && (
 		<section class="mb-10" data-animate data-delay="3">
-			<h2 class="mb-4 text-lg font-semibold text-text-muted">
-				wiki <span class="text-sm font-normal">({wiki.length})</span>
+			<h2 class="section-heading">
+				<span>wiki</span>
+				<span aria-hidden="true" class="sep text-primary">•</span>
+				<span class="section-count">{wiki.length}</span>
 			</h2>
 			<ul class="space-y-3">
 				{wiki.map((entry) => (
@@ -103,3 +112,47 @@ const meta = {
 </PageLayout>
 
 <AnimateIn />
+
+<style>
+	.tag-page-header {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 2rem;
+		flex-wrap: wrap;
+	}
+
+	.tag-name {
+		font-size: 1.25rem;
+		font-weight: 600;
+	}
+
+	.tag-count {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+	}
+
+	.sep {
+		font-size: 1.25rem;
+	}
+
+	.section-heading {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+		font-size: 1rem;
+		font-weight: 600;
+		color: var(--color-text-muted);
+		text-transform: lowercase;
+	}
+
+	.section-heading .sep {
+		font-size: 1rem;
+	}
+
+	.section-count {
+		font-size: 0.875rem;
+		font-weight: 400;
+	}
+</style>

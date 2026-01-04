@@ -1,4 +1,5 @@
 ---
+import { Icon } from "astro-icon/components";
 import AnimateIn from "@/components/ui/AnimateIn.astro";
 import { getGlobalTags } from "@/data/content";
 import PageLayout from "@/layouts/Base.astro";
@@ -22,22 +23,27 @@ function formatCount(info: { counts: { post: number; project: number; wiki: numb
 ---
 
 <PageLayout meta={meta} pageType="listing">
-	<h1 class="title mb-6" data-animate>tags</h1>
-	<ul class="space-y-4" data-animate data-delay="1">
+	<div class="tags-header" data-animate>
+		<h1 class="title">tags</h1>
+		<button type="button" class="sort-toggle hidden sm:flex" data-sort="count" title="sort by count">
+			<Icon name="lucide:hash" size={16} class="sort-icon sort-icon-count" />
+			<Icon name="lucide:arrow-down-a-z" size={16} class="sort-icon sort-icon-alpha hidden" />
+		</button>
+	</div>
+	<ul class="tags-grid" data-animate data-delay="1">
 		{
 			allTags.map((info) => (
-				<li class="flex items-center gap-x-2">
+				<li class="tag-item" data-tag={info.tag} data-count={info.total}>
 					<a
-						class="cactus-link inline-block"
+						class="tag-link"
 						data-astro-prefetch
 						href={`/tags/${info.tag}/`}
 						title={`view content with the tag: ${info.tag}`}
 					>
-						&#35;{info.tag}
+						<span class="tag-name">#{info.tag}</span>
+						<span class="tag-count">{info.total}</span>
 					</a>
-					<span class="inline-block text-sm text-text-muted">
-						- {formatCount(info)}
-					</span>
+					<span class="tag-breakdown">{formatCount(info)}</span>
 				</li>
 			))
 		}
@@ -45,3 +51,119 @@ function formatCount(info: { counts: { post: number; project: number; wiki: numb
 </PageLayout>
 
 <AnimateIn />
+
+<script>
+	document.addEventListener("astro:page-load", () => {
+		const sortToggle = document.querySelector<HTMLButtonElement>(".sort-toggle");
+		const tagsGrid = document.querySelector<HTMLUListElement>(".tags-grid");
+		if (!sortToggle || !tagsGrid) return;
+
+		const countIcon = sortToggle.querySelector<HTMLElement>(".sort-icon-count");
+		const alphaIcon = sortToggle.querySelector<HTMLElement>(".sort-icon-alpha");
+
+		let sortMode: "count" | "alpha" = "count";
+
+		const sortTags = () => {
+			const items = Array.from(tagsGrid.querySelectorAll<HTMLLIElement>(".tag-item"));
+			items.sort((a, b) => {
+				if (sortMode === "count") {
+					return (Number(b.dataset.count) || 0) - (Number(a.dataset.count) || 0);
+				}
+				return (a.dataset.tag || "").localeCompare(b.dataset.tag || "");
+			});
+			for (const item of items) {
+				tagsGrid.appendChild(item);
+			}
+		};
+
+		sortToggle.addEventListener("click", () => {
+			sortMode = sortMode === "count" ? "alpha" : "count";
+			sortToggle.dataset.sort = sortMode;
+			sortToggle.title = sortMode === "count" ? "sort by count" : "sort alphabetically";
+			if (countIcon && alphaIcon) {
+				countIcon.classList.toggle("hidden", sortMode !== "count");
+				alphaIcon.classList.toggle("hidden", sortMode !== "alpha");
+			}
+			sortTags();
+		});
+	});
+</script>
+
+<style>
+	.tags-header {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.sort-toggle {
+		align-items: center;
+		justify-content: center;
+		padding: 0.375rem;
+		font-size: 0.8125rem;
+		color: var(--color-text-muted);
+		background: transparent;
+		border: 1px solid var(--color-border-default);
+		border-radius: 0.375rem;
+		cursor: pointer;
+		transition: all 150ms var(--ease-snappy);
+	}
+
+	.sort-toggle:hover {
+		border-color: var(--color-accent);
+		color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+	}
+
+	.tags-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+		gap: 0.75rem;
+	}
+
+	.tag-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		padding: 0.75rem 1rem;
+		border-radius: 0.5rem;
+		border: 1px solid var(--color-border-default);
+		background: var(--color-surface-0);
+		transition: all 150ms var(--ease-snappy);
+	}
+
+	.tag-item:hover {
+		border-color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-accent) 5%, var(--color-surface-0));
+	}
+
+	.tag-link {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.5rem;
+		text-decoration: none;
+	}
+
+	.tag-name {
+		font-weight: 600;
+		color: var(--color-link);
+	}
+
+	.tag-count {
+		font-size: 0.75rem;
+		font-weight: 500;
+		padding: 0.125rem 0.375rem;
+		border-radius: 0.25rem;
+		background: color-mix(in srgb, var(--color-accent) 15%, transparent);
+		color: var(--color-accent);
+	}
+
+	.tag-breakdown {
+		font-size: 0.75rem;
+		color: var(--color-text-muted);
+	}
+</style>

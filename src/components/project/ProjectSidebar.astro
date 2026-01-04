@@ -30,7 +30,7 @@ function isActive(logSlug: string): boolean {
 		<ul class="sidebar-list">
 			{sortedLogs.map((log) => {
 				const logSlug = getLogSlug(log);
-				const href = `/projects/${projectFolder}/${logSlug}/`;
+				const href = `/project/${projectFolder}/${logSlug}/`;
 				const active = isActive(logSlug);
 
 				return (

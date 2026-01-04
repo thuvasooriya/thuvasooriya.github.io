@@ -1,7 +1,6 @@
 ---
 import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
-import FormattedDate from "@/components/shared/FormattedDate.astro";
 import Card from "@/components/ui/Card.astro";
 
 type ContentEntry = CollectionEntry<"post"> | CollectionEntry<"project">;
@@ -11,15 +10,16 @@ export interface Props {
 	entry: ContentEntry;
 	href?: string;
 	withDesc?: boolean;
+	projectCode?: string;
 }
 
-const { as: Tag = "article", entry, href, withDesc = true } = Astro.props;
+const { as: Tag = "article", entry, href, withDesc = true, projectCode } = Astro.props;
 
 function getDefaultHref(e: ContentEntry): string {
 	if (e.collection === "post") {
-		return `/posts/${e.id}/`;
+		return `/post/${e.id}/`;
 	}
-	return `/projects/${e.id}/`;
+	return `/project/${e.id}/`;
 }
 
 const resolvedHref = href ?? getDefaultHref(entry);
@@ -28,12 +28,12 @@ const title = entry.data.title;
 const description = entry.data.description;
 const tags = entry.data.tags;
 
-const publishDate = entry.collection === "post" ? entry.data.published : entry.data.started;
 const coverImage = entry.collection === "post" ? entry.data.cover_image : undefined;
-const isDraft = entry.collection === "post" ? entry.data.draft : entry.data.status === "init";
+const isDraft = entry.collection === "post" ? entry.data.draft : false;
+const displayCode = entry.collection === "project" ? (entry.data.code ?? projectCode) : undefined;
 ---
 
-<Card as={Tag} class="group block @container">
+<Card as={Tag} class:list={["content-card group block @container", { "is-draft": isDraft }]}>
 	<a href={resolvedHref} class="card-link block p-4" data-astro-prefetch>
 		<div class="content-card-layout">
 			{coverImage && (
@@ -46,47 +46,32 @@ const isDraft = entry.collection === "post" ? entry.data.draft : entry.data.stat
 						width={600}
 						height={400}
 					/>
-					{isDraft && (
-						<span class="draft-badge">draft</span>
-					)}
 				</div>
 			)}
 
 			<div class="content-card-body">
-				{!coverImage && isDraft && (
-					<div class="inline-flex">
-						<span class="draft-badge-inline">draft</span>
-					</div>
-				)}
-
-				<h3 class="card-title line-clamp-2 text-lg font-semibold @[640px]:text-xl">
-					{title}
-				</h3>
-
-				{publishDate && (
-					<FormattedDate
-						class="card-meta text-xs font-medium lowercase"
-						date={publishDate}
-					/>
-				)}
+				<div class="card-title-row">
+					<h3 class="card-title line-clamp-2 text-lg font-semibold @[640px]:text-xl">
+						{title}
+					</h3>
+					{displayCode && (
+						<span class="project-code-badge">{displayCode}</span>
+					)}
+				</div>
 
 				{withDesc && description && (
-					<p class="card-text line-clamp-1 text-sm leading-relaxed">
+					<p class="card-description line-clamp-2 text-sm leading-relaxed">
 						{description}
 					</p>
 				)}
 
 				{tags && tags.length > 0 && (
-					<div class="flex min-w-0 flex-wrap items-center gap-1.5">
+					<div class="card-tags">
 						{tags.slice(0, 3).map((tag: string) => (
-							<span class="card-badge whitespace-nowrap px-2 py-1 text-xs font-medium">
-								#{tag}
-							</span>
+							<span class="card-tag">#{tag}</span>
 						))}
 						{tags.length > 3 && (
-							<span class="card-badge px-2 py-1 text-xs">
-								+{tags.length - 3}
-							</span>
+							<span class="card-tag">+{tags.length - 3}</span>
 						)}
 					</div>
 				)}
@@ -96,6 +81,60 @@ const isDraft = entry.collection === "post" ? entry.data.draft : entry.data.stat
 </Card>
 
 <style>
+	.content-card {
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-accent) 3%, var(--color-global-bg)) 0%,
+			var(--color-global-bg) 50%,
+			color-mix(in srgb, var(--color-accent) 5%, var(--color-global-bg)) 100%
+		);
+		border-color: color-mix(in srgb, var(--color-accent) 15%, transparent);
+	}
+
+	.content-card:hover {
+		background: linear-gradient(
+			135deg,
+			color-mix(in srgb, var(--color-accent) 8%, var(--color-global-bg)) 0%,
+			color-mix(in srgb, var(--color-accent) 3%, var(--color-global-bg)) 50%,
+			color-mix(in srgb, var(--color-accent) 10%, var(--color-global-bg)) 100%
+		);
+		border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+	}
+
+	.content-card.is-draft {
+		background: 
+			repeating-linear-gradient(
+				-45deg,
+				transparent,
+				transparent 10px,
+				color-mix(in srgb, var(--color-red) 5%, transparent) 10px,
+				color-mix(in srgb, var(--color-red) 5%, transparent) 20px
+			),
+			linear-gradient(
+				135deg,
+				color-mix(in srgb, var(--color-red) 3%, var(--color-global-bg)) 0%,
+				var(--color-global-bg) 100%
+			);
+		border-color: color-mix(in srgb, var(--color-red) 20%, transparent);
+	}
+
+	.content-card.is-draft:hover {
+		background: 
+			repeating-linear-gradient(
+				-45deg,
+				transparent,
+				transparent 10px,
+				color-mix(in srgb, var(--color-red) 8%, transparent) 10px,
+				color-mix(in srgb, var(--color-red) 8%, transparent) 20px
+			),
+			linear-gradient(
+				135deg,
+				color-mix(in srgb, var(--color-red) 5%, var(--color-global-bg)) 0%,
+				var(--color-global-bg) 100%
+			);
+		border-color: color-mix(in srgb, var(--color-red) 30%, transparent);
+	}
+
 	.content-card-layout {
 		display: flex;
 		flex-direction: column;
@@ -108,7 +147,7 @@ const isDraft = entry.collection === "post" ? entry.data.draft : entry.data.stat
 		width: 100%;
 		overflow: hidden;
 		border-radius: 0.375rem;
-		border: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+		border: 1px solid color-mix(in srgb, var(--color-accent) 15%, transparent);
 	}
 
 	.content-card-body {
@@ -118,29 +157,55 @@ const isDraft = entry.collection === "post" ? entry.data.draft : entry.data.stat
 		min-width: 0;
 	}
 
-	.draft-badge {
-		position: absolute;
-		left: 0.5rem;
-		top: 0.5rem;
-		padding: 0.25rem 0.5rem;
-		border-radius: 0.25rem;
-		background-color: var(--color-warning);
-		color: black;
-		font-size: 0.75rem;
+	.card-title-row {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 0.5rem;
+	}
+
+	.card-title-row .card-title {
+		flex: 1;
+		min-width: 0;
+	}
+
+	.project-code-badge {
+		flex-shrink: 0;
+		color: var(--color-accent);
+		font-family: var(--font-mono);
+		font-size: 1.125rem;
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 	}
 
-	.draft-badge-inline {
-		padding: 0.25rem 0.5rem;
-		border-radius: 0.25rem;
-		background-color: var(--color-warning);
-		color: black;
+	@container (min-width: 640px) {
+		.project-code-badge {
+			font-size: 1.25rem;
+		}
+	}
+
+	.card-description {
+		color: color-mix(in srgb, var(--color-global-text) 70%, transparent);
+		min-height: 2.5rem;
+	}
+
+	.card-tags {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 0.375rem;
+		min-width: 0;
+	}
+
+	.card-tag {
+		padding: 0.125rem 0.5rem;
 		font-size: 0.75rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		font-weight: 500;
+		color: var(--color-accent);
+		background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+		border-radius: 0.25rem;
+		white-space: nowrap;
 	}
 
 	@container (min-width: 480px) {

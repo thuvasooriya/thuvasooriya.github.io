@@ -41,15 +41,15 @@ export const menuLinks: Array<{ title: string; path: string }> = [
 	},
 	{
 		title: "posts",
-		path: "/posts/",
+		path: "/post/",
 	},
 	{
 		title: "tweets",
-		path: "/tweets/",
+		path: "/tweet/",
 	},
 	{
 		title: "projects",
-		path: "/projects/",
+		path: "/project/",
 	},
 	{
 		title: "wiki",

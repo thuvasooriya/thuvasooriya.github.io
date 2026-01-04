@@ -1,18 +1,224 @@
 ---
 import AnimateIn from "@/components/ui/AnimateIn.astro";
+import GradientBlurs from "@/components/ui/GradientBlurs.astro";
 import PageLayout from "@/layouts/Base.astro";
 
 const meta = {
 	description: "Oops! It looks like this page is lost in space!",
-	title: "Oops! You found a missing page!",
+	title: "404 - page not found",
 };
 ---
 
-<PageLayout meta={meta}>
-	<div data-animate>
-		<h1 class="title mb-6">404 | oops something went wrong</h1>
-		<p class="mb-8">please use the navigation to find your way back</p>
-	</div>
+<PageLayout meta={meta} pageType="home">
+	<GradientBlurs variant="error" />
+
+	<section class="error-page">
+
+		<div class="error-content" data-animate>
+			<div class="error-illustration">
+				<svg
+					class="ghost-svg"
+					viewBox="0 0 200 200"
+					fill="none"
+					xmlns="http://www.w3.org/2000/svg"
+					aria-hidden="true"
+				>
+					<g class="ghost-body">
+						<path
+							d="M100 20C55.8 20 20 55.8 20 100v60c0 5.5 6.3 8.5 10.6 5l15.4-12.3c2.4-1.9 5.8-1.9 8.2 0l15.4 12.3c2.6 2.1 6.2 2.1 8.8 0l15.4-12.3c2.4-1.9 5.8-1.9 8.2 0l15.4 12.3c2.6 2.1 6.2 2.1 8.8 0l15.4-12.3c2.4-1.9 5.8-1.9 8.2 0l15.4 12.3c4.3 3.5 10.6.5 10.6-5v-60c0-44.2-35.8-80-80-80z"
+							fill="currentColor"
+							class="ghost-fill"
+						/>
+						<circle cx="70" cy="90" r="12" class="ghost-eye" />
+						<circle cx="130" cy="90" r="12" class="ghost-eye" />
+						<path
+							d="M85 115c0 8.3 6.7 15 15 15s15-6.7 15-15"
+							stroke="currentColor"
+							stroke-width="4"
+							stroke-linecap="round"
+							class="ghost-mouth"
+						/>
+					</g>
+					<g class="sparkles">
+						<circle cx="35" cy="50" r="3" class="sparkle sparkle-1" />
+						<circle cx="165" cy="45" r="2" class="sparkle sparkle-2" />
+						<circle cx="25" cy="130" r="2" class="sparkle sparkle-3" />
+						<circle cx="175" cy="120" r="3" class="sparkle sparkle-4" />
+						<circle cx="50" cy="170" r="2" class="sparkle sparkle-5" />
+						<circle cx="150" cy="175" r="2" class="sparkle sparkle-6" />
+					</g>
+				</svg>
+			</div>
+
+			<div class="error-text">
+				<h1 class="error-code">404</h1>
+				<p class="error-message">looks like this page wandered off</p>
+				<p class="error-hint">maybe it's exploring the void...</p>
+				<a href="/" class="error-link">
+					<span>take me home</span>
+					<svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>
+					</svg>
+				</a>
+			</div>
+		</div>
+	</section>
 </PageLayout>
 
 <AnimateIn />
+
+<style>
+	.error-page {
+		position: relative;
+		min-height: 60vh;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: hidden;
+	}
+
+	.error-content {
+		position: relative;
+		z-index: 10;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 2rem;
+		text-align: center;
+		padding: 2rem;
+	}
+
+	.error-illustration {
+		width: 10rem;
+		height: 10rem;
+	}
+
+	@media (min-width: 640px) {
+		.error-illustration {
+			width: 14rem;
+			height: 14rem;
+		}
+	}
+
+	.ghost-svg {
+		width: 100%;
+		height: 100%;
+		color: var(--color-primary);
+	}
+
+	.ghost-body {
+		animation: ghost-float 3s ease-in-out infinite;
+		transform-origin: center;
+	}
+
+	@keyframes ghost-float {
+		0%, 100% { transform: translateY(0) rotate(-2deg); }
+		50% { transform: translateY(-10px) rotate(2deg); }
+	}
+
+	.ghost-fill {
+		opacity: 0.15;
+	}
+
+	.ghost-eye {
+		fill: var(--color-primary);
+	}
+
+	.ghost-mouth {
+		stroke: var(--color-primary);
+	}
+
+	.sparkle {
+		animation: sparkle 2s ease-in-out infinite;
+	}
+
+	.sparkle-1 { animation-delay: 0s; fill: var(--color-peach); }
+	.sparkle-2 { animation-delay: 0.3s; fill: var(--color-red); }
+	.sparkle-3 { animation-delay: 0.6s; fill: var(--color-maroon); }
+	.sparkle-4 { animation-delay: 0.9s; fill: var(--color-peach); }
+	.sparkle-5 { animation-delay: 1.2s; fill: var(--color-red); }
+	.sparkle-6 { animation-delay: 1.5s; fill: var(--color-maroon); }
+
+	@keyframes sparkle {
+		0%, 100% { opacity: 0.3; transform: scale(1); }
+		50% { opacity: 1; transform: scale(1.5); }
+	}
+
+	.error-text {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.error-code {
+		font-size: 5rem;
+		font-weight: 700;
+		line-height: 1;
+		background: linear-gradient(
+			135deg,
+			var(--color-peach) 0%,
+			var(--color-red) 50%,
+			var(--color-maroon) 100%
+		);
+		-webkit-background-clip: text;
+		background-clip: text;
+		-webkit-text-fill-color: transparent;
+		animation: gradient-shift 5s ease infinite;
+		background-size: 200% 200%;
+	}
+
+	@keyframes gradient-shift {
+		0%, 100% { background-position: 0% 50%; }
+		50% { background-position: 100% 50%; }
+	}
+
+	@media (min-width: 640px) {
+		.error-code {
+			font-size: 8rem;
+		}
+	}
+
+	.error-message {
+		font-size: 1.25rem;
+		font-weight: 500;
+		color: var(--color-global-text);
+	}
+
+	@media (min-width: 640px) {
+		.error-message {
+			font-size: 1.5rem;
+		}
+	}
+
+	.error-hint {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		font-style: italic;
+	}
+
+	.error-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 1rem;
+		padding: 0.75rem 1.5rem;
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: var(--color-global-bg);
+		background: color-mix(in srgb, var(--color-primary) 85%, transparent);
+		border-radius: 0.5rem;
+		text-decoration: none;
+		transition: all 200ms ease;
+	}
+
+	.error-link:hover {
+		background: var(--color-primary);
+		box-shadow: 0 0 20px color-mix(in srgb, var(--color-primary) 50%, transparent);
+	}
+
+	.error-link .arrow-icon {
+		width: 1rem;
+		height: 1rem;
+	}
+</style>

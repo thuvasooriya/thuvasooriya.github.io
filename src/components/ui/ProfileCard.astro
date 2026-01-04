@@ -1,0 +1,493 @@
+---
+/**
+ * ProfileCard - Profile card with casual/formal modes
+ *
+ * Features:
+ * - Smooth crossfade transition between modes
+ * - Photo maintains square aspect ratio, sized to content height
+ * - Tooltip on hover
+ * - About button in top-right (desktop) / bottom (mobile)
+ */
+import { Image } from "astro:assets";
+import { getEntry } from "astro:content";
+import { Icon } from "astro-icon/components";
+import avatarImg from "@/assets/avatar.jpg";
+import photoImg from "@/assets/thuva.jpg";
+import LanguageGreeting from "@/components/ui/LanguageGreeting.astro";
+
+interface Props {
+	class?: string;
+}
+
+const { class: className }: Props = Astro.props;
+
+const aboutPage = await getEntry("page", "about");
+if (!aboutPage) throw new Error("About page content not found");
+
+const p = aboutPage.data.profile;
+---
+
+<profile-card class:list={["profile-card", className]} data-mode="formal">
+	<div class="link-group">
+		<a href="https://docs.thuvasooriya.me/cv.pdf" class="cv-link" target="_blank" rel="noopener">
+			<span>cv</span>
+			<Icon name="lucide:file-text" class="link-icon" />
+		</a>
+		<a href="/about/" class="about-link">
+			<span>more</span>
+			<Icon name="lucide:arrow-right" class="link-arrow" />
+		</a>
+	</div>
+
+	<div class="card-layout">
+		<div class="card-image">
+			<Image
+				src={avatarImg}
+				alt="Avatar"
+				class="profile-img img-casual"
+				width={280}
+				height={280}
+				loading="eager"
+			/>
+			<Image
+				src={photoImg}
+				alt="Thuvaragan"
+				class="profile-img img-formal"
+				width={280}
+				height={280}
+				loading="eager"
+			/>
+		</div>
+
+		<div class="card-content">
+			<LanguageGreeting
+				className="profile-greeting"
+				textColor="text-accent"
+				cursorColor="bg-accent"
+				typingSpeed={80}
+				pauseDuration={2000}
+				paddingX=""
+				paddingY=""
+			/>
+
+			<div class="mode-content-wrapper">
+				<!-- Casual content -->
+				<div class="mode-content content-casual">
+					<p class="intro">i'm <strong class="name">{p?.name || "thuvasooriya"}</strong></p>
+					<p class="work">{p?.work || "researcher, engineer and designer"}</p>
+					<p class="experience">{p?.experience}</p>
+					{p?.focus && <p class="focus">{p.focus}</p>}
+					{p?.now && <p class="now"><span class="now-label">now:</span> {p.now}</p>}
+				</div>
+
+				<!-- Formal content -->
+				<div class="mode-content content-formal">
+					<p class="intro">i'm <strong class="name">{p?.formal_name || p?.name || "Thuvaragan S."}</strong></p>
+					<p class="work">{p?.formal_work || p?.work || "researcher, engineer and designer"}</p>
+					<p class="experience" set:html={p?.formal_experience} />
+					{p?.formal_focus && <p class="focus formal-focus">{p.formal_focus}</p>}
+					{p?.formal_now && <p class="now"><span class="now-label">now:</span> {p.formal_now}</p>}
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<span class="tooltip">click to switch</span>
+</profile-card>
+
+<script>
+	class ProfileCard extends HTMLElement {
+		#flipped = true;
+
+		connectedCallback() {
+			this.addEventListener("click", this.#handleClick);
+			this.addEventListener("keydown", this.#handleKeydown);
+			this.setAttribute("role", "button");
+			this.setAttribute("tabindex", "0");
+		}
+
+		disconnectedCallback() {
+			this.removeEventListener("click", this.#handleClick);
+			this.removeEventListener("keydown", this.#handleKeydown);
+		}
+
+		#handleClick = (e: MouseEvent) => {
+			const target = e.target as HTMLElement;
+			if (target.closest("a")) return;
+			this.#flip();
+		};
+
+		#handleKeydown = (e: KeyboardEvent) => {
+			if (e.key === "Enter" || e.key === " ") {
+				e.preventDefault();
+				this.#flip();
+			}
+		};
+
+		#flip() {
+			this.#flipped = !this.#flipped;
+			this.dataset.mode = this.#flipped ? "formal" : "casual";
+			
+			const greeting = this.querySelector(".profile-greeting");
+			if (greeting) {
+				greeting.classList.add("greeting-fade");
+				setTimeout(() => greeting.classList.remove("greeting-fade"), 150);
+			}
+		}
+	}
+
+	customElements.define("profile-card", ProfileCard);
+</script>
+
+<style>
+	.profile-card {
+		--profile-color: var(--color-accent);
+		display: block;
+		position: relative;
+		padding: 1.25rem;
+		background: linear-gradient(135deg, color-mix(in srgb, var(--profile-color) 8%, color-mix(in srgb, var(--color-global-bg) 70%, transparent)) 0%, color-mix(in srgb, var(--color-global-bg) 70%, transparent) 100%);
+		border: 1px solid color-mix(in srgb, var(--profile-color) 20%, transparent);
+		border-radius: var(--card-radius, 0.5rem);
+		cursor: pointer;
+		transition: all 200ms ease-in-out;
+	}
+
+	.profile-card[data-mode="formal"] {
+		--profile-color: var(--color-primary);
+	}
+
+	.profile-card:hover {
+		background: linear-gradient(135deg, color-mix(in srgb, var(--profile-color) 10%, color-mix(in srgb, var(--color-global-bg) 70%, transparent)) 0%, color-mix(in srgb, var(--color-global-bg) 70%, transparent) 100%);
+		border-color: color-mix(in srgb, var(--profile-color) 30%, transparent);
+	}
+
+	.profile-card:focus-visible {
+		outline: 2px solid var(--profile-color);
+		outline-offset: 2px;
+	}
+
+	@media (min-width: 480px) {
+		.profile-card {
+			padding: 1.5rem;
+		}
+	}
+
+	/* tooltip */
+	.tooltip {
+		position: absolute;
+		bottom: -1.75rem;
+		left: 50%;
+		transform: translateX(-50%);
+		padding: 0.25rem 0.5rem;
+		font-size: 0.7rem;
+		color: var(--color-text-muted);
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 200ms ease;
+		white-space: nowrap;
+	}
+
+	.profile-card:hover .tooltip {
+		opacity: 1;
+	}
+
+	/* link group - cv + about buttons flush with card corner */
+	.link-group {
+		position: absolute;
+		top: 0;
+		right: 0;
+		display: flex;
+		z-index: 5;
+	}
+
+	.about-link,
+	.cv-link {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--color-text-muted);
+		background: color-mix(in srgb, var(--color-global-text) 8%, transparent);
+		text-decoration: none;
+		transition: color 150ms ease-in-out, background 150ms ease-in-out;
+	}
+
+	.cv-link {
+		border-bottom-left-radius: var(--card-radius, 0.5rem);
+	}
+
+	.about-link {
+		border-top-right-radius: var(--card-radius, 0.5rem);
+	}
+
+	.about-link:hover,
+	.cv-link:hover {
+		color: var(--profile-color);
+		background: color-mix(in srgb, var(--profile-color) 15%, transparent);
+	}
+
+	.link-arrow,
+	.link-icon {
+		width: 0.875rem;
+		height: 0.875rem;
+		transition: transform 150ms ease-in-out;
+	}
+
+	.about-link:hover .link-arrow {
+		transform: translateX(2px);
+	}
+
+	/* mobile: full width at bottom */
+	@media (max-width: 479px) {
+		.link-group {
+			top: auto;
+			bottom: 0;
+			left: 0;
+			right: 0;
+		}
+
+		.cv-link {
+			flex: 1;
+			border-radius: 0;
+			border-bottom-left-radius: var(--card-radius, 0.5rem);
+		}
+
+		.about-link {
+			flex: 1;
+			border-radius: 0;
+			border-bottom-right-radius: var(--card-radius, 0.5rem);
+		}
+	}
+
+	/* layout - mobile: stacked, desktop: grid with image sized to content */
+	.card-layout {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 1rem;
+		padding-bottom: 2.5rem;
+	}
+
+	@media (min-width: 480px) {
+		.card-layout {
+			display: grid;
+			grid-template-columns: auto 1fr;
+			gap: 1.5rem;
+			padding-bottom: 0;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.card-layout {
+			align-items: stretch;
+		}
+	}
+
+	/* image container */
+	.card-image {
+		position: relative;
+		width: 7rem;
+		height: 7rem;
+	}
+
+	@media (min-width: 480px) {
+		.card-image {
+			width: 8rem;
+			height: 8rem;
+		}
+	}
+
+	@media (min-width: 768px) {
+		.card-image {
+			width: auto;
+			height: auto;
+			min-height: 8rem;
+			aspect-ratio: 1;
+		}
+	}
+
+	.profile-img {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		border-radius: calc(var(--card-radius, 0.5rem) - 2px);
+		transition: opacity 200ms ease-in-out;
+	}
+
+	.img-casual { opacity: 1; }
+	.img-formal { opacity: 0; }
+	.profile-card[data-mode="formal"] .img-casual { opacity: 0; }
+	.profile-card[data-mode="formal"] .img-formal { opacity: 1; }
+
+	/* mode content - stacked crossfade (no position changes) */
+	.card-content {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.25rem;
+		text-align: center;
+		position: relative;
+	}
+
+	@media (min-width: 480px) {
+		.card-content {
+			align-items: flex-start;
+			text-align: left;
+			justify-content: center;
+		}
+	}
+
+	/* greeting - match intro text size */
+	.profile-greeting {
+		font-size: 1rem;
+		font-weight: 600;
+		margin-bottom: 0;
+		line-height: 1.5;
+		transition: opacity 200ms ease-in-out, color 200ms ease-in-out;
+	}
+
+	@media (min-width: 480px) {
+		.profile-greeting {
+			justify-content: flex-start;
+		}
+	}
+
+	.profile-greeting.greeting-fade {
+		opacity: 0.5;
+	}
+
+	:global(.profile-greeting .greeting-container) {
+		justify-items: center;
+	}
+
+	@media (min-width: 480px) {
+		:global(.profile-greeting .greeting-container) {
+			justify-items: start;
+		}
+	}
+
+	:global(.profile-greeting .greeting-text) {
+		font-size: 1rem;
+		color: var(--profile-color);
+	}
+
+	:global(.profile-greeting .greeting-cursor) {
+		background-color: var(--profile-color);
+	}
+
+	/* mode content wrapper - grid stack so both contents contribute to height */
+	.mode-content-wrapper {
+		display: grid;
+		width: 100%;
+	}
+
+	.mode-content {
+		grid-area: 1 / 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		transition: opacity 200ms ease-in-out, visibility 200ms ease-in-out;
+	}
+
+	/* casual visible by default, formal hidden */
+	.content-casual {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	.content-formal {
+		opacity: 0;
+		visibility: hidden;
+	}
+
+	/* formal mode: swap visibility */
+	.profile-card[data-mode="formal"] .content-casual {
+		opacity: 0;
+		visibility: hidden;
+	}
+
+	.profile-card[data-mode="formal"] .content-formal {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	/* typography */
+	.intro {
+		font-size: 1rem;
+		color: var(--color-global-text);
+		margin: 0;
+	}
+
+	.name {
+		color: var(--profile-color);
+		font-weight: 600;
+	}
+
+	.work {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		margin: 0;
+	}
+
+	.experience {
+		font-size: 0.875rem;
+		color: var(--color-global-text);
+		line-height: 1.5;
+		margin: 0.375rem 0 0;
+	}
+
+	.experience a {
+		color: var(--profile-color);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+		transition: opacity 150ms ease-in-out;
+	}
+
+	.experience a:hover {
+		opacity: 0.8;
+	}
+
+	.focus {
+		font-size: 0.875rem;
+		color: var(--profile-color);
+		font-style: italic;
+		padding: 0.5rem 0.75rem;
+		background: linear-gradient(135deg, color-mix(in srgb, var(--profile-color) 8%, transparent) 0%, transparent 100%);
+		border-left: 2px solid color-mix(in srgb, var(--profile-color) 50%, transparent);
+		border-radius: 0 var(--card-radius, 0.5rem) var(--card-radius, 0.5rem) 0;
+		margin: 0.5rem 0 0;
+	}
+
+	.formal-focus {
+		font-style: normal;
+		border-left-color: var(--profile-color);
+		background: linear-gradient(135deg, color-mix(in srgb, var(--profile-color) 10%, transparent) 0%, transparent 100%);
+	}
+
+	.now {
+		font-size: 0.875rem;
+		color: var(--color-text-muted);
+		margin: 0.25rem 0 0;
+	}
+
+	.now-label {
+		color: var(--profile-color);
+		font-weight: 500;
+	}
+
+	/* reduced motion */
+	@media (prefers-reduced-motion: reduce) {
+		.profile-img,
+		.mode-content,
+		.profile-card {
+			transition-duration: 0.01ms;
+		}
+	}
+</style>

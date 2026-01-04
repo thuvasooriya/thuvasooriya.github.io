@@ -162,10 +162,10 @@ const allTags = await getGlobalTagNames();
 	}
 
 	function getCollectionFromUrl(url: string): CollectionType | null {
-		if (url.startsWith("/posts/")) return "post";
-		if (url.startsWith("/projects/")) return "project";
+		if (url.startsWith("/post/")) return "post";
+		if (url.startsWith("/project/")) return "project";
 		if (url.startsWith("/wiki/")) return "wiki";
-		if (url.startsWith("/tweets/") && url !== "/tweets/" && !url.match(/^\/tweets\/\d+\/$/)) return "tweet";
+		if (url.startsWith("/tweet/") && url !== "/tweet/" && !url.match(/^\/tweet\/\d+\/$/)) return "tweet";
 		return null;
 	}
 
@@ -181,8 +181,8 @@ const allTags = await getGlobalTagNames();
 	}
 
 	class SiteSearch extends HTMLElement {
-		#closeBtn: HTMLButtonElement;
-		#loadMoreBtn: HTMLButtonElement;
+		#closeBtn: HTMLButtonElement | null = null;
+		#loadMoreBtn: HTMLButtonElement | null = null;
 		#dialog: HTMLDialogElement;
 		#searchInput: HTMLInputElement | null = null;
 		#searchClear: HTMLButtonElement | null = null;
@@ -206,8 +206,8 @@ const allTags = await getGlobalTagNames();
 
 		constructor() {
 			super();
-			this.#closeBtn = this.querySelector<HTMLButtonElement>("button[data-close-modal]")!;
-			this.#loadMoreBtn = this.querySelector<HTMLButtonElement>(".load-more-btn")!;
+			this.#closeBtn = this.querySelector<HTMLButtonElement>("button[data-close-modal]");
+			this.#loadMoreBtn = this.querySelector<HTMLButtonElement>(".load-more-btn");
 			this.#dialog = this.querySelector("dialog")!;
 			this.#controller = new AbortController();
 
@@ -219,8 +219,8 @@ const allTags = await getGlobalTagNames();
 
 			this.#state = loadState();
 
-			this.#closeBtn.addEventListener("click", this.closeModal);
-			this.#loadMoreBtn.addEventListener("click", () => this.#loadMoreResults());
+			this.#closeBtn?.addEventListener("click", this.closeModal);
+			this.#loadMoreBtn?.addEventListener("click", () => this.#loadMoreResults());
 			this.#dialog.addEventListener("click", this.onDialogClick);
 
 			if (import.meta.env.DEV) return;
@@ -407,7 +407,7 @@ const allTags = await getGlobalTagNames();
 			if (!this.#resultsContainer) return;
 
 			if (this.#loadedCount >= this.#currentResults.length) {
-				this.#loadMoreBtn.hidden = true;
+				if (this.#loadMoreBtn) this.#loadMoreBtn.hidden = true;
 				if (this.#loadedCount === 0) {
 					this.#renderResults(false);
 				}
@@ -442,7 +442,7 @@ const allTags = await getGlobalTagNames();
 			this.#loadedResults = [];
 			this.#loadedCount = 0;
 			this.#focusedIndex = -1;
-			this.#loadMoreBtn.hidden = true;
+			if (this.#loadMoreBtn) this.#loadMoreBtn.hidden = true;
 		}
 
 		#renderLoadingState() {
@@ -455,7 +455,7 @@ const allTags = await getGlobalTagNames();
 				this.#resultsContainer.insertBefore(status, this.#resultsContainer.firstChild);
 			}
 			if (this.#emptyState) this.#emptyState.hidden = true;
-			this.#loadMoreBtn.hidden = true;
+			if (this.#loadMoreBtn) this.#loadMoreBtn.hidden = true;
 		}
 
 		#renderError() {
@@ -465,7 +465,7 @@ const allTags = await getGlobalTagNames();
 			status.className = "search-status search-error";
 			status.textContent = "something went wrong";
 			this.#resultsContainer.insertBefore(status, this.#resultsContainer.firstChild);
-			this.#loadMoreBtn.hidden = true;
+			if (this.#loadMoreBtn) this.#loadMoreBtn.hidden = true;
 		}
 
 		#renderResults(hasMore: boolean) {
@@ -491,12 +491,12 @@ const allTags = await getGlobalTagNames();
 							subtitle.textContent = "no content in selected collections";
 						} else {
 							subtitle.textContent = "try different keywords or filters";
-						}
-					}
 				}
-				this.#loadMoreBtn.hidden = true;
-				return;
+				}
 			}
+			if (this.#loadMoreBtn) this.#loadMoreBtn.hidden = true;
+			return;
+		}
 
 			if (this.#emptyState) this.#emptyState.hidden = true;
 
@@ -559,11 +559,13 @@ const allTags = await getGlobalTagNames();
 
 			this.#resultsContainer.appendChild(fragment);
 
-			this.#loadMoreBtn.hidden = !hasMore;
-			if (hasMore) {
-				const remaining = this.#currentResults.length - this.#loadedCount;
-				const text = this.#loadMoreBtn.querySelector(".load-more-text");
-				if (text) text.textContent = `${remaining} more`;
+			if (this.#loadMoreBtn) {
+				this.#loadMoreBtn.hidden = !hasMore;
+				if (hasMore) {
+					const remaining = this.#currentResults.length - this.#loadedCount;
+					const text = this.#loadMoreBtn.querySelector(".load-more-text");
+					if (text) text.textContent = `${remaining} more`;
+				}
 			}
 		}
 

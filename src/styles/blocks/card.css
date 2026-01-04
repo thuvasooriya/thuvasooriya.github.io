@@ -1,6 +1,6 @@
 @theme {
-  --card-bg: var(--color-global-bg);
-  --card-bg-hover: color-mix(in srgb, var(--color-accent) 5%, var(--color-global-bg));
+  --card-bg: color-mix(in srgb, var(--color-global-bg) 70%, transparent);
+  --card-bg-hover: color-mix(in srgb, var(--color-accent) 10%, color-mix(in srgb, var(--color-global-bg) 80%, transparent));
   --card-border: color-mix(in srgb, var(--color-global-text) 15%, transparent);
   --card-border-hover: color-mix(in srgb, var(--color-accent) 25%, transparent);
   --card-radius: 0.5rem;

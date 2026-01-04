@@ -9,14 +9,17 @@ interface Props {
 
 const { sidebarType } = Astro.props;
 const hasSidebar = !!sidebarType;
+const isTagsPage = Astro.url.pathname === "/tags/" || Astro.url.pathname === "/tags";
+const hasLeftAction = hasSidebar || isTagsPage;
 ---
 
 <mobile-nav
 	class="fixed inset-x-0 bottom-0 z-50 sm:hidden"
 	data-visible="true"
 	data-sidebar-type={sidebarType}
+	data-is-tags-page={isTagsPage ? "true" : undefined}
 >
-	<div class:list={["mobile-nav-bar flex h-14 items-center px-2", hasSidebar ? "justify-between" : "justify-around"]}>
+	<div class:list={["mobile-nav-bar flex h-14 items-center px-2", hasLeftAction ? "justify-between" : "justify-around"]}>
 		{hasSidebar && (
 			<button
 				aria-label={`Toggle ${sidebarType} sidebar`}
@@ -27,12 +30,24 @@ const hasSidebar = !!sidebarType;
 			</button>
 		)}
 
+		{isTagsPage && (
+			<button
+				aria-label="Toggle sort order"
+				class="mobile-nav-btn mobile-sort-trigger flex h-11 w-11 items-center justify-center rounded-full"
+				data-sort="count"
+				type="button"
+			>
+				<Icon name="lucide:hash" class="sort-icon sort-icon-count h-5 w-5" />
+				<Icon name="lucide:a-arrow-down" class="sort-icon sort-icon-alpha hidden h-5 w-5" />
+			</button>
+		)}
+
 		<button
-			aria-label="Search"
-			class="mobile-nav-btn mobile-search-trigger flex h-11 w-11 items-center justify-center rounded-full"
+			aria-label="Theme settings"
+			class="mobile-nav-btn mobile-theme-trigger flex h-11 w-11 items-center justify-center rounded-full"
 			type="button"
 		>
-			<Icon name="lucide:search" class="h-5 w-5" />
+			<Icon name="lucide:swatch-book" class="h-5 w-5" />
 		</button>
 
 		<a
@@ -44,11 +59,11 @@ const hasSidebar = !!sidebarType;
 		</a>
 
 		<button
-			aria-label="Theme settings"
-			class="mobile-nav-btn mobile-theme-trigger flex h-11 w-11 items-center justify-center rounded-full"
+			aria-label="Search"
+			class="mobile-nav-btn mobile-search-trigger flex h-11 w-11 items-center justify-center rounded-full"
 			type="button"
 		>
-			<Icon name="lucide:swatch-book" class="h-5 w-5" />
+			<Icon name="lucide:search" class="h-5 w-5" />
 		</button>
 
 		<button
@@ -293,6 +308,27 @@ const hasSidebar = !!sidebarType;
 						const isOpen = sidebar.dataset.open === "true";
 						sidebar.dataset.open = (!isOpen).toString();
 					}
+				}, { signal });
+			}
+
+			const sortTrigger = this.querySelector<HTMLButtonElement>(".mobile-sort-trigger");
+			if (sortTrigger && this.dataset.isTagsPage === "true") {
+				const countIcon = sortTrigger.querySelector<SVGElement>(".sort-icon-count");
+				const alphaIcon = sortTrigger.querySelector<SVGElement>(".sort-icon-alpha");
+
+				sortTrigger.addEventListener("click", () => {
+					closeAll();
+					const currentSort = sortTrigger.dataset.sort;
+					const newSort = currentSort === "count" ? "alpha" : "count";
+					sortTrigger.dataset.sort = newSort;
+
+					if (countIcon && alphaIcon) {
+						countIcon.classList.toggle("hidden", newSort !== "count");
+						alphaIcon.classList.toggle("hidden", newSort !== "alpha");
+					}
+
+					const desktopToggle = document.querySelector<HTMLButtonElement>(".sort-toggle");
+					desktopToggle?.click();
 				}, { signal });
 			}
 

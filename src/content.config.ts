@@ -52,6 +52,20 @@ const page = defineCollection({
 	schema: z.object({
 		title: z.string(),
 		description: z.string().optional(),
+		profile: z
+			.object({
+				name: z.string(),
+				formal_name: z.string().optional(),
+				work: z.string().optional(),
+				formal_work: z.string().optional(),
+				experience: z.string().optional(),
+				formal_experience: z.string().optional(),
+				focus: z.string().optional(),
+				formal_focus: z.string().optional(),
+				now: z.string().optional(),
+				formal_now: z.string().optional(),
+			})
+			.optional(),
 		tiles: z
 			.array(
 				z.object({

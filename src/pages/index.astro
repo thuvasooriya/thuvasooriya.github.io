@@ -4,7 +4,8 @@ import { Icon } from "astro-icon/components";
 import ContentCard from "@/components/shared/ContentCard.astro";
 import Tweet from "@/components/tweet/Tweet.astro";
 import AnimateIn from "@/components/ui/AnimateIn.astro";
-import LanguageGreeting from "@/components/ui/LanguageGreeting.astro";
+import GradientBlurs from "@/components/ui/GradientBlurs.astro";
+import ProfileCard from "@/components/ui/ProfileCard.astro";
 import { PAGINATION } from "@/constants";
 import { getAllPosts } from "@/data/post";
 import PageLayout from "@/layouts/Base.astro";
@@ -20,16 +21,10 @@ const latest_tweets = all_tweets.sort(collectionDateSort).slice(0, 2);
 ---
 
 <PageLayout meta={{ title: "home" }} pageType="home">
-	<section class="z-0">
-		<div aria-hidden="true" class="home-gradient-blur home-gradient-blur-1"></div>
-		<div aria-hidden="true" class="home-gradient-blur home-gradient-blur-2"></div>
-		<div aria-hidden="true" class="home-gradient-blur home-gradient-blur-3"></div>
-	</section>
+	<GradientBlurs />
 
-	<section class="relative z-10 mb-8">
-		<div class="flex w-full justify-start">
-			<LanguageGreeting className="text-4xl md:text-5xl" paddingX="px-6" paddingY="py-4" rounded="rounded-lg" />
-		</div>
+	<section class="relative z-10 mb-8" data-animate>
+		<ProfileCard />
 	</section>
 
 	<div class="grid gap-6 md:grid-cols-2">
@@ -37,7 +32,7 @@ const latest_tweets = all_tweets.sort(collectionDateSort).slice(0, 2);
 			<div class="mb-6 flex items-center justify-between">
 				<h2 class="title text-accent text-xl">posts</h2>
 				<a
-					href="/posts/"
+					href="/post/"
 					class="group text-accent transition-all hover:translate-x-0.5"
 					title="view all posts"
 				>
@@ -65,7 +60,7 @@ const latest_tweets = all_tweets.sort(collectionDateSort).slice(0, 2);
 					<div class="mb-6 flex items-center justify-between">
 						<h2 class="title text-accent text-xl">tweets</h2>
 						<a
-							href="/tweets/"
+							href="/tweet/"
 							class="group text-accent transition-all hover:translate-x-0.5"
 							title="view all tweets"
 						>

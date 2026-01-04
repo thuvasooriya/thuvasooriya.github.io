@@ -7,11 +7,15 @@ const year = new Date().getFullYear();
 ---
 
 <footer
-	class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 pt-20 pb-4 text-center align-top font-semibold text-text-muted sm:flex-row sm:justify-between sm:text-xs"
+	class="mt-auto flex w-full flex-col items-center justify-center gap-y-2 pt-8 pb-4 text-center align-top font-semibold text-text-muted sm:flex-row sm:justify-between sm:text-xs"
+	style="background: transparent;"
 >
 	<div class="me-0 sm:me-4 flex items-center gap-1">
 		<Icon name="lucide:copyright" class="h-3.5 w-3.5" />
 		{siteConfig.author}
+		<span class="text-text-tertiary">•</span>
+		WEB-013
+		<span class="text-text-tertiary">•</span>
 		{year}
 	</div>
 	<nav aria-label="More on this site" class="sm:divide-accent hidden gap-x-2 sm:flex sm:gap-x-0 sm:divide-x">

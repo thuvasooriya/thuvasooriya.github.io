@@ -1,12 +1,6 @@
 /* home page specific styles */
 
 @theme {
-	/* gradient/blur effects */
-	--home-gradient-1: var(--color-accent);
-	--home-gradient-2: var(--color-primary);
-	--home-gradient-3: var(--color-variant-2);
-	--home-blur-size: 100px;
-
 	/* section backgrounds */
 	--home-section-bg: color-mix(in srgb, var(--color-accent) 5%, transparent);
 	--home-section-border: color-mix(in srgb, var(--color-accent) 20%, transparent);
@@ -30,39 +24,6 @@
 	max-width: var(--layout-listing-max-width);
 	margin-left: auto;
 	margin-right: auto;
-}
-
-/* gradient blurs */
-.home-gradient-blur {
-	position: absolute;
-	border-radius: 50%;
-	filter: blur(60px);
-	opacity: 0.5;
-	pointer-events: none;
-}
-
-.home-gradient-blur-1 {
-	background-color: var(--home-gradient-1);
-	width: 6rem;
-	height: 6rem;
-	top: 1rem;
-	left: 0;
-}
-
-.home-gradient-blur-2 {
-	background-color: var(--home-gradient-2);
-	width: 8rem;
-	height: 8rem;
-	top: 1rem;
-	right: 0;
-}
-
-.home-gradient-blur-3 {
-	background-color: var(--home-gradient-3);
-	width: 16rem;
-	height: 16rem;
-	top: 12.5rem;
-	right: 0.5rem;
 }
 
 /* section styles */

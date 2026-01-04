@@ -4,12 +4,14 @@ interface Props {
 	textColor?: string;
 	bgColor?: string;
 	cursorColor?: string;
+	fontWeight?: string;
 	typingSpeed?: number;
 	pauseDuration?: number;
 	showLanguage?: boolean;
 	paddingX?: string;
 	paddingY?: string;
 	rounded?: string;
+	style?: string;
 }
 
 const {
@@ -17,16 +19,18 @@ const {
 	textColor = "text-primary",
 	bgColor = "",
 	cursorColor = "bg-primary",
+	fontWeight = "font-semibold",
 	typingSpeed = 100,
 	pauseDuration = 1000,
 	showLanguage = false,
 	paddingX = "px-3",
 	paddingY = "py-1.5",
 	rounded = "rounded-sm",
+	style = "",
 } = Astro.props;
 
 const greetings = [
-	{ language: "english", text: "hello!" },
+	{ language: "english", text: "hello there!" },
 	{ language: "japanese", text: "こんにちは!" },
 	{ language: "tamil", text: "வணக்கம்!" },
 	{ language: "sinhala", text: "සුබ දවසක්!" },
@@ -48,11 +52,12 @@ const longestGreeting = greetings.reduce((a, b) => (a.text.length > b.text.lengt
 	data-typing-speed={typingSpeed}
 	data-pause-duration={pauseDuration}
 	data-show-language={showLanguage}
+	style={style}
 >
 	<div class={`inline-block ${bgColor} ${paddingX} ${paddingY} ${rounded}`}>
 		<div class="greeting-container">
-			<span class="greeting-sizer" aria-hidden="true">{longestGreeting}</span>
-			<span class={`greeting-text ${textColor}`} data-text><span class={`greeting-cursor ${cursorColor}`} data-cursor></span></span>
+			<span class={`greeting-sizer ${fontWeight}`} aria-hidden="true">{longestGreeting}</span>
+			<span class={`greeting-text ${textColor} ${fontWeight}`} data-text><span class={`greeting-cursor ${cursorColor}`} data-cursor></span></span>
 		</div>
 	</div>
 	{showLanguage && <div class="greeting-lang mt-1.5 min-h-[1em] text-center text-xs opacity-70" data-lang />}
@@ -208,6 +213,7 @@ const longestGreeting = greetings.reduce((a, b) => (a.text.length > b.text.lengt
 	.greeting-text {
 		display: inline-flex;
 		align-items: center;
+		min-height: 1.5em;
 	}
 
 	.greeting-cursor {

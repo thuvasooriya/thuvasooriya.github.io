@@ -18,7 +18,7 @@ const display_name = tweet.data.title;
 ---
 
 <Card as={Tag} class={`tweet-card not-prose block ${className || ""}`}>
-	<a class="tweet-link-overlay" href={`/tweets/${tweet.id}/`} aria-label={display_name}>
+	<a class="tweet-link-overlay" href={`/tweet/${tweet.id}/`} aria-label={display_name}>
 		<span class="sr-only">Read tweet: {display_name}</span>
 	</a>
 
@@ -67,7 +67,7 @@ const display_name = tweet.data.title;
 	}
 
 	.tweet-card:hover {
-		background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);
+		background-color: color-mix(in srgb, var(--color-accent) 3%, var(--color-global-bg));
 	}
 
 	.tweet-header,
@@ -144,7 +144,7 @@ const display_name = tweet.data.title;
 				const content_el = tweet_card.querySelector(".tweet-content");
 				const heading = heading_el?.textContent?.trim() || "";
 				const text_content = content_el?.textContent?.trim() || "";
-				const tweet_url = `${SITE_URL}/tweets/${slug}/`;
+				const tweet_url = `${SITE_URL}/tweet/${slug}/`;
 				const share_text = `${heading}\n\n${text_content}\n\n${tweet_url}`;
 
 				try {

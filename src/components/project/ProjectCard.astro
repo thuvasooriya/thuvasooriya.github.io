@@ -39,7 +39,7 @@ const gradient_percent = current_status?.percent ?? 0;
 	data-status={status}
 	style={`--status-color: ${current_status?.color ?? "var(--color-accent)"}; --gradient-percent: ${gradient_percent}%;`}
 >
-	<a class="card-overlay" href={`/projects/${project.slug}/`} aria-label={title}>
+	<a class="card-overlay" href={`/project/${project.slug}/`} aria-label={title}>
 		<span class="sr-only">View project: {title}</span>
 	</a>
 
