@@ -64,7 +64,7 @@ runs:
         echo "validating content structure..."
         
         # check required directories
-        for dir in posts tweets pages proj; do
+        for dir in page post project tweet wiki; do
           if [ ! -d "${CONTENT_DIR}/${dir}" ]; then
             echo "warning: ${dir} directory not found"
           else
@@ -73,20 +73,22 @@ runs:
         done
         
         # count markdown files in each collection
-        post_count=$(find "${CONTENT_DIR}/posts" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
-        tweet_count=$(find "${CONTENT_DIR}/tweets" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
-        page_count=$(find "${CONTENT_DIR}/pages" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
-        proj_count=$(find "${CONTENT_DIR}/proj" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
+        page_count=$(find "${CONTENT_DIR}/page" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
+        post_count=$(find "${CONTENT_DIR}/post" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
+        project_count=$(find "${CONTENT_DIR}/project" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
+        tweet_count=$(find "${CONTENT_DIR}/tweet" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
+        wiki_count=$(find "${CONTENT_DIR}/wiki" -name "*.md" -o -name "*.mdx" 2>/dev/null | wc -l | tr -d ' ')
         
         echo ""
         echo "content summary:"
-        echo "  posts:   ${post_count} files"
-        echo "  tweets:  ${tweet_count} files"
-        echo "  pages:   ${page_count} files"
-        echo "  proj:    ${proj_count} files"
+        echo "  page:    ${page_count} files"
+        echo "  post:    ${post_count} files"
+        echo "  project: ${project_count} files"
+        echo "  tweet:   ${tweet_count} files"
+        echo "  wiki:    ${wiki_count} files"
         
         # calculate total
-        total=$((post_count + tweet_count + page_count + proj_count))
+        total=$((page_count + post_count + project_count + tweet_count + wiki_count))
         echo "  total:   ${total} content files"
         
         # warn if no content found
