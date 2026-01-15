@@ -24,14 +24,14 @@ const dateTimeOptions: Intl.DateTimeFormatOptions = {
 ---
 
 {
-	data.cover_image && (
+	data.cover && (
 		<div class="mb-6">
 			<Image
-				alt={data.cover_image.alt}
+				alt={data.cover.alt}
 				class="rounded-md object-cover"
 				fetchpriority="high"
 				loading="eager"
-				src={data.cover_image.src}
+				src={data.cover.src}
 			/>
 		</div>
 	)

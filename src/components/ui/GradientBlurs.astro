@@ -15,11 +15,11 @@ interface Props {
 }
 
 const default_blurs: Blur[] = [
-	{ color: "var(--color-primary)", size: "10rem", top: "0", right: "15%" },
-	{ color: "var(--color-variant-6)", size: "9rem", top: "60%", left: "5%", opacity: 0.25 },
-	{ color: "var(--color-variant-2)", size: "14rem", top: "25%", right: "0", opacity: 0.3 },
-	{ color: "var(--color-accent)", size: "12rem", top: "45%", left: "20%" },
-	{ color: "var(--color-variant-3)", size: "10rem", top: "85%", right: "25%" },
+	{ color: "var(--color-primary)", size: "10rem", top: "0", right: "15%", opacity: 0.25 },
+	{ color: "var(--color-variant-6)", size: "9rem", top: "60%", left: "5%", opacity: 0.15 },
+	{ color: "var(--color-variant-2)", size: "14rem", top: "25%", right: "0", opacity: 0.18 },
+	{ color: "var(--color-accent)", size: "12rem", top: "45%", left: "20%", opacity: 0.25 },
+	{ color: "var(--color-variant-3)", size: "10rem", top: "85%", right: "25%", opacity: 0.2 },
 ];
 
 const { blurs = default_blurs, animate = true } = Astro.props;

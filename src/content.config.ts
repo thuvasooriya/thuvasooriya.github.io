@@ -11,7 +11,7 @@ const post = defineCollection({
 		z.object({
 			title: z.string().max(60),
 			description: z.string(),
-			cover_image: z
+			cover: z
 				.object({
 					alt: z.string(),
 					src: image(),

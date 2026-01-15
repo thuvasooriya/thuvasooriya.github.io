@@ -15,6 +15,7 @@ import rehypeMathjax from "rehype-mathjax";
 import rehypeUnwrapImages from "rehype-unwrap-images";
 import remarkDirective from "remark-directive";
 import remarkMath from "remark-math";
+import { rehypeCleanUrls } from "./src/plugins/rehype-clean-urls";
 import { rehypeObsidianImages } from "./src/plugins/rehype-obsidian-images";
 import { remarkAdmonitions } from "./src/plugins/remark-admonitions";
 import { remarkObsidianImages } from "./src/plugins/remark-obsidian-images";
@@ -84,6 +85,7 @@ export default defineConfig({
 					collectionBase: "name",
 				},
 			],
+			rehypeCleanUrls,
 			rehypeObsidianImages,
 		],
 		remarkPlugins: [

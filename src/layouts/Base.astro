@@ -1,6 +1,8 @@
 ---
 import { ClientRouter } from "astro:transitions";
-import { AstroFont } from "astro-font";
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource-variable/inter";
+import "@fontsource/merriweather";
 import BaseHead from "@/components/layout/BaseHead.astro";
 import Footer from "@/components/layout/Footer.astro";
 import Header from "@/components/layout/Header.astro";
@@ -44,40 +46,17 @@ const layoutClass =
 		<ThemeProvider />
 		<BaseHead articleDate={articleDate} description={description} ogImage={ogImage} title={title} />
 		<ClientRouter />
-		<AstroFont
-			config={[
-				{
-					src: [],
-					name: "JetBrains Mono",
-					googleFontsURL:
-						"https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap",
-					preload: true,
-					display: "swap",
-					selector: "html[data-typography='mono'] body",
-					fallback: "monospace",
-				},
-				{
-					src: [],
-					name: "Inter",
-					googleFontsURL:
-						"https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
-					preload: false,
-					display: "swap",
-					selector: "html[data-typography='sans'] body",
-					fallback: "sans-serif",
-				},
-				{
-					src: [],
-					name: "Merriweather",
-					googleFontsURL:
-						"https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap",
-					preload: false,
-					display: "swap",
-					selector: "html[data-typography='serif'] body",
-					fallback: "serif",
-				},
-			]}
-		/>
+		<style is:global>
+			html[data-typography="mono"] body {
+				font-family: "JetBrains Mono Variable", monospace;
+			}
+			html[data-typography="sans"] body {
+				font-family: "Inter Variable", sans-serif;
+			}
+			html[data-typography="serif"] body {
+				font-family: "Merriweather", serif;
+			}
+		</style>
 	</head>
 	<body
 		class={`bg-global-bg text-global-text font-body flex min-h-screen flex-col px-4 py-4 text-sm antialiased sm:px-8 sm:py-8`}
